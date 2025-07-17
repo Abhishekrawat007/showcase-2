@@ -1,0 +1,120 @@
+/* product-card design starts here */
+body {
+  font-family: sans-serif;
+  padding: 10px;
+}
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+.product-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 12px;
+  min-height: 250px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  /* justify-content: space-between; */
+  position: relative;
+  background: #fff;
+}
+.product-link{
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.image-container {
+  position: relative;
+}
+.product-img {
+  /* width: 100%; */
+  height: 180px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.media-info {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: black;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.stock-label {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.price {
+  margin: 4px 0 2px;
+}
+.old {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 16px;
+}
+.new {
+  font-weight: bold;
+  color: #222;
+  font-size: 20px;
+  
+}
+.discount {
+  color: green;
+  font-size: 12px;
+}
+.button-group {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  gap: 6px;
+}
+.button-group a, .button-group button {
+  padding: 8px;
+  font-size: 14px;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.call-btn { background: #007bff; color: white; }
+.whatsapp-btn { background: #25d366; color: white; }
+.view-btn { background: #6c757d; color: white; }
+.out-btn {
+  background: gray;
+  color: white;
+  cursor: not-allowed;
+}
+.out-of-stock {
+  opacity: 0.8;
+}
+.details{
+  margin-top: 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+@media (max-width: 600px) {
+  .product-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .product-card{
+    padding: 10px;
+  }
+  .button-group a, .button-group button {
+    font-size: 16px;
+    padding: 10px;
+  }
+}
+/* product card design ends here */

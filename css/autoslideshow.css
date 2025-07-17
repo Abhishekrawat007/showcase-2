@@ -1,0 +1,154 @@
+/* Slideshow container */
+#slideshow-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: auto;
+  overflow: hidden;
+  border-radius: 10px;
+  height: 450px; /* Fixed height for desktop */
+  /* background: #000;; */
+}
+
+/* Common slideshow wrapper style */
+.slideshow-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%; /* Fill container height */
+  overflow: hidden;
+}
+
+.slideshow-wrapper .auto-slide {
+  /* display: none; */
+  width: 100%;
+  height: 100%; /* Fill container height */
+  cursor: pointer;
+}
+
+
+.slideshow-wrapper .auto-slide img {
+  width: 100%;
+  height: 450px; /* Fixed height */
+  object-fit: fill; 
+  display: block;
+}
+
+/* Arrow controls */
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  user-select: none;
+  transform: translateY(-50%);
+}
+
+.prev {
+  left: 10px;
+}
+
+.next {
+  right: 10px;
+}
+
+/* Dots */
+.dots-container {
+  text-align: center;
+  position: absolute;
+  width: 100%;
+  bottom: 10px;
+}
+
+.dot {
+  height: 12px;
+  width: 12px;
+  margin: 0 4px;
+  background-color: #ccc; /* normal dot color */
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.active-dot {
+  background-color: #f39c12; /* active dot color */
+  animation: glow 1s ease-in-out infinite;
+}
+
+/* Optional glow animation */
+@keyframes glow {
+  0% { transform: scale(1); box-shadow: 0 0 0px #f39c12; }
+  50% { transform: scale(1.3); box-shadow: 0 0 8px #f39c12; }
+  100% { transform: scale(1); box-shadow: 0 0 0px #f39c12; }
+}
+
+/* Fading transition effect */
+/* Base styles for slides */
+.auto-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 1s ease-in-out;
+}
+
+/* Show the active slide */
+.auto-slide.active {
+  opacity: 1;
+  z-index: 1;
+  pointer-events: auto;
+}
+@media screen and (min-width: 769px) {
+  .desktop-slideshow {
+    display: block;
+  }
+  .mobile-slideshow {
+    display: none;
+  }
+}
+/* Responsive: Mobile */
+@media screen and (max-width: 768px) {
+  #slideshow-container {
+    height: 390px; /* Fixed height for mobile */
+    margin-top: 0px;
+    padding-top: 0px;
+  }
+  /* .slideshow-wrapper .aut0-slide img{
+    height: 280px;
+  } */
+   .slideshow-wrapper .auto-slide img {
+  width: 100%;
+  height: 450px; /* Fixed height */
+  object-fit: contain; 
+  display: block;}
+
+   main,.mobile-slideshow{
+    margin-top: 15px;
+    padding-top: 15px;
+   }
+   /* main,.mobile-slideshow{
+    margin-top: 0; 
+    padding-top: 0;
+   } */
+  .desktop-slideshow {
+    display: none;
+  }
+  .mobile-slideshow {
+    display: block;
+    height: 100%; /* Fill container height */
+  }
+  .mobile-slideshow .auto-slide,
+  .mobile-slideshow .aut0-slide img {
+    height: 100%;
+    object-fit: contain;
+  }
+}

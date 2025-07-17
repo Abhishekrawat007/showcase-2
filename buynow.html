@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Order – Sublime Store</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 1rem;
+    }
+    body.cart-page {
+  font-family: Arial, sans-serif;
+  background: #f9f9f9;
+  margin: 0;
+  padding: 20px;
+}
+/* Top banner */
+ .top-banner {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   background: #ffcc00;
+   color: #000;
+   padding: 8px 12px;
+   text-align: center;
+   font-weight: bold;
+   z-index: 9999;
+   font-size: 14px;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+ }
+
+ /* close button */
+ .banner-close {
+   background: none;
+   border: none;
+   font-size: 18px;
+   cursor: pointer;
+   font-weight: bold;
+
+ }
+
+ .top-banner span {
+   display: inline-block;
+   white-space: nowrap;
+   animation: scrollBanner 10s linear infinite;
+   font-weight: bold;
+   font-size: 14px;
+   padding-left: 100%;
+ }
+
+ @keyframes scrollBanner {
+   0% {
+     transform: translateX(0);
+   }
+
+   100% {
+     transform: translateX(-100%);
+   }
+ }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      margin-top: 40px;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.2rem;
+      font-size: 1.8rem;
+    }
+
+    .back-btn {
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 999px;
+      padding: 6px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+
+    .product {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .product img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .product-price {
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .quantity-controls {
+      margin-top: 8px;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      background: #007bff;
+      padding: 4px 10px;
+      border-radius: 8px;
+      color: white;
+    }
+
+    .quantity-controls button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .quantity-controls span {
+      background-color: white;
+      color: #333;
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .summary {
+      margin-top: 1.5rem;
+      font-weight: bold;
+      font-size: 1.2rem;
+      text-align: right;
+    }
+
+    .note {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #d32f2f;
+      text-align: right;
+    }
+
+    #orderForm {
+      margin-top: 1.5rem;
+    }
+
+    #orderForm input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .error-msg {
+      color: red;
+      font-size: 14px;
+      margin-top: -0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    #orderForm button[type="submit"] {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 999px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .continue-btn {
+      background-color: #ffcc00;
+      color: #333;
+      border: none;
+      padding: 10px;
+      font-weight: bold;
+      border-radius: 16px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 10px;
+    }
+
+    .continue-btn:hover {
+      background-color: #ffdb4d;
+    }
+
+    .confirmed-box {
+      text-align: center;
+      padding: 20px;
+      color: green;
+    }
+
+    .confirmed-box h3 {
+      margin-bottom: 10px;
+    }
+    input[type="checkbox"] {
+  vertical-align: middle;
+  margin: 0 8px 0 0;
+  accent-color: green;
+  transform: scale(1.2);
+}
+body.dark-mode {
+  background-color: #121212 !important;
+  color: #fff;
+}
+
+body.dark-mode .container,
+body.dark-mode #orderForm,
+body.dark-mode .confirmed-box {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+body.dark-mode input {
+  background-color: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+  box-shadow: none;
+}
+
+body.dark-mode input::placeholder {
+  color: #bbb;
+}
+
+body.dark-mode .quantity-controls {
+  background: #444;
+  color: #fff;
+}
+
+body.dark-mode .product-price {
+  color: #8bc34a;
+}
+
+body.dark-mode .note {
+  color: #ffb74d;
+}
+
+body.dark-mode .continue-btn {
+  background-color: #ffc107;
+  color: #000;
+}
+
+body.dark-mode .continue-btn:hover {
+  background-color: #ffcd39;
+}
+.total-summary {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: right;
+  margin-top: 1rem;
+  color: #212529;
+}
+
+body.dark-mode .total-summary {
+  color: #fff;
+}.theme-toggle-btn {
+  position: absolute;
+  right: 50px; /* default for mobile */
+  top: 80px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  z-index: 9999;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+/* Adjust for larger screens only */
+@media (min-width: 768px) {
+  .theme-toggle-btn {
+    right: 480px; /* less exaggerated */
+    top: 80px;
+  }
+}
+  
+ body.dark-mode label[style*="padding: 14px"] {
+  background-color: #1e1e1e !important;
+  border-color: #444 !important;
+  color: #fff;
+}
+
+body.dark-mode label[style*="padding: 14px"] div {
+  color: #ddd;
+}
+
+body.dark-mode label[style*="padding: 14px"] div > div:first-child {
+  color: #fff; /* Title */
+}
+
+body.dark-mode label[style*="padding: 14px"] a {
+  color: #90caf9 !important; /* light blue link */
+}
+body.dark-mode .payment-method {
+  background-color: #1e1e1e !important;
+  color: #eee !important;
+  border-color: #333 !important;
+}
+
+label:hover {
+  background-color: #f0f8ff;
+}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script defer data-domain="sublimestore.in" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+    <body class="cart-page">
+   <!-- 🔼 Top Banner -->
+  <div class="top-banner" id="topBanner">
+    <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
+    <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
+  </div>
+  <div class="container">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+  <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">🌙</button>
+    <h1>Your Order</h1>
+    <div id="productSection"></div>
+   <div class="summary total-summary">
+  Total: ₹<span id="totalPrice">0</span>
+</div>
+    <div class="note" id="deliveryNote" style="display:none;">Delivery charges may apply on orders below ₹199.</div>
+    <form id="orderForm" onsubmit="submitOrder(event)" autocomplete="off">
+      <input type="text" id="customerName" placeholder="Your Name" required />
+      <div id="nameError" class="error-msg" style="display:none;">Please enter your name.</div>
+
+      <input type="tel" id="customerPhone" placeholder="Mobile Number" required />
+      <div id="phoneError" class="error-msg" style="display:none;">Please enter a valid 10-digit mobile number.</div>
+   
+    <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px;">Payment method</h3>
+
+<!-- Cash on Delivery -->
+<label class="payment-method" data-method="cod" style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 14px 12px; margin-bottom: 16px; background: #fff; cursor: pointer;">
+  <input type="radio" name="paymentMethod" value="cod" checked style="margin-right: 12px; width: 18px; height: 18px;" />
+  <div style="flex: 1;">
+    <div style="font-weight: 600; font-size: 15px;">Cash on Delivery / Pay on Delivery</div>
+    <div style="font-size: 13px; color: #555;">Cash, UPI and Cards accepted.</div>
+  </div>
+  <i class="fas fa-wallet" style="margin-right: 8px; color: #4CAF50;"></i>
+</label>
+
+      
+      <button type="submit">Confirm Order</button>
+
+      <div style="margin-top: 10px; font-size: 14px; color: #555; text-align: center;">
+        To buy more than one product, click the <strong>Add to Cart</strong> button instead.
+      </div>
+
+      <button class="continue-btn" type="button" onclick="addToCartAndGoBack()">Add to Cart & Continue Shopping</button>
+    </form>
+  </div>
+<!-- Hidden PDF Template -->
+<div id="pdfInvoice" style="display:none; padding: 20px; font-family: Arial;">
+  <div style="text-align: center; margin-bottom: 10px;">
+    <h2 style="margin: 5px 0;">Sublime Store</h2>
+    <p style="font-size: 13px;">Near Variety Store Link Road, Takana Road, Pithoragarh</p>
+    <p style="font-size: 13px;">📞 +91 8868839446 | ✉️ s4sublimestore@gmail.com</p>
+  </div>
+
+  <div id="invoiceMeta" style="margin-bottom: 20px; font-size: 14px;">
+    <strong>Customer:</strong> <span id="pdfName"></span><br>
+    <strong>Phone:</strong> <span id="pdfPhone"></span><br>
+    <strong>Order ID:</strong> <span id="pdfOrderId"></span><br>
+    <strong>Date:</strong> <span id="pdfDate"></span>
+  </div>
+
+  <table style="width:100%; border-collapse: collapse; font-size: 14px;" border="1">
+    <thead style="background:#f0f0f0;">
+      <tr>
+        <th>No.</th>
+        <th>Image</th>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody id="pdfProductRows"></tbody>
+  </table>
+
+  <div style="text-align: right; font-weight: bold; margin-top: 15px; font-size: 24px;">
+    Total: ₹<span id="pdfTotal"></span>
+  </div>
+
+  <div style="margin-top: 20px; text-align: center; font-size: 13px; color: #555;">
+    ✅ Thank you for shopping at <strong>Sublime Store</strong><br>
+    We’ll call or WhatsApp you to confirm your order.
+  </div>
+</div>
+  <script src="js/product.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
+      authDomain: "sublimestore-a0252.firebaseapp.com",
+      projectId: "sublimestore-a0252",
+      storageBucket: "sublimestore-a0252.appspot.com",
+      messagingSenderId: "460519742193",
+      appId: "1:460519742193:web:92b91dc5ee963cc371e750"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const TELEGRAM_BOT_TOKEN = "7658138886:AAGGfB0KOK3IVuJcQcG3Z7kG0xlJMkGTLaA";
+    const TELEGRAM_CHAT_IDS = [6020806530, 5056028508, 5310057351];
+
+    const urlParams = new URLSearchParams(window.location.search);
+const productId = urlParams.get("id") || sessionStorage.getItem("buyNowProduct");
+    const product = products.find(p => p.id == productId);
+    let quantity = 1;
+
+    if (!product) {
+      document.getElementById("productSection").innerHTML = "<p>Product not found.</p>";
+      document.querySelector(".summary").style.display = "none";
+    } else {
+      renderProduct(product);
+    }
+
+    function renderProduct(prod) {
+      const div = document.getElementById("productSection");
+      div.innerHTML = `
+        <div class="product">
+          <img src="${prod.images[0]}" alt="${prod.name}" />
+          <div class="product-info">
+            <div class="product-title">${prod.name}</div>
+            <div class="product-price">Price: ₹${prod.newPrice}</div>
+            <div class="quantity-controls">
+              <button onclick="changeQty(-1)">−</button>
+              <span id="qtyValue">${quantity}</span>
+              <button onclick="changeQty(1)">+</button>
+            </div>
+          </div>
+        </div>
+      `;
+      updateTotal();
+    }
+
+    function changeQty(delta) {
+      quantity += delta;
+      if (quantity < 1) quantity = 1;
+      document.getElementById("qtyValue").textContent = quantity;
+      updateTotal();
+    }
+
+    function updateTotal() {
+      const total = product.newPrice * quantity;
+      document.getElementById("totalPrice").textContent = total;
+      const deliveryNote = document.getElementById("deliveryNote");
+if (total < 199) {
+  deliveryNote.innerHTML = 
+    `<div style="
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 500;
+    ">
+      ⚠️ Delivery charges may apply on orders below ₹199.
+    </div>`
+  ;
+  deliveryNote.style.display = "block";
+} else {
+  deliveryNote.style.display = "none";
+}
+    }
+
+    function addToCartAndGoBack() {
+      const raw = JSON.parse(localStorage.getItem("cart") || "{}");
+      raw[product.id] = { ...product, qty: quantity };
+      localStorage.setItem("cart", JSON.stringify(raw));
+      location.href = "index.html";
+    }
+
+    function submitOrder(e) {
+      e.preventDefault();
+      const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
+      const nameError = document.getElementById("nameError");
+      const phoneError = document.getElementById("phoneError");
+
+      let valid = true;
+      nameError.style.display = "none";
+      phoneError.style.display = "none";
+
+      if (!name || name.length < 2) {
+        nameError.style.display = "block";
+        valid = false;
+      }
+
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        phoneError.style.display = "block";
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      const button = document.querySelector("#orderForm button[type='submit']");
+      button.disabled = true;
+      button.textContent = "Processing...";
+
+      const orderId = "ORD" + Date.now();
+
+const order = {
+  orderId,
+  name,
+  phone,
+  items: [{
+  id: product.id,
+  title: product.name,
+  qty: quantity,
+  price: product.newPrice,
+  image: product.images[0] // Add this line
+}],
+  totalAmount: product.newPrice * quantity,
+  timestamp: new Date().toISOString()
+};
+async function loadImageAsBase64(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.setAttribute("crossOrigin", "anonymous");
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      canvas.width = this.naturalWidth;
+      canvas.height = this.naturalHeight;
+      canvas.getContext("2d").drawImage(this, 0, 0);
+      resolve(canvas.toDataURL("image/jpeg"));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+     firebase.database().ref("orders").push(order).then(async () => {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "pt", "a4");
+  const pageWidth = pdf.internal.pageSize.getWidth();
+
+  const loadImageAsBase64 = (url) =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/jpeg"));
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+
+  // Header
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(18);
+  pdf.text("Sublime Store", pageWidth / 2, 40, { align: "center" });
+  pdf.setFontSize(10);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Near Variety Store, Link Road, Takana Road, Pithoragarh", pageWidth / 2, 55, { align: "center" });
+  pdf.text("Phone: +91 8868839446 | Website: sublimestore.in", pageWidth / 2, 70, { align: "center" });
+
+  let y = 100;
+  pdf.setFontSize(12);
+  pdf.text(`Customer: ${name}`, 40, y);
+  pdf.text(`Phone: ${phone}`, 40, y + 18);
+  pdf.text(`Order ID: ${orderId}`, 40, y + 36);
+  pdf.text(`Date: ${new Date().toLocaleString()}`, 40, y + 54);
+  y += 100;
+
+  // Table
+  const item = order.items[0];
+  let imgBase64 = "";
+  try {
+    imgBase64 = await loadImageAsBase64(item.image);
+  } catch {}
+
+  const rows = [[
+    1,
+    { content: "", image: imgBase64, imageWidth: 50, imageHeight: 50 },
+    item.title,
+    item.qty,
+    `Rs. ${item.price}`,
+    `Rs. ${item.price * item.qty}`
+  ]];
+
+  rows.push([
+    { content: 'Total', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } },
+    { content: `Rs. ${order.totalAmount}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } }
+  ]);
+
+  pdf.autoTable({
+    startY: y,
+    head: [["No.", "Image", "Product", "Qty", "Price", "Subtotal"]],
+    body: rows,
+    styles: {
+    fontSize: 10,
+    valign: 'middle',
+    halign: 'center',
+    cellPadding: 6
+  },
+  bodyStyles: { minCellHeight: 60 },
+  tableWidth: 'auto',
+  theme: 'grid',
+  columnStyles: {
+    0: { cellWidth: 40 },           // No.
+    1: { cellWidth: 70 },           // Image
+    2: { cellWidth: 190 },          // Product Name
+    3: { cellWidth: 60 },           // Qty
+    4: { cellWidth: 80, halign: 'right' }, // Price
+    5: { cellWidth: 90, halign: 'right' }  // Subtotal
+  },
+    didDrawCell: function (data) {
+      if (data.column.index === 1 && data.cell.raw?.image) {
+        const x = data.cell.x + (data.cell.width - 50) / 2;
+        const y = data.cell.y + (data.cell.height - 50) / 2;
+        pdf.addImage(data.cell.raw.image, "JPEG", x, y, 50, 50);
+      }
+    }
+  });
+
+  let finalY = pdf.lastAutoTable.finalY + 20;
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(14);
+  pdf.text(`Total: Rs. ${order.totalAmount}`, pageWidth - 150, finalY);
+
+  pdf.setFont("times", "italic");
+  pdf.setFontSize(11);
+  pdf.setTextColor(60);
+  pdf.text("Thank you for shopping at Sublime Store.\nWe’ll call or WhatsApp you to confirm your order.", pageWidth / 2, finalY + 30, { align: "center" });
+
+  const pdfBlob = pdf.output("blob");
+  const pdfFile = new File([pdfBlob], `${name.trim().toLowerCase().replace(/\s+/g, '')}.pdf`, {
+  type: "application/pdf"
+});
+
+  const formData = new FormData();
+  formData.append("document", pdfFile);
+  formData.append("caption", `🛒 *Buy Now Order*
+🧾 *Order ID:* ${orderId}
+👤 *Name:* ${name}
+📞 *Phone:* ${phone}
+🔗 *WhatsApp:* https://wa.me/91${phone}
+💰 *Total:* ₹${order.totalAmount}
+📦 *Product:* ${product.name} x${quantity}`);
+
+  await Promise.all(TELEGRAM_CHAT_IDS.map(chatId =>
+    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument?chat_id=${chatId}&parse_mode=Markdown`, {
+      method: "POST",
+      body: formData
+    })
+  ));
+
+  document.querySelector(".container").innerHTML = `
+    <div class="confirmed-box">
+      <h3>✓ Order Confirmed</h3>
+      <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
+      <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
+    </div>`;
+  sessionStorage.removeItem("buyNowProduct");
+}).catch(err => {
+  alert("Error: Please try again.");
+  button.disabled = false;
+  button.textContent = "Confirm Order";
+  console.error(err);
+});
+
+    }
+      const toggleBtn = document.getElementById('themeToggle');
+
+  function applyTheme(mode) {
+    if (mode === 'dark') {
+      document.body.classList.add('dark-mode');
+      toggleBtn.textContent = '☀️';
+    } else {
+      document.body.classList.remove('dark-mode');
+      toggleBtn.textContent = '🌙';
+    }
+    localStorage.setItem('theme', mode);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedMode = localStorage.getItem('theme') || 'light';
+    applyTheme(savedMode);
+
+    toggleBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.contains('dark-mode');
+      applyTheme(isDark ? 'light' : 'dark');
+    });
+  });
+  </script>
+</body>
+</html>

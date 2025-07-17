@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🛍 Product Editor - SublimeStore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- <link rel="stylesheet" href="css/editor.css" /> -->
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    button.add {
+      background: #28a745;
+    }
+    button.export {
+      background: #007bff;
+    }
+    button.delete {
+      background: #dc3545;
+    }
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .product-card {
+      background: #fff;
+      padding: 1.2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    }
+    .product-card label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+      color: #444;
+    }
+    .product-card input,
+    .product-card textarea,
+    .product-card select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 4px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .product-card textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .product-card .actions {
+      margin-top: 10px;
+      text-align: right;
+    }
+    .product-card .actions button {
+      margin-left: 8px;
+    }
+    .preview-images img {
+      height: 60px;
+      margin: 5px 5px 0 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .search-box {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .search-box input {
+      width: 80%;
+      max-width: 500px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button.undo {
+      background: #ffc107;
+    }
+    button.exit {
+      background: #6c757d;
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .modal.hidden {
+      display: none;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .modal-content p {
+      margin: 1rem 0;
+      color: #555;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #modal-cancel {
+      background: #ccc;
+    }
+    #modal-confirm {
+      background: #dc3545;
+      color: white;
+    }
+    button.logout {
+      background: #17a2b8;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    if (localStorage.getItem("isAdmin") !== "true") {
+      window.location.href = "admin.html";
+    }
+  </script>
+
+  <h1>🛠 SublimeStore Product Editor</h1>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="🔍 Search by name, category, or tag..." oninput="debouncedSearch()" />
+  </div>
+
+<div class="controls">
+    <button class="add" onclick="addProduct()">➕ Add New Product</button>
+    <button class="export" onclick="exportProducts()">💾 Export product.js</button>
+    <button class="undo" onclick="undoChanges()">↩️ Undo Changes</button>
+    <button class="exit" onclick="exitEditor()">🚪 Exit Editor</button>
+    <button class="logout" onclick="logout()">🔐 Logout</button>
+  </div>
+
+  <div class="product-list" id="productList">
+    <!-- Product cards render here -->
+  </div>
+
+  <!-- 🔔 Modal Component -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modal-title">Title</h2>
+      <p id="modal-message">Message</p>
+      <div class="modal-buttons">
+        <button id="modal-cancel">Cancel</button>
+        <button id="modal-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+
+ <!-- Firebase SDKs --><script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, collection, getDocs, addDoc,
+    updateDoc, deleteDoc, doc, setDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
+    authDomain: "sublimestore-a0252.firebaseapp.com",
+    projectId: "sublimestore-a0252",
+    storageBucket: "sublimestore-a0252.appspot.com",
+    messagingSenderId: "460519742193",
+    appId: "1:460519742193:web:92b91dc5ee963cc371e750"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.firestore = { db, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc };
+</script><!-- Core Logic --><script type="module" src="js/editor.js">
+
+  </script>
+</body>
+</html>

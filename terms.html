@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+ <title>Sublime Store – Affordable Trendy Products</title>
+<meta name="description" content="Buy amazing affordable products online from Sublime Store. Free delivery on orders over ₹199.">
+<meta name="keywords" content="Sublime Store, online shop, budget products, free delivery India">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+      <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/herosection.css">
+    
+  <style>
+body {
+  font-family: 'Segoe UI', sans-serif !important;
+  margin: 0;
+  padding: 0;
+  background: #f9f9f9 !important;
+  color: #333 !important;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: #fff !important;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  border-radius: 10px;
+  margin-top: 60px;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #2c3e50 !important;
+}
+
+h2 {
+  font-size: 20px;
+  margin-top: 30px;
+  color: #34495e !important;
+}
+
+p {
+  line-height: 1.6;
+  margin-bottom: 16px;
+  color: #333 !important;
+}
+
+ul {
+  margin-left: 20px;
+  color: #333 !important;
+}
+
+a {
+  color: #007acc !important;
+}
+
+body.dark {
+  background: #121212 !important;
+  color: #f0f0f0 !important;
+}
+
+body.dark .container {
+  background-color: #1e1e1e !important;
+  color: #f0f0f0 !important;
+}
+
+body.dark h1,
+body.dark h2 {
+  color: #ffffff !important;
+}
+
+body.dark p,
+body.dark li {
+  color: #dddddd !important;
+}
+
+body.dark a {
+  color: #66ccff !important;
+}
+/* Make text black inside static content even in dark mode */
+body.dark-mode .static-page,
+body.dark-mode .static-page * {
+  color: #000 !important;
+}
+@media(max-width: 600px) {
+  .container {
+    padding: 20px;
+  }
+}
+
+   
+  </style>
+</head>
+<body>
+    <!-- 🔼 Top Banner -->
+      <div class="top-banner" id="topBanner">
+        <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
+        <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
+      </div>
+    <!-- ✅ Navbar loads here -->
+    <!-- ✅ Navbar loads here -->
+  <div id="navbar"></div>
+     <!-- ✅ Your script to load navbar -->
+  <script>
+    fetch('navbar.html')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+      });
+  </script>
+  <main>
+  <div class="container">
+    <div class="static-page">
+    <h1>Terms & Conditions</h1>
+    <p>Welcome to Sublime Store! By accessing or using our website, you agree to comply with and be bound by the following terms and conditions.</p>
+
+    <h2>1. General</h2>
+    <p>These Terms apply to all users of the site. By using our services, you accept these terms in full. If you disagree with any part, please do not use our website.</p>
+
+    <h2>2. Products and Pricing</h2>
+    <p>All products and prices are subject to change without notice. We make every effort to display accurate information but cannot guarantee there are no errors.</p>
+
+    <h2>3. Orders</h2>
+    <ul>
+      <li>All orders are subject to availability.</li>
+      <li>We reserve the right to cancel or refuse any order at our sole discretion.</li>
+      <li>Orders confirmed via WhatsApp or payment gateway are considered final.</li>
+    </ul>
+
+    <h2>4. Shipping & Delivery</h2>
+    <p>We strive to ship your products as quickly as possible. Delivery times may vary depending on your location and availability.</p>
+
+    <h2>5. Returns & Refunds</h2>
+    <p>Due to the customized nature of certain products, returns or exchanges may not be accepted unless defective. Please contact us within 24 hours of delivery for support.</p>
+
+    <h2>6. Privacy Policy</h2>
+    <p>We value your privacy. Any personal information collected is used only to fulfill orders and improve your experience. We do not share your data with third parties.</p>
+
+    <h2>7. Limitation of Liability</h2>
+    <p>Sublime Store is not liable for any indirect or consequential loss arising from the use of our website or products.</p>
+
+    <h2>8. Contact</h2>
+    <p>If you have any questions about these Terms & Conditions, please contact us at <strong>s4sublimestore@gmail.com</strong> or WhatsApp/Call us directly.</p>
+  </div>
+  </div>
+  <footer class="footer">
+  <!-- Your full footer HTML content here -->
+   <div id="footer-placeholder"></div>
+
+<script>
+  fetch('/footer.html')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('footer-placeholder').innerHTML = data;
+    });
+</script>
+</footer>
+  </main>
+  <script src="js/product.js"></script>
+ <script src="js/navbar.js"></script>
+ <script src="js/search.js" defer></script>
+</body>
+</html>

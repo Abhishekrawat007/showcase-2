@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Account - Sublime Store</title>
+  <link rel="stylesheet" href="styles.css" />
+ 
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"/>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-md p-6 bg-white rounded-xl shadow-lg" id="loginSection">
+    <h2 class="text-2xl font-semibold mb-4 text-center">Login to View Your Orders</h2>
+    <div id="otpForm">
+      <input type="tel" id="phoneNumber" placeholder="Enter Mobile Number" class="w-full border p-2 rounded mb-2" />
+      <div id="recaptcha-container"></div>
+      <button onclick="sendOTP()" class="bg-blue-600 text-white px-4 py-2 rounded w-full mt-2">Send OTP</button>
+    </div>
+    <div id="verifySection" class="hidden mt-4">
+      <input type="text" id="otpCode" placeholder="Enter OTP" class="w-full border p-2 rounded mb-2" />
+      <button onclick="verifyOTP()" class="bg-green-600 text-white px-4 py-2 rounded w-full">Verify</button>
+    </div>
+  </div>
+
+  <div id="accountSection" class="hidden w-full max-w-2xl mx-auto bg-white rounded-xl shadow p-6 mt-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Your Orders</h2>
+      <button onclick="logout()" class="text-sm text-red-600 underline">Logout</button>
+    </div>
+    <div id="ordersList" class="space-y-4">
+      <!-- Orders will be injected here -->
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
+      authDomain: "sublimestore-a0252.firebaseapp.com",
+      projectId: "sublimestore-a0252",
+      storageBucket: "sublimestore-a0252.appspot.com",
+      messagingSenderId: "460519742193",
+      appId: "1:460519742193:web:92b91dc5ee963cc371e750"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'normal',
+      callback: () => {}
+    });
+
+    let confirmationResult;
+
+    function sendOTP() {
+      const phone = document.getElementById("phoneNumber").value;
+      auth.signInWithPhoneNumber("+91" + phone, window.recaptchaVerifier)
+        .then(result => {
+          confirmationResult = result;
+          document.getElementById("otpForm").classList.add("hidden");
+          document.getElementById("verifySection").classList.remove("hidden");
+        })
+        .catch(error => alert("Error: " + error.message));
+    }
+
+    function verifyOTP() {
+      const code = document.getElementById("otpCode").value;
+      confirmationResult.confirm(code)
+        .then(result => {
+          const user = result.user;
+          localStorage.setItem("mobileNumber", user.phoneNumber.replace("+91", ""));
+          showOrders(user.phoneNumber.replace("+91", ""));
+        })
+        .catch(error => alert("OTP Incorrect"));
+    }
+
+  let allOrders = [];
+  let currentPage = 1;
+  const ordersPerPage = 5;
+
+
+  function groupOrdersByMonth(orders) {
+    const groups = {};
+
+    orders.forEach(order => {
+      const date = new Date(order.timestamp);
+      const key = date.toLocaleString('default', { month: 'long', year: 'numeric' }); // e.g., "June 2025"
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(order);
+    });
+
+    return groups;
+  }
+
+ function showGroupedOrders() {
+  const container = document.getElementById("ordersList");
+  container.innerHTML = "";
+
+  const grouped = groupOrdersByMonth(allOrders);
+  const months = Object.keys(grouped).reverse();
+
+  months.forEach(monthKey => {
+    const orders = grouped[monthKey];
+
+    const section = document.createElement("div");
+    section.className = "mb-4 border rounded overflow-hidden";
+
+    // Header
+    const header = document.createElement("button");
+    header.className = "w-full text-left px-4 py-2 bg-blue-600 text-white font-semibold cursor-pointer";
+    header.textContent = `${monthKey} (${orders.length} orders)`;
+
+    const content = document.createElement("div");
+    content.className = "p-4 bg-gray-50 space-y-4 hidden";
+
+    // Search box
+    const searchBox = document.createElement("input");
+    searchBox.type = "text";
+    searchBox.placeholder = "Search in this month...";
+    searchBox.className = "w-full mb-4 px-3 py-2 border rounded focus:outline-none focus:ring";
+
+    const resultsWrapper = document.createElement("div");
+    content.appendChild(searchBox);
+    content.appendChild(resultsWrapper);
+
+    const renderOrders = (filterText = "") => {
+      resultsWrapper.innerHTML = "";
+      const filtered = orders.filter(order => {
+        if (!filterText.trim()) return true;
+        const matchName = order.name?.toLowerCase().includes(filterText);
+        const matchPhone = order.phone?.includes(filterText);
+        const matchItems = order.items?.some(item =>
+          item.name?.toLowerCase().includes(filterText)
+        );
+        return matchName || matchPhone || matchItems;
+      });
+
+      if (filtered.length === 0) {
+        resultsWrapper.innerHTML = `<p class="text-sm text-gray-500 italic">No matching orders found.</p>`;
+        return;
+      }
+
+      filtered.forEach(order => {
+        const items = order.items.map(item =>
+          `<li>${item.name} × ${item.quantity} — ₹${item.price}</li>`
+        ).join("");
+
+        const orderHTML = `
+          <div class="border rounded p-3 bg-white shadow-sm">
+            <p><strong>Date:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+            <p><strong>Name:</strong> ${order.name}</p>
+            <p><strong>Phone:</strong> ${order.phone}</p>
+            <p><strong>Total:</strong> ₹${order.total}</p>
+            <ul class="mt-2 text-sm list-disc pl-5">${items}</ul>
+          </div>`;
+        resultsWrapper.innerHTML += orderHTML;
+      });
+    };
+
+    searchBox.addEventListener("input", e => {
+      renderOrders(e.target.value.toLowerCase());
+    });
+
+    renderOrders(); // Initial render
+
+    header.onclick = () => {
+      content.classList.toggle("hidden");
+    };
+
+    section.appendChild(header);
+    section.appendChild(content);
+    container.appendChild(section);
+  });
+}
+
+  function showOrders(mobile) {
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("accountSection").classList.remove("hidden");
+
+    db.ref("orders").orderByChild("phone").equalTo(mobile).once("value", snapshot => {
+      const orders = snapshot.val();
+      if (!orders) {
+        document.getElementById("ordersList").innerHTML = "<p>No orders found.</p>";
+        return;
+      }
+
+      allOrders = Object.entries(orders)
+        .map(([id, order]) => ({ id, ...order }))
+        .sort((a, b) => b.timestamp - a.timestamp); // newest first
+
+      showGroupedOrders();
+    });
+  }
+
+
+
+  function showOrders(mobile) {
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("accountSection").classList.remove("hidden");
+
+    db.ref("orders").orderByChild("phone").equalTo(mobile).once("value", snapshot => {
+      const orders = snapshot.val();
+      if (!orders) {
+        document.getElementById("ordersList").innerHTML = "<p>No orders found.</p>";
+        return;
+      }
+
+      allOrders = Object.entries(orders)
+        .map(([id, order]) => ({ id, ...order }))
+        .sort((a, b) => b.timestamp - a.timestamp); // newest first
+
+      currentPage = 1;
+      paginateOrders();
+    });
+  }
+
+
+
+    function logout() {
+      auth.signOut().then(() => {
+        localStorage.removeItem("mobileNumber");
+        location.reload();
+      });
+    }
+
+    // Auto-login if previously logged in
+    window.onload = () => {
+      const phone = localStorage.getItem("mobileNumber");
+      if (phone) {
+        showOrders(phone);
+      }
+    };
+  </script>
+</body>
+</html>

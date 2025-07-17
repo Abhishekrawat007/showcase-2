@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+<title>Sublime Store – Affordable Trendy Products</title>
+<meta name="description" content="Buy amazing affordable products online from Sublime Store. Free delivery on orders over ₹199.">
+<meta name="keywords" content="Sublime Store, online shop, budget products, free delivery India">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+   <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/herosection.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f9f9f9;
+      color: #333;
+    }
+    .top-banner{
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    input, textarea {
+      margin-bottom: 15px;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    button {
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .info p {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+    .info a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .info a:hover {
+      text-decoration: underline;
+    }
+    .main-contact{
+        margin-top: 50px;
+    }
+    
+   .simple-back-btn {
+  display: inline-block;
+  /* margin: 20px 0; */
+  margin-top: 60px;
+  padding: 10px 16px;
+  background-color: #f0f0f0;
+  color: #333;
+  text-decoration: none;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease-in-out;
+}
+
+.simple-back-btn:hover {
+  background-color: #333;
+  color: #fff;
+  border-color: #333;
+}
+    @media(max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      .simple-back-btn{
+        margin-top: 110px;
+      }
+      .main-contact{
+        margin-top: 0px;
+      }
+    }
+    body.dark-mode .static-page,
+body.dark-mode .static-page * {
+  color: #000 !important;
+}
+  </style>
+</head>
+<body>
+     <!-- 🔼 Top Banner -->
+      <div class="top-banner" id="topBanner">
+        <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
+        <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
+      </div>
+    <!-- ✅ Navbar loads here -->
+  <div id="navbar"></div>
+
+  <!-- ✅ Your script to load navbar -->
+  <script>
+    fetch('navbar.html')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+      });
+  </script>
+  <div class="static-page">
+  <a href="services.html" class="simple-back-btn">← Back </a>
+  <main class="main-contact">
+    
+  <div class="container">
+   
+    <form name="contact" method="POST" data-netlify="true">
+      <h1>Let’s Talk 👋</h1>
+      <input type="text" name="name" required placeholder="Your Name">
+      <input type="email" name="email" required placeholder="Your Email">
+      <textarea name="message" rows="5" placeholder="Your Message"></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+    <div class="info">
+      <h1>Contact Info</h1>
+      <p><strong>Phone:</strong> <a href="tel:+918868839446">+91 8868839446</a></p>
+      <p><strong>Email:</strong> <a href="mailto:s4sublimestore@gmail.com">s4sublimestore@gmail.com</a></p>
+      <p><strong>WhatsApp:</strong> <a href="https://wa.me/918868839446" target="_blank">Message us on WhatsApp</a></p>
+      <p><strong>Follow us:</strong></p>
+      <p>
+        <a href="https://www.instagram.com/thesublimestore_" target="_blank">Instagram</a> |
+        <a href="https://youtube.com/@Sublime.store-pithoragarh" class="youtube" target="_blank" rel="noopener noreferrer">YouTube</a>
+      </p>
+    </div>
+  </div>
+  </div>
+  </main>
+  <footer class="footer">
+  <!-- Your full footer HTML content here -->
+   <div id="footer-placeholder"></div>
+
+<script>
+  fetch('/footer.html')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('footer-placeholder').innerHTML = data;
+    });
+</script>
+</footer>
+   <script src="js/product.js"></script>
+ <script src="js/navbar.js"></script>
+ <script src="js/search.js" defer></script>
+  <!-- <script src="js/script.js" defer></script> -->
+</body>
+</html>

@@ -1,0 +1,93 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+ <title>Sublime Store – Affordable Trendy Products</title>
+<meta name="description" content="Buy amazing affordable products online from Sublime Store. Free delivery on orders over ₹199.">
+<meta name="keywords" content="Sublime Store, online shop, budget products, free delivery India">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+   <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- <link rel="stylesheet" href="css/autoslideshow.css"> -->
+  <link rel="stylesheet" href="css/product-card.css">
+<!-- Firebase App (the core Firebase SDK) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<!-- Firebase Realtime Database -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
+  authDomain: "sublimestore-a0252.firebaseapp.com",
+  projectId: "sublimestore-a0252",
+  storageBucket: "sublimestore-a0252.firebasestorage.app",
+  messagingSenderId: "460519742193",
+  appId: "1:460519742193:web:92b91dc5ee963cc371e750"
+};
+
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+</script>
+<script defer data-domain="sublimestore.in" src="https://plausible.io/js/script.js"></script>
+</head>
+<body> <!-- 🔼 Top Banner -->
+      <div class="top-banner" id="topBanner">
+        <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
+        <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
+      </div>
+   <!-- ✅ Navbar loads here -->
+  <div id="navbar"></div>
+
+  <!-- ✅ Your script to load navbar -->
+  <script>
+    fetch('navbar.html')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+      });
+  </script>
+<main>
+  <button onclick="history.back()" class="back-btn">← Back</button>
+  <div class="product-detail" id="productDetail"></div>
+  
+  <h2 class="related-title">Related Products</h2>
+  <div class="product-list" id="relatedProducts"></div>
+</main>
+<footer class="footer">
+  <!-- Your full footer HTML content here -->
+   <div id="footer-placeholder"></div>
+
+<script>
+  fetch('/footer.html')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('footer-placeholder').innerHTML = data;
+    });
+</script>
+</footer>
+<button id="scrollToTopBtn" onclick="scrollToTop()" title="Go to top"><i class="fas fa-arrow-up"></i></button>
+
+<!-- Floating Cart Bar -->
+<div id="floatingCartBar" class="modern-cart-bar hidden">
+  <div class="cart-info">
+  <i class="fas fa-cart-shopping" style="font-size: 24px; color: #fff;"></i>
+    <span id="cartItemCount">0</span> items |
+    <span id="cartTotalAmount">₹0</span>
+  </div>
+  <a href="cart.html" class="view-cart-btn">View Cart →</a>
+</div>
+
+  <script src="js/product.js"></script>
+  <script src="js/navbar.js"defer></script>
+  <!-- <script src="js/cart.js"></script> -->
+  <script src="js/script-detail.js"></script>
+  <script src="js/script.js" defer></script>
+</body>
+</html>

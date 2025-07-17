@@ -1,0 +1,366 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Orders – Sublime Store</title>
+  <meta name="description" content="Track and view your past orders from Sublime Store.">
+  <meta name="theme-color" content="#1e88e5"/>
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+    <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }.container {
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #1e88e5;
+}
+
+.otp-box {
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 14px;
+  color: #666;
+  display: block;
+  margin-bottom: 6px;
+}
+
+input[type="tel"],
+input[type="text"] {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.search-bar input {
+  border-radius: 2px !important;
+}
+.button-primary {
+  width: 100%;
+  background: linear-gradient(to right, #007bff, #00c6ff);
+  color: white;
+  padding: 14px;
+  border: none;
+  font-size: 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.button-primary:hover {
+  background: linear-gradient(to right, #0056b3, #00aaff);
+}
+
+small {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  color: gray;
+}
+
+#orderList {
+  margin-top: 30px;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.order-card img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.order-info {
+  flex: 1;
+}
+
+.order-info h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.order-info p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.order-info button {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.top-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.top-controls button {
+  background-color: #dedede;
+  color: #222;
+  border: none;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
+  width: auto;            /* 👈 important to override 100% */
+  display: inline-block;  /* 👈 prevent full width */
+}
+
+.top-controls button:hover {
+  background-color: #d5d5d5;
+}
+
+body.dark-mode .top-controls button {
+  background-color: #2f2f2f;
+  color: #eee;
+}
+
+body.dark-mode .top-controls button:hover {
+  background-color: #3a3a3a;
+}
+.back-btn, .theme-toggle-btn {
+  background-color: #e0e0e0; /* soft grey to contrast */
+  color: #333;
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover, .theme-toggle-btn:hover {
+  background-color: #d5d5d5;
+}
+
+body.dark-mode .back-btn,
+body.dark-mode .theme-toggle-btn {
+  background-color: #2c2c2c;
+  color: #eee;
+}
+
+body.dark-mode .back-btn:hover,
+body.dark-mode .theme-toggle-btn:hover {
+  background-color: #3a3a3a;
+}
+
+/* Dark Mode */
+body.dark-mode {
+  background-color: #121212;
+  color: #fff;
+}
+
+body.dark-mode .container {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+body.dark-mode input,
+body.dark-mode button {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+body.dark-mode .order-card {
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .order-info p {
+  color: #ccc;
+}
+
+body.dark-mode .order-info h4 {
+  color: #fff;
+}
+
+
+
+  </style>  <!-- Firebase -->  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script></head>
+<body>
+   <!-- 🔼 Top Banner -->
+      <div class="top-banner" id="topBanner">
+        <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
+        <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
+      </div>
+    <!-- ✅ Navbar loads here -->
+    <!-- ✅ Navbar loads here -->
+  <div id="navbar"></div>
+     <!-- ✅ Your script to load navbar -->
+  <script>
+    fetch('navbar.html')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+      });
+  </script>
+  <main>
+  <div class="container">
+    <!-- Back Button + Theme Toggle -->
+    <div class="top-controls">
+ <button onclick="goBack()">← Back</button>
+  <button id="themeToggle" aria-label="Toggle Dark Mode">🌙</button>
+</div>
+
+    <div class="otp-box" id="phoneSection">
+      <h2>Your Orders</h2>
+      <div class="form-group">
+  <label for="phone">Mobile Number</label>
+  <input type="tel" id="phone" placeholder="Enter your 10-digit number">
+  <div id="phoneError" style="color: red; font-size: 13px; margin-top: 6px; display: none;">
+    Please enter a valid 10-digit Indian phone number.
+  </div>
+</div>
+      <!-- Show Orders -->
+<button class="button-primary" onclick="searchOrders()">Show Orders</button>
+      <small>We'll never share your number.</small>
+    </div>
+
+    <div id="orderList"></div>
+  </div>
+  </main>
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
+  authDomain: "sublimestore-a0252.firebaseapp.com",
+  projectId: "sublimestore-a0252",
+  storageBucket: "sublimestore-a0252.appspot.com",
+  messagingSenderId: "460519742193",
+  appId: "1:460519742193:web:92b91dc5ee963cc371e750"
+};
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+function searchOrders() {
+  const phone = document.getElementById("phone").value.trim();
+  const errorMsg = document.getElementById("phoneError");
+
+  if (!/^[6-9]\d{9}$/.test(phone)) {
+    errorMsg.style.display = "block";
+    return;
+  }
+
+  errorMsg.style.display = "none"; // hide if input is valid
+  document.getElementById("phoneSection").style.display = "none";
+
+  database
+    .ref("orders")
+    .orderByChild("phone")
+    .equalTo(phone)
+    .once("value", snapshot => {
+      const orders = snapshot.val();
+      if (!orders) {
+        document.getElementById("orderList").innerHTML = "<p>No orders found.</p>";
+        return;
+      }
+
+      const ordersArray = Object.values(orders);
+      document.getElementById("orderList").innerHTML = 
+  `<h2 style="margin-bottom: 20px; color: #1e88e5; text-align: center;">Your Orders</h2>` +
+  ordersArray.map(order => {
+
+const dateTime = new Date(order.timestamp).toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        });
+        return order.items.map(item => 
+          `<div class="order-card">
+            <img src="${item.image}" alt="${item.title}">
+            <div class="order-info">
+              <h4>${item.title}</h4>
+              <p>Qty: ${item.qty}</p>
+              <p>Total: ₹${item.price * item.qty}</p>
+              <p style="font-size: 13px; color: gray;">Ordered on: ${dateTime}</p>
+              <button class="button-primary" onclick="location.href='buynow.html?id=${item.id}'">Buy Again</button>
+            </div>
+          </div>`
+        ).join("");
+      }).join("");
+    });
+}
+const toggleBtn = document.getElementById('themeToggle');
+
+function applyTheme(mode) {
+  if (mode === 'dark') {
+    document.body.classList.add('dark-mode');
+    toggleBtn.textContent = '☀️';
+  } else {
+    document.body.classList.remove('dark-mode');
+    toggleBtn.textContent = '🌙';
+  }
+  localStorage.setItem('theme', mode);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const savedMode = localStorage.getItem('theme') || 'light';
+  applyTheme(savedMode);
+
+  toggleBtn.addEventListener('click', () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    applyTheme(isDark ? 'light' : 'dark');
+  });
+});
+function goBack() {
+    if (document.referrer && document.referrer.includes(location.hostname)) {
+      history.back();
+    } else {
+      location.href = "index.html"; // Fallback
+    }
+  }
+</script>
+<script src="js/product.js"></script>
+ <script src="js/navbar.js"></script>
+ <script src="js/search.js" defer></script>
+</body>
+</html>

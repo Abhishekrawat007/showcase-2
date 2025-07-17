@@ -1,0 +1,64 @@
+ <header>
+    <!-- Desktop Navbar -->
+    <div class="navbar-desktop">
+      <div class="nav-logo"> <a href="index.html"><img  src="images/logosublime2.png" alt="Sublime storeLogo" class="logo"></a></div>
+      <div class="nav-center">
+  <a href="index.html" id="homeLink" class="desktop-link">Home</a>
+  <a href="index.html#productList" id="allProductsLink" class="desktop-link">Products</a>
+  <a href="about.html" class="desktop-link">About</a>
+  <a href="services.html" class="desktop-link">Services</a>
+</div>
+
+<div class="search-hamburger-combo">
+  <div class="desktop-dropdown-container">
+    <div class="desktop-dropdown-trigger" id="openDesktopMenu" title="All Categories">
+      <i class="fas fa-bars"></i><span class="hamburger-label">All</span>
+    </div>
+    <div class="desktop-dropdown" id="desktopDropdown">
+      <a href="index.html">Home</a>
+      <a href="yourorders.html">Your Orders</a>
+      <a href="return.html">Return Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+      <button id="desktopDarkToggle">🌙 Dark Mode</button>
+      <div class="social-links">
+        <a href="https://www.instagram.com/thesublimestore_" target="_blank">Instagram</a>
+        <a href="https://www.youtube.com/@sublime.store-pithoragarh" target="_blank">YouTube</a>
+        <a href="https://wa.me/918868839446" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="desktopSearchInput" placeholder="Search Products...">
+    <i class="fas fa-search"></i>
+  </div>
+</div>
+    </div><!-- Mobile Navbar -->
+<div class="navbar-mobile">
+  <i class="fas fa-bars" id="openMenu"></i>
+  <div class="nav-logo"><a href="index.html"><img src="images/logo1.webp" alt="Sublime store logo" class="logo"></a></div>
+  <i class="fas fa-search" id="openSearch"></i>
+</div>
+
+<!-- Mobile Search -->
+<div class="mobile-search" id="mobileSearch" style="display: none;">
+  <i class="fas fa-times" id="closeSearch" style="margin-right: 10px;"></i>
+  <input type="text" id="mobileSearchInput" placeholder="Search Products...">
+</div>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="menu-header">
+    <div class="nav-logo" ><a href="index.html"><img src="images/logo1.png" alt="Sublime store logo" class="logo"></a></div>
+    <i class="fas fa-times" id="closeMenu"></i>
+  </div>
+  <a href="index.html" id="homeLinkMobile" class="mobile-link">Home</a>
+  <a href="index.html#productList" id="allProductsLinkMobile" class="mobile-link">All Products</a>
+  <a href="yourorders.html" class="mobile-link">Your Orders</a>
+  <a href="about.html" class="mobile-link">About Us</a>
+  <a href="services.html" class="mobile-link">Services</a>
+   <button id="darkModeToggle" onclick="toggleDarkMode()" style="margin: 1rem 1rem 0; padding: 10px 15px; background: #444; color: #fff; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;">🌙 Dark Mode</button>
+</div>
+</div>
+
+  </header>

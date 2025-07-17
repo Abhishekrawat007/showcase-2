@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+   <title>Sublime Store – Affordable Trendy Products</title>
+<meta name="description" content="Buy amazing affordable products online from Sublime Store. Free delivery on orders over ₹199.">
+<meta name="keywords" content="Sublime Store, online shop, budget products, free delivery India">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+     <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/herosection.css">
+    <style>
+    :root {
+      --accent: #007acc;
+      --bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --radius: 14px;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: #333;
+  line-height: 1.6;
+}
+
+/* —— Hero —— */
+.hero {
+  text-align: center;
+  padding: 80px 20px 60px;
+  background: linear-gradient(135deg, var(--accent) 0%, #00b4d8 100%);
+  color: #fff;
+}
+
+.hero h1 {
+  font-size: 2.6rem;
+  margin-bottom: 12px;
+}
+
+.hero p {
+  font-size: 1.05rem;
+  max-width: 640px;
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+/* —— Service Grid —— */
+.services {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 32px;
+  max-width: 1200px;
+  margin: -50px auto 80px; /* overlap hero */
+  padding: 0 24px;
+}
+
+.service-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 0.4s ease, box-shadow 0.3s ease;
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.service-card.show {
+  opacity: 1;
+  transform: none;
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.service-image {
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+}
+
+.service-content {
+  padding: 24px;
+}
+
+.service-content h3 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+
+.service-content p {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* —— CTA —— */
+.cta {
+  text-align: center;
+  margin: 0 auto 100px;
+  padding: 0 24px;
+}
+
+.cta h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  color: #222;
+}
+
+.cta a {
+  display: inline-block;
+  padding: 12px 28px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.cta a:hover {
+  background: #005e99;
+}
+/* ✅ Fix for service cards in dark mode */
+body.dark-mode .service-card {
+  background-color: #1e1e1e !important;
+  color: white !important;
+  border-color: #444;
+}
+
+body.dark-mode .service-content p {
+  color: #ccc !important;
+}
+
+body.dark-mode .service-content h3 {
+  color: #00b4d8 !important;
+}
+
+/* —— Responsive —— */
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+}
+
+  </style>
+  
+</head>
+<body>
+   <!-- 🔼 Top Banner -->
+      <div class="top-banner" id="topBanner">
+        <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
+        <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
+      </div>
+     <!-- ✅ Navbar loads here -->
+  <div id="navbar"></div>
+
+  <!-- ✅ Your script to load navbar -->
+  <script>
+    fetch('navbar.html')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+      });
+  </script>
+<main> 
+  <!-- hero section -->
+  <section class="hero">
+    <h1>What We Do Best</h1>
+    <p>From cutting‑edge gadgets to full CCTV setups and expert laptop care — Sublime Store delivers modern tech solutions at prices you’ll love.</p>
+  </section>  <!-- —— Services Grid —— -->  <section class="services">
+    <!-- Gadgets -->
+    <article class="service-card">
+      <div class="service-image" style="background-image:url('images/gpt3.jpg');"></div>
+      <div class="service-content">
+        <h3>Unique Tech Gadgets</h3>
+        <p>Discover hand‑picked smart devices and accessories that make life easier, cooler, and more connected.</p>
+      </div>
+    </article><!-- Gifts -->
+<article class="service-card">
+  <div class="service-image" style="background-image:url('images/gpt4.jpg');"></div>
+  <div class="service-content">
+    <h3>Thoughtful Gifts</h3>
+    <p>Curated presents for every occasion — birthdays, festivals, or just‑because surprises that show you care.</p>
+  </div>
+</article>
+
+<!-- CCTV -->
+<article class="service-card">
+  <div class="service-image" style="background-image:url('images/cc.jpg');"></div>
+  <div class="service-content">
+    <h3>CCTV Sales & Installation</h3>
+    <p>Protect what matters: high‑resolution cameras, professional fitting, and real‑time monitoring — all at the city’s lowest rates.</p>
+  </div>
+</article>
+
+<!-- New Laptop -->
+<article class="service-card">
+  <div class="service-image" style="background-image:url('images/newlaptop.jpg');"></div>
+  <div class="service-content">
+    <h3>New Laptop Sales</h3>
+    <p>We also sell brand new laptops across major brands — reliable, affordable, and future-ready.</p>
+  </div>
+</article>
+<!-- Second‑hand Laptops -->
+<article class="service-card">
+  <div class="service-image" style="background-image:url('images/secondhandlaptop.JPG');"></div>
+  <div class="service-content">
+    <h3>Second-hand Laptops</h3>
+    <p>Budget‑friendly devices, fully tested and backed by warranty — perfect for students, startups, and savvy shoppers.</p>
+  </div>
+</article>
+<!-- Laptop Repair -->
+<article class="service-card">
+  <div class="service-image" style="background-image:url('images/laptop-repair.jpg');"></div>
+  <div class="service-content">
+    <h3>Laptop Repair</h3>
+    <p>Fast diagnostics, genuine parts, and transparent pricing. Your laptop back in action, typically within 24‑48 hours.</p>
+  </div>
+</article>
+</section>  <!-- —— Call to Action —— -->  <section class="cta">
+  <h2>Need a custom solution or bulk pricing?</h2>
+  <a href="contact.html">Talk to Our Team</a>
+</section>  <!-- —— Scroll‑reveal Script —— -->  <script>
+    const cards = document.querySelectorAll('.service-card');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('show');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    cards.forEach(card => observer.observe(card));
+  </script>
+</main>
+<footer class="footer">
+  <!-- Your full footer HTML content here -->
+   <div id="footer-placeholder"></div>
+
+<script>
+  fetch('/footer.html')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('footer-placeholder').innerHTML = data;
+    });
+</script>
+</footer>
+<button id="scrollToTopBtn" onclick="scrollToTop()" title="Go to top"><i class="fas fa-arrow-up"></i></button>
+
+ <script src="js/product.js"></script>
+ <script src="js/navbar.js"></script>
+ <script src="js/search.js" defer></script>
+
+  <!-- <script src="js/script.js" defer></script> -->
+</body>
+</html>
