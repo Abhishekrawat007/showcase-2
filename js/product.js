@@ -1,7 +1,7 @@
 const products = [
   {
     "id": 1,
-    "name": "Moon Lamp()",
+    "name": "Moon Lamp",
     "name2": "",
     "category": "lights",
     "categories": [
