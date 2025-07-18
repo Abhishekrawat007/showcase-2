@@ -1,30 +1,41 @@
 const { Octokit } = require("@octokit/rest");
+const token = process.env.GITHUB_TOKEN;
 
-exports.handler = async function (event, context) {
+exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return {
+      statusCode: 405,
+      body: "Method Not Allowed",
+    };
   }
 
-  const { token, repo, owner, path, content } = JSON.parse(event.body);
+  const body = JSON.parse(event.body);
+  const { owner, repo, path, content } = body;
 
   const octokit = new Octokit({ auth: token });
 
   try {
-    const file = await octokit.repos.getContent({ owner, repo, path });
-    const sha = file.data.sha;
-
-    const response = await octokit.repos.createOrUpdateFileContents({
+    // Get the existing file SHA
+    const { data: existingFile } = await octokit.repos.getContent({
       owner,
       repo,
       path,
-      message: "Product data updated via editor",
+    });
+
+    const sha = existingFile.sha;
+
+    const updateResponse = await octokit.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path,
+      message: "Update product data via Netlify Function",
       content: Buffer.from(content).toString("base64"),
-      sha,
+      sha: sha,
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Updated", response }),
+      body: JSON.stringify({ message: "File updated successfully!", url: updateResponse.data.content.html_url }),
     };
   } catch (error) {
     return {
