@@ -1,2580 +1,4527 @@
 const products = [
   {
-    id: 1,
-    name: "Moon Lamp",
-    name2:"",
-    category:"lights",
-    categories:["gifts","lights","trending"],
-    images: ["images/moonlamp1.jpg", "images/moonlamp2.jpg", "images/moonlamp3.jpg"],
-    video: "https://youtube.com/watch?v=TcAZwTE0dDI" ,
-    oldPrice: 450,
-    newPrice: 400,
-    discount: "11%",
-    mediaCount: "3 photos + video",
-    inStock: true
-  },
-  {
-    id: 2,
-    name: "Mimo Massager",
-    categories:["man","woman"],
-    images: ["images/mimomassager.jpg", "images/mimomassager2.jpg","images/mimomassager3.jpg"],
-    video: "https://youtube.com/watch?v=4OUZPAkSx68",
-    oldPrice: 180,
-    newPrice: 150,
-    discount: "16%",
-    mediaCount: "3 photos + video",
-    inStock: true
-  },
-  // Add more products here
-  {
-    id: 3,
-    name: "Sunset Lamp",    
-    category:"lights",
-    images: ["images/sunsetlamp1.jpg", "images/sunsetlamp2.jpg","images/sunsetlamp3.webp","images/sunsetlamp4.jpg"],
-    video: "https://youtube.com/watch?v=BdDP_0cDxzc",
-    oldPrice: 350,
-    newPrice: 300,
-    discount: "14%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },
-   
-  {
-    id: 4,
-    name: "T12 BT Ear Buds",
-    name2: "Ear Buds",
-    category:"earphone",
-    images: ["images/t12btcarbuds1.jpg", "images/t12btearbuds2.jpg", "images/t12btearbuds3.jpg","images/t12btearbuds4.jpg"],
-    video: "",
-    oldPrice: 350,
-    newPrice: 300,
-    discount: "14%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-   {
-    id: 5,
-    name: "Rabbit Guitarist",
-    category:"kids",
-    images: ["images/rabbitguitarist1.jpg", "images/rabbitguitarist2.jpg", "images/rabbitguitarist3.jpg"],
-    video: "",
-    oldPrice: 900,
-    newPrice: 800,
-    discount: "11%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id: 6,
-    name: "Round dry fruit cutter",
-    name2:"dry fruit cutter",
-    category:"kitchen",
-    categories:["kitchen","woman"],
-    images: ["images/rounddryfruitcutter.jpg", "images/rounddryfruitcutter2.jpg","images/rounddryfruitcutter3.webp","images/rounddryfruitcutter4.jpg" ],
-    video: "https://youtube.com/watch?v=7ko2F4oocgc",
-    oldPrice: 130,
-    newPrice: 100,
-    discount: "23%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },
-   {
-    id: 7,
-    name: "Sealing Clip Set",
-    categories:["kitchen","woman"],
-    images: ["images/sealingclipset1.webp", "images/sealingclipset2.jpg", "images/sealingclipset3.jpg"],
-    video: "",
-    oldPrice: 125,
-    newPrice: 90,
-    discount: "29%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id: 8,
-    name: "Stationery Kitty Gift Rencic Box",
-    name2:"Stationery kitty box",
-    categories:["kids","gifts","girls"],
-    images: ["images/stationarykitty1.jpg", "images/stationarykitty2.jpg", "images/stationarykitty3.jpg"],
-    video: "",
-    oldPrice: 220,
-    newPrice: 150,
-    discount: "30%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-   {
-    id: 9,
-    name: "Super Soft Bath Sponge",
-    name2:"Bath Sponge",
-    categories:["woman","girls"],
-    images: ["images/supersoftbathsponge1.jpg", "images/supersoftbathsponge2.jpg", "images/supersoftbathsponge3.jpg","images/supersoftbathsponge4.jpg"],
-    video: "",
-    oldPrice: 85,
-    newPrice: 60,
-    discount: "31%",
-    mediaCount: "3 photos",
-    inStock: true,
-   } 
-
-  ,{
-    id: 10,
-    name: "Needle Threader",
-    categories:["home","woman"],
-    images: ["images/needlethreader.JPG", "images/needlethreader2.JPG", "images/needlethreader3.jpg"],
-    video: "https://youtube.com/watch?v=aBCBgc5D-x8",
-    oldPrice: 22,
-    newPrice: 10,
-    discount: "54%",
-    mediaCount: "3 photos + video",
-    inStock: true
-  },
-   {
-    id: 11,
-    name: "Motion Sensor Solar Light",
-    name2:"Solar Light",
-    categories:["home","lights"],
-    images: ["images/motionsensorsolarlight1.jpg", "images/motionsensorsolarlight2.webp", "images/motionsensorsolarlight3.webp","images/motionsensorsolarlight4.webp","images/motionsensorsolarlight5.webp","images/motionsensorsolarlight6.webp"],
-    video: "https://youtube.com/watch?v=3hvp_tdYzPg",
-    oldPrice: 250,
-    newPrice: 200,
-    discount: "20%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id: 12,
-    name: "Lint Remover",
-    categories:["trending","home","woman"],
-    images: ["images/lintremover.webp", "images/lintremover1.jpg", "images/lintremover2.jpg","images/lintremover4.jpg"],
-    video: "https://youtube.com/watch?v=iWwuVFnNLXU",
-    oldPrice: 350,
-    newPrice: 270,
-    discount: "23%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },
-   
-  {
-    id:13,
-    name: "Intelligence Book",
-    category:"kids",
-    images: ["images/intelligencebook1.webp", "images/intelligencebook2.webp", "images/intelligencebook3.webp","images/intelligencebook4.webp","images/intelligencebook5.webp"],
-    video: "",
-    oldPrice: 530,
-    newPrice: 420,
-    discount: "20%",
-    mediaCount: "5 photos",
-    inStock: false
-  },
- 
-  {
-    id: 14,
-    name: "Cartoon Travel Toothbrush Holder",
-    name2:"Toothbrush Holder",
-    categories: ["man","woman","kids","girls","handful"],
-    images: ["images/cartoontraveltoothbrushholder1.jpg", "images/cartoontraveltoothbrushholder2.jpg", "images/cartoontraveltoothbrushholder3.jpg","images/cartoontraveltoothbrushholder4.jpg"],
-    video: "",
-    oldPrice: 120,
-    newPrice: 70,
-    discount: "41%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id: 15,
-    name: "12 Pocket UG Organiser",
-    name2:"UG Organiser",
-    categories:["woman","man","home"],
-    images: ["images/12pocketugorganiser(imp).jpg","images/12pocketugorganiser.jpg" , "images/12pocketugorganiser2.jpg","images/12pocketugorganiser4.jpg"],
-    video: "",
-    oldPrice: 270,
-    newPrice: 220,
-    discount: "18%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id: 16,
-    name: "Adhesive Wall Hook Sticker",
-    name2:"Wall Sticker",
-    categories: ["home","woman","handful"],
-    images: ["images/adhesivewallhooksticker1.jpg","images/adhesivewallhooksticker2.jpg" , "images/adhesivewallhooksticker3.jpg","images/adhesivewallhooksticker4.jpg","images/adhesivewallhooksticker5.webp","images/adhesivewallhooksticker6.jpg"],
-    video: "",
-    oldPrice: 20,
-    newPrice: 10,
-    discount: "50%",
-    mediaCount: "6 photos",
-    inStock: true
-  },
-  {
-    id: 17,
-    name: "6 Layer Shoe rack",
-    name2:"Shoe rack",
-    categories: ["home","woman"],
-    images: ["images/6layershoerack1.webp","images/6layershoerack2.webp" , "images/6layershoerack3.webp","images/6layershoerack4.webp","images/6layershoerack5.webp"],
-    video: "",
-    oldPrice: 430,
-    newPrice: 350,
-    discount: "18%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-  {
-    id: 18,
-    name: "All Color Stain Remover",
-    name2:"Stain Remover",
-    categories: ["man","woman","kitchen"],
-    images: ["images/allcolorstainremover.webp","images/allcolorstainremover2.webp" , "images/allcolorstainremover3.webp","images/allcolorstainremover4.webp","images/allcolorstainremover5.webp","images/allcolorstainremover6.webp",],
-    video: "",
-    oldPrice: 150,
-    newPrice: 100,
-    discount: "33%",
-    mediaCount: "6 photos",
-    inStock: true
-  },
-  {
-    id: 19,
-    name: "Chargable Remote Control Car",
-    name2:"Remote Control Car",
-    categories: ["kids","girls"],
-    images: ["images/chargableremotecontrolcar1.jpg","images/chargableremotecontrolcar2.jpg" , "images/chargableremotecontrolcar3.jpg","images/chargableremotecontrolcar4.jpg","images/chargableremotecontrolcar5.jpg"],
-    video: "",
-    oldPrice: 550,
-    newPrice: 400,
-    discount: "27%",
-    mediaCount: "6 photos",
-    inStock: true
-  },
-  
-  {
-    id:20,
-    name: "Color Changing Purse",
-    categories: ["woman","girls"],
-    images: ["images/colorchangingpurse1.jpg","images/colorchangepurse2.jpg","images/colorchangepurse3.jpg" ],
-    video: "",
-    oldPrice: 300,
-    newPrice: 200,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-  {
-    id:21,
-    name: "Mini Silicon Laundry Ball(4 piece)",
-    name2:"Laundry Ball",
-    categories: ["handful","home","woman"],
-    images: ["images/minisiliconlaundryball1.jpg","images/minisiliconlaundryball2.jpg","images/minisiliconlaundryball3.jpg"],
-    video: "",
-    oldPrice: 80,
-    newPrice: 50,
-    discount: "37%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-  {
-    id:22,
-    name: "Astronaut Projector",
-    categories: ["trending","gifts","lights","home"],
-    images: ["images/astronautprojector(imp).jpg","images/astronautprojector1.jpg","images/astronautprojector2.webp" , "images/astronautprojector3.jpg","images/astronautprojector4.jpg","images/astronautprojector5.jpg","images/astronautprojector6.jpg",],
-    video: "https://youtube.com/watch?v=aFL2pNeuHhw",
-    oldPrice: 900,
-    newPrice: 700,
-    discount: "22%",
-    mediaCount: "7 photos + video",
-    inStock: true
-  },
-  {
-    id:23,
-    name: "Camping Rechargeable bulb",
-    name2:"Camping Bulb",
-    categories: ["lights","man"],
-    images: ["images/campingricharablebulb1.jpg","images/campingricharablebulb2.jpg","images/campingricharablebulb3.jpg"],
-    video: "",
-    oldPrice: 250,
-    newPrice: 180,
-    discount: "28%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-  {
-    id:24,
-    name: "Advance Oil Bottle",
-    categories: ["kitchen","woman","home"],
-    images: ["images/advanceoilbottle.jpg","images/advanceoilbottle2.jpg","images/advanceoilbottle3.jpg","images/advanceoilbottle4.jpg" ],
-    video: "",
-    oldPrice: 200,
-    newPrice: 150,
-    discount: "22%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:25,
-    name: "Color Changing Clock",
-    categories: ["lights","kids"],
-    images: ["images/colorchangingclock1.jpg","images/colorchangingclock2.jpg","images/colorchangingclock3.webp","images/colorchangingclock4.jpg"],
-    video: "",
-    oldPrice: 300,
-    newPrice: 250,
-    discount: "16%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:26,
-    name: "Fridge Cover",
-    categories: ["kitchen","woman","home"],
-    images: ["images/fridgecover1.jpg","images/fridgecover2.jpg","images/fridgecover3.jpg"],
-    video: "",
-    oldPrice: 200,
-    newPrice: 120,
-    discount: "40%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-  {
-    id:27,
-    name: "Holi Refill (Set of 16)",
-    name2: "Holi Refill",
-    category: "man",
-    images: ["images/holirefill1.jpg","images/holirefill2.jpg","images/holirefill3.jpg" , "images/holirefill4.jpg","images/holirefill5.jpg"],
-    video: "",
-    oldPrice: 900,
-    newPrice: 800,
-    discount: "21%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-
-  {
-    id:28,
-    name: "Cookware Cleaner Paste",
-    name2: "Cookware Cleaner",
-    category: "kitchen",
-    images: ["images/cookwarecleanerpaste1.jpg","images/cookwarecleanerpaste2.jpg","images/cookwarecleanerpaste3.jpg" , "images/cookwarecleanerpaste4.webp"],
-    video: "",
-    oldPrice:"" ,
-    newPrice: 80,
-    discount: "22%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:29,
-    name: "Cute Little Night Lamp",
-    name2:"Night Lamp",
-    categories: ["gifts","lights"],
-    images: ["images/cutelittlenightlamp.jpg","images/cutelittlenightlamp2.jpg","images/cutelittlenightlamp3.jpg","images/cutelittlenightlamp4.jpg","images/cutelittlenightlamp5.jpg","images/cutelittlenightlamp6.jpg","images/cutelittlenightlamp7.jpg"],
-    video: "",
-    oldPrice: 300,
-    newPrice: 200,
-    discount: "33%",
-    mediaCount: "7 photos",
-    inStock: false
-  },
-  {
-    id:30,
-    name: "Fridge Storage Divider 4pc Set(4 piece)",
-    name2: "Fridge Storage divider",
-    category: "kitchen",
-    images: ["images/fridgestoragedivider4pcset.jpg","images/fridgestoragedivider4pcset2.jpg","images/fridgestoragedivider4pcset3.jpg"],
-    video: "",
-    oldPrice: 90,
-    newPrice: 50,
-    discount: "44%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-   {
-    id:31,
-    name: "3d Massager",
-    categories: ["man","woman"],
-    images: ["images/3dmassager.jpg","images/3dmassager2.jpg","images/3dmassager3.jpg"],
-    video: "",
-    oldPrice: 220,
-    newPrice: 150,
-    discount: "31%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-   {
-    id:32,
-    name: "3 Hook Rotary Sticker(1 pc)",
-    name2:"Rotary Sticker",
-    categories: ["kitchen","home","handful"],
-    images: ["images/3hookrotarysticker3.jpg","images/3hookrotarysticker2.jpg","images/3hookrotarysticker.jpg","images/3hookrotarysticker4.jpg"],
-    video: "",
-    oldPrice: 70,
-    newPrice: 50,
-    discount: "28%",
-    mediaCount: "4 photos",
-    inStock: false
-  },
-   {
-    id:33,
-    name: "3 Layer MultiPurpose Organiser",
-    name2:"Multipurpose Organiser",
-    categories: ["home","woman"],
-    images: ["images/3layermultipurposeorganiser.jpg","images/3layermultipurposeorganise2.jpg","images/3layermultipurposeorganiser3.jpg"],
-    video: "",
-    oldPrice: 750,
-    newPrice: 600,
-    discount: "20%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-  {
-    id:34,
-    name: "30pc Plant Climbing Fixing Clip",
-    name2:"Plant fixing Clip",
-    categories: ["home","handful"],
-    images: ["images/30pcplantclimbingfixingclip.jpg","images/30pcplantclimbingfixingclip2.jpg","images/30pcplantclimbingfixingclip3.webp",],
-    video: "https://youtube.com/watch?v=4RnCWLS0PLQ",
-    oldPrice: 140,
-    newPrice: 100,
-    discount: "28%",
-    mediaCount: "3 photos + video",
-    inStock: true
-  },
-  {
-    id:35,
-    name: "Baby Projector Torch",
-    categories: ["kids","girls"],
-    images: ["images/babyprojectortorch.jpg","images/babyprojectortorch2.jpg","images/babyprojectortorch3.jpg",],
-    video: "",
-    oldPrice: 200,
-    newPrice: 150,
-    discount: "25%",
-    mediaCount: "3 photos",
-    inStock: false
-  },{
-    id:36,
-    name: "Flash Drum Toy",
-    category: "kids",
-    images: ["images/flashdrumtoy.jpg","images/flashdrumtoy1.webp","images/flashdrumtoy2.webp","images/flashdrumtoy3.webp","images/flashdrumtoy4.webp"],
-    video: "",
-    oldPrice: 450,
-    newPrice: 350,
-    discount: "22%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:37,
-    name: "P9 Wireless Headphones",
-    name2:"Wireless Headphones",
-    category: "earphone",
-    images: ["images/p9wirelessheadphones1.jpg","images/p9wirelessheadphones2.jpg","images/p9wirelessheadphones3.jpg","images/p9wirelessheadphones4.jpg"],
-    video: "",
-    oldPrice: 700,
-    newPrice: 500,
-    discount: "28%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:38,
-    name: "Storage Peeler",
-    categories: ["kitchen","home"],
-    images: ["images/storagepeeler.jpg","images/storagepeeler2.webp","images/storagepeeler3.webp","images/storagepeeler4.webp"],
-    video: "",
-    oldPrice: 80,
-    newPrice: 50,
-    discount: "37%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:39,
-    name: "Vaccum Flask Set",
-    categories: ["kitchen","man","woman","gifts"],
-    images: ["images/vacuumflaskset1.webp","images/vacuumflaskset2.webp","images/vacuumflaskset3.jpg","images/vaccumflaskset4.webp"],
-    video: "",
-    oldPrice: 380,
-    newPrice: 300,
-    discount: "21%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:40,
-    name: "Wave Lamp",
-    categories: ["lights","home"],
-    images: ["images/wavelamp1.webp","images/wavelamp2.webp","images/wavelamp3.webp","images/wavelamp4.jpg","images/wavelamp5.webp","images/wavelamp6.webp"],
-    video: "https://youtube.com/watch?v=bK0T5ny-otU",
-    oldPrice: 430,
-    newPrice: 325,
-    discount: "24%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },
-  {
-    id:41,
-    name: "Washing Machine Stand",
-    categories: ["kitchen","home"],
-    images: ["images/wasingmachinestand1.jpg","images/wasingmachinestand2.webp","images/wasingmachinestand3.jpg"],
-    video: "",
-    oldPrice: 150,
-    newPrice: 100,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },
-  {
-    id:42,
-    name: "Wooden Saving Counter",
-    categories:["trending","woman","kids","girls","handful"],
-    images: ["images/woodensavingcounter5.webp","images/woodensavingcounter2.webp","images/woodensavingcounter1.webp","images/woodensavingcounter3.webp","images/woodensavingcounter4.webp",],
-    video: "",
-    oldPrice: 300,
-    newPrice: 230,
-    discount: "23%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-  {
-    id:43,
-    name: "Paper Soap",
-    categories: ["kids","girls","woman"],
-    images: ["images/travelsoapbox1.webp","images/travelsoapbox2.webp","images/travelsoapbox3.jpg","images/travelsoapbox4.jpg","images/travelsoapbox3jpg.jpg"],
-    video: "",
-    oldPrice: 60,
-    newPrice: 30,
-    discount: "50%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-  {
-    id:44,
-    name: "Triangle Squeezing Mop",
-    name2:"Squeezing Mop",
-    categories: ["kitchen","home"],
-    images: ["images/trianglesqueezingmop1.webp","images/trianglesqueezingmop.jpg","images/trianglesqueezingmop2.jpg"],
-    video: "",
-    oldPrice: 380,
-    newPrice: 300,
-    discount: "21%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:45,
-    name: "Temperature Bottle",
-    categories: ["woman","man","kids","girls"],
-    images: ["images/temperaturebottle.jpeg","images/temperaturebottle1.webp","images/temperaturebottle2.jpg","images/temperaturebottle3.webp"],
-    video: "",
-    oldPrice: 330,
-    newPrice: 230,
-    discount: "30%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:46,
-    name: "Travel Bag",
-    category: "woman",
-    images: ["images/travelbag1.webp","images/travelbag2.webp","images/travelbag3.webp"],
-    video: "https://youtube.com/watch?v=CMwqUXuLlvc",
-    oldPrice: 400,
-    newPrice: 320,
-    discount: "15%",
-    mediaCount: "3 photos + video",
-    inStock: true
-  },
-  {
-    id:47,
-    name: "Super Observant Towel(Size:40cm*40cm)",
-    name2: "Super Towel",
-    categories: ["home","kitchen","woman"],
-    images: ["images/superobservanttowel1.webp","images/superobservanttowel2.jpg","images/superobservanttowel3.jpg"],
-    video: "",
-    oldPrice: 130,
-    newPrice: 80,
-    discount: "38%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:48,
-    name: "Steel Gym Shaker",
-    category: "man",
-    images: ["images/steelgymshaker.jpeg","images/steelgymshaker2.webp","images/steelgymshaker3.webp","images/steelgymshaker4.jpg"],
-    video: "",
-    oldPrice: 400,
-    newPrice: 350,
-    discount: "12.5%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:49,
-    name: "Silver Gas Saver",
-    categories:["kitchen","handful"],
-    images: ["images/silvergassaver1.jpg","images/silvergassaver2.jpg","images/silvergassaver3.webp"],
-    video: "https://youtube.com/watch?v=YUvFZiHz5d4",
-    oldPrice: 150,
-    newPrice: 120,
-    discount: "20%",
-    mediaCount: "3 photos + video",
-    inStock: true
-  },{
-    id:50,
-    name: "Sparkle Gun",
-    category: "man",
-    images: ["images/sparklegun1.jpg","images/sparklegun2.jpg","images/sparklegun3.jpg","images/sparklegun4.webp"],
-    video: "https://youtube.com/watch?v=8nn2tSsYdb8",
-    oldPrice: 280,
-    newPrice: 200,
-    discount: "27%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },
-  {
-    id:51,
-    name: "Silicon Shoe Cover",
-    categories: ["woman","man","handful","home"],
-    images: ["images/siliconshoecover1.jpg","images/siliconshoecover2.jpg","images/siliconshoecover3.jpg"],
-    video: "",
-    oldPrice: 120,
-    newPrice: 80,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:52,
-    name: "Shoe Cleaning Brush",
-    categories: ["man","woman","handful"],
-    images: ["images/shoecleaningbrush1.jpg","images/shoecleaningbrush2.webp","images/shoecleaningbrush3.jpg","images/shoecleaningbrush4.webp","images/shoecleaningbrush5.webp"],
-    video: "",
-    oldPrice: 120,
-    newPrice: 80,
-    discount: "33%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:53,
-    name: "Roll-up Bag",
-    category: "woman",
-    images: ["images/rollupbag1.jpg","images/rollupbag2.jpg","images/rollupbag3.jpg"],
-    video: "",
-    oldPrice: 140,
-    newPrice: 100,
-    discount: "28%",
-    mediaCount: "3 photos",
-    inStock: true
-  }
-  ,{
-    id:54,
-    name: "Rain Card",
-    categories: ["woman","man","handful"],
-    images: ["images/raincard.jpg","images/raincard1.webp","images/raincard2.jpg","images/raincard3.jpg","images/raincard4.webp"],
-    video: "",
-    oldPrice: 50,
-    newPrice: 25,
-    discount: "50%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:55,
-    name: "Portable Juicer",
-    categories: ["kitchen","woman","man"],
-    images: ["images/portablejuicer1.webp","images/portablejuicer2.webp","images/portablejuicer3.webp","images/portablejuicer4.webp","images/portablejuicer5.webp"],
-    video: "",
-    oldPrice: 450,
-    newPrice: 350,
-    discount: "22%",
-    mediaCount: "5 photos",
-    inStock: false
-  },{
-    id:56,
-    name: "Moving Titanic Liquid Ship",
-    categories: ["gifts","man","home"],
-    images: ["images/movingtitanicliquidship1.jpg","images/movingtitanicliquidship2.webp","images/movingtitanicliquidship3.jpg","images/movingtitanicliquidship4.jpg","images/movingtitanicliquidship23.jpg"],
-    video: "https://youtube.com/watch?v=c7gFyV11bNs",
-    oldPrice: 450,
-    newPrice: 300,
-    discount: "26%",
-    mediaCount: "5 photos + video",
-    inStock: false
-  },
-  {
-    id:57,
-    name: "Moving Sand Art",
-    categories: ["gifts","home","woman"],
-    images: ["images/movinglandslide1.webp","images/movinglandslide2.webp","images/movinglandslide3.jpg","images/movinglandslide4.webp","images/movinglandslide.jpg"],
-    video: "https://youtube.com/watch?v=4iLtaVz1WzY",
-    oldPrice: 420,
-    newPrice: 350,
-    discount: "16%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },{
-    id:58,
-    name: "Motivational Bottle(1L)",
-    categories: ["gifts","girls","woman","man","kids"],
-    images: ["images/motivationalbottle5.webp","images/motivationalbottle2.jpg","images/motivationalbottle3.jpg","images/motivationalbottle4.jpg","images/motivationalbottle5.webp","images/motivationalbottle6.jpg","images/motivationalbottle1.jpg","images/motivationalbottle7.jpg"],
-    video: "",
-    oldPrice: 280,
-    newPrice: 200,
-    discount: "28%",
-    mediaCount: "8 photos",
-    inStock: true
-  },{
-    id:59,
-    name: "2 Litre Motivational Bottle",
-    name2:"2L Bottle",
-    categories:  ["gifts","girls","woman","man","kids"],
-    images: ["images/motivationalbottle4.jpg","images/2lmotivationalbottle.jpg","images/motivationalbottle6.jpg","images/motivationalbottle1.jpg","images/motivationalbottle7.jpg","images/2lmotivationalbottle1.webp","images/2lmotivationalbottle4.webp"],
-    video: "https://youtube.com/watch?v=DgoozRpbtDQ",
-    oldPrice: 300,
-    newPrice: 250,
-    discount: "16%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:60,
-    name: "Mobile Stand Cute",
-    categories: ["girls","woman"],
-    images: ["images/mobilestandcute1.jpg","images/mobilestandcute2.jpg","images/mobilestandcute3.jpg"],
-    video: "",
-    oldPrice: 150,
-    newPrice: 100,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:61,
-    name: "Metal Plant Stick",
-    categories: ["home","handful"],
-    images: ["images/metelplantstick1.webp","images/metelplantstick2.webp","images/metelplantstick3.jpg"],
-    video: "",
-    oldPrice: 30,
-    newPrice: 20,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:62,
-    name: "Magic Water Book",
-    categories: ["kids","girls"],
-    images: ["images/magicwaterbook1.webp","images/magicwaterbook2.webp","images/magicwaterbook3.webp","images/magicwaterbook4.webp"],
-    video: "",
-    oldPrice: 80,
-    newPrice: 50,
-    discount: "37.5%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:63,
-    name: "Magic Umbrella",
-    categories: ["woman","girls"],
-    images: ["images/magicumbrella1.jpg","images/magicumbrella2.webp","images/magicumbrella3.jpg","images/magicumbrella4.jpg","images/magicumbrella5.jpg"],
-    video: "https://youtube.com/watch?v=YuOTOW_7flo",
-    oldPrice: 350,
-    newPrice: 250,
-    discount: "28%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },{
-    id:64,
-    name: "Magic Towel (Size:40*30cm)",
-    name2:"Magic Towel",
-    categories: ["handful","girls","woman","man","kids"],
-    images: ["images/magictowel1.jpg","images/magictowel2.jpg","images/magictowel3.jpg","images/magictowel4.webp"],
-    video: "",
-    oldPrice: 100,
-    newPrice: 70,
-    discount: "30%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:65,
-    name: "LED 3W Torch",
-    categories: ["lights","home","man"],
-    images: ["images/led3wtorch1.webp","images/led3wtorch2.webp","images/led3wtorch3.webp","images/led3wtorch4.webp"],
-    video: "",
-    oldPrice: 200,
-    newPrice: 150,
-    discount: "25%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:66,
-    name: "Kids Digital Camera",
-    name2:"Kids Camera",
-    categories: ["kids","girls","gifts"],
-    images: ["images/kidsdigitalcamera.jpeg","images/kidsdigitalcamera1.webp","images/kidsdigitalcamera3.webp","images/kidsdigitalcamera4.webp","images/kidsdigitalcamera2.jpg"],
-    video: "https://youtube.com/watch?v=X7Y7DZfyakY",
-    oldPrice: 700,
-    newPrice: 550,
-    discount: "21%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },{
-    id:67,
-    name: "Ice Bag",
-    categories: ["woman","man"],
-    images: ["images/icebag1.webp","images/icebag2.webp","images/icebag3.webp","images/icebag4.webp","images/icebag5.webp"],
-    video: "",
-    oldPrice: 235,
-    newPrice: 150,
-    discount: "36%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:68,
-    name: "Garden Tool Set",
-    categories: ["handful","home","woman"],
-    images: ["images/gardentoolset1.jpg","images/gardentoolset2.jpg","images/gardentoolset3.jpg","images/gardentoolset4.webp"],
-    video: "",
-    oldPrice: 185,
-    newPrice: 120,
-    discount: "35%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:69,
-    name: "Foldable Bag With Wheels",
-    name2:"Foldable Bag",
-    category: "woman",
-    images: ["images/foldablebagwithwheels.jpg","images/foldablebagwithwheels2.jpg","images/foldablebagwithwheels1.jpg"],
-    video: "",
-    oldPrice: 680,
-    newPrice: 450,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: false
-  },{
-    id:70,
-    name: "Garlic Crusher",
-    category: "kitchen",
-    images: ["images/garliccrusher.jpeg","images/garliccrusher1.webp","images/garliccrusher2.jpg","images/garliccrusher3.jpg"],
-    video: "",
-    oldPrice: 280,
-    newPrice: 200,
-    discount: "28%",
-    mediaCount: "4 photos",
-    inStock: false
-  },{
-    id:71,
-    name: "Floating Pen",
-    categories: ["girls","kids"],
-    images: ["images/floatingpen.jpeg","images/floatingpen2.webp","images/floatingpen3.webp","images/floatingpen1.jpg"],
-    video: "",
-    oldPrice: 200,
-    newPrice: 150,
-    discount: "25%",
-    mediaCount: "4 photos",
-    inStock: true
-  }
-  ,{
-    id:72,
-    name: "Compressed Towel(Size:140*77cm)",
-    name2: "Compressed Towel",
-    categories: ["handful","kids","woman","man"],
-    images: ["images/compressedtowel1.jpg","images/compressedtowel2.webp","images/compressedtowel3.jpg"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 120,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:73,
-    name: "Cloth Line (Multipurpose With 12 Clips)",
-    name2:"Cloth Line",
-    categories: ["home","woman","handful"],
-    images: ["images/clothline1.jpg","images/clothline2.jpg","images/clothline3.webp","images/clothline4.webp"],
-    video: "",
-    oldPrice: 220,
-    newPrice: 150,
-    discount: "31%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:74,
-    name: "Chair Shape Mobile Stand",
-    name2:"Chair Mobile Stand",
-    categories: ["man","handful"],
-    images: ["images/chaiershapemobilestand1.jpg","images/chaiershapemobilestand2.jpg","images/chaiershapemobilestand3.webp","images/chaiershapemobilestand4.jpg"],
-    video: "",
-    oldPrice: 50,
-    newPrice: 30,
-    discount: "40%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:75,
-    name: "Bottle Umbrella",
-    categories: ["woman","girls","handful"],
-    images: ["images/bottelumbrella1.jpg","images/bottelumbrella2.jpg","images/bottelumbrella3.jpg","images/bottelumbrella4.jpg","images/bottelumbrella5.jpg","images/bottleumbrella4.webp"],
-    video: "https://youtube.com/watch?v=OtKDVLZp_tQ",
-    oldPrice: 320,
-    newPrice: 250,
-    discount: "21%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:76,
-    name: "Mini Gap Cleaning Brush",
-    categories: ["kitchen","home"],
-    images: ["images/minigapcleaningbrush1.jpg","images/minigapcleaningbrush2.jpg","images/minigapcleaningbrush3.webp","images/minigapcleaningbrush4.jpg"],
-    video: "",
-    oldPrice: 40,
-    newPrice: 20,
-    discount: "50%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:77,
-    name: "Bottle Cleaning Brush",
-    categories: ["woman","kitchen","handful"],
-    images: ["images/bottelcleaningbrush1.jpg","images/bottelcleaningbrush2.jpg","images/bottelcleaningbrush3.jpg","images/bottelcleaningbrush4.jpg"],
-    video: "",
-    oldPrice: 50,
-    newPrice: 30,
-    discount: "40%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:78,
-    name: "Banana Case",
-    category: "kids",
-    images: ["images/bananacase3.webp","images/bananacase1.webp","images/bananacase2.webp","images/bananacase4.jpg","images/bananacase.jpg"],
-    video: "",
-    oldPrice: 50,
-    newPrice: 30,
-    discount: "40%",
-    mediaCount: "5 photos",
-    inStock: true
-  }
-  ,{
-    id:79,
-    name: "Air Cooler Fan",
-    categories: ["man","woman","handful","home"],
-    images: ["images/aircoolerfan.webp","images/aircoolerfan4.webp","images/aircoolerfan3.webp","images/aircoolerfan2.jpg","images/aircoolerfan1.webp"],
-    video: "https://youtube.com/watch?v=GtCCT6MQZlY",
-    oldPrice: 830,
-    newPrice: 600,
-    discount: "27%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },{
-    id:80,
-    name: "360 Mosquito Killing Lamp",
-    name2:"Mosquito Killing Lamp",
-    categories: ["home","handful"],
-    images: ["images/360masquitokillinglamp1.webp","images/360masquitokillinglamp2.webp","images/360masquitokillinglamp3.webp","images/360masquitokillinglamp4.jpg"],
-    video: "",
-    oldPrice: 280,
-    newPrice: 150,
-    discount: "46%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:81,
-    name: "120 LED Sensor Light",
-    name2:"LED Sensor Light",
-    categories: ["lights","home"],
-    images: ["images/120ledsensorlight.jpeg","images/120ledsensorlight1.webp","images/120ledsensorlight2.jpg","images/120ledsensorlight4.webp","images/120ledsensorlight5.jpg"],
-    video: "",
-    oldPrice: 280,
-    newPrice: 230,
-    discount: "17%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:82,
-    name: "66 Liter Storage Bag",
-    name2:"66L Storage Bag",
-    categories: ["home","woman"],
-    images: ["images/66literstoragebag1.webp","images/66literstoragebag2.webp","images/66literstoragebag3.jpg","images/66literstoragebag4.jpg","images/66literstoragebag5.jpg","images/66literstoragebag7.jpg","images/66literstoragebag8.webp","images/66literstoragebag9.jpg",],
-    video: "https://youtube.com/watch?v=l69mTxmefqU",
-    oldPrice: 480,
-    newPrice: 300,
-    discount: "37%",
-    mediaCount: "8 photos + video",
-    inStock: true
-  },{
-    id:83,
-    name: "Unicorn Pencil",
-    categories: ["girls","kids"],
-    images: ["images/5pcsetuniqornpencil.webp","images/5pcsetuniqornpencil5.jpg","images/5pcsetuniqornpencil3.webp","images/5pcsetuniqornpencil4.webp"],
-    video: "",
-    oldPrice: 20,
-    newPrice: 15,
-    discount: "25%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:84,
-    name: "Kitchen Cleaner Foam Spray",
-    category: "kitchen",
-    images: ["images/kitchencleaner1.webp","images/kitchencleaner2.jpg"],
-    video: "https://youtube.com/watch?v=ENV90ugwcmU",
-    oldPrice: 230,
-    newPrice: 200,
-    discount: "34%",
-    mediaCount: "2 photos + video",
-    inStock: true
-  },{
-    id:85,
-    name: "Tube Paper Soap",
-    categories: ["girls","kids","trending"],
-    images: ["images/4pctubepapersoap1.webp","images/4pctubepapersoap2.webp","images/4pctubepapersoap3.webp","images/4pctubepapersoap.jpg"],
-    video: "",
-    oldPrice: 50,
-    newPrice: 40,
-    discount: "20%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:86,
-    name: "Lipstick Pen",
-    category: "girls",
-    images: ["images/3pclipstickpen1.webp","images/3pclipstickpen2.webp","images/3pclipstickpen.jpg"],
-    video: "",
-    oldPrice: 30,
-    newPrice: 25,
-    discount: "20%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:87,
-    name: "3 Drawer Cosmic Storage Organiser",
-    name2:"Cosmic Organiser",
-    categories: ["girls","woman","home"],
-    images: ["images/3drawercosmicstorageorganiser.webp","images/3drawercosmicstorageorganiser2.webp","images/3drawercosmicstorageorganiser3.jpg","images/3drawercosmicstorageorganiser4.jpg"],
-    video: "https://youtube.com/watch?v=U28HusqQ4sw",
-    oldPrice: 650,
-    newPrice: 500,
-    discount: "23%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },{
-    id:88,
-    name: "Trash(Polythene) Bag",
-    categories: ["kitchen","home","handful"],
-    images: ["images/2pcsettrashbag.jpg","images/2pcsettrashbag2.jpeg","images/2pcsettrashbag3.jpeg","images/2pcsettrashbag1.webp"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 100,
-    discount: "44%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:89,
-    name: "3 in 1 Portable Vaccum",
-    category: "home",
-    images: ["images/3in1portablevaccum.webp","images/3in1portablevaccum2.webp","images/3in1portablevaccum3.webp","images/3in1portablevaccum4.webp"],
-    video: "",
-    oldPrice: 480,
-    newPrice: 350,
-    discount: "27%",
-    mediaCount: "4 photos",
-    inStock: true
-  }
-  ,{
-    id:90,
-    name: "Acrylic Sticker Mirror",
-    category: "home",
-    images: ["images/acrylicstickermirror1.jpg","images/acrylicstickermirror2.webp","images/acrylicstickermirror3.jpg"],
-    video: "",
-    oldPrice: 175,
-    newPrice: 120,
-    discount: "31%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:91,
-    name: "Anti Crack Heel",
-    category: "woman",
-    images: ["images/anticrackheel.jpg","images/anticrackheel2.jpg","images/anticrackheel3.jpg","images/anticrackheel4.jpg","images/anticrackheel5.webp"],
-    video: "",
-    oldPrice: 100,
-    newPrice: 60,
-    discount: "40%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:92,
-    name: "Anti Slip Clothes Line",
-    categories: ["woman","home"],
-    images: ["images/antislipclothesline.webp","images/antislipclothesline1.webp","images/antislipclothesline2.webp"],
-    video: "",
-    oldPrice: 80,
-    newPrice: 50,
-    discount: "60%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:93,
-    name: "Astronaut Shape Pen",
-    name2:"Astronaut Pen",
-    categories: ["girls","kids"],
-    images: ["images/astroanautshapegelpen.jpeg","images/astronautshapegelpen2.jpg","images/astroanautshapegelpen3.jpg","images/astroanautshapegelpen2.webp"
+    "id": 1,
+    "name": "Moon Lamp",
+    "name2": "",
+    "category": "lights",
+    "categories": [
+      "gifts",
+      "lights",
+      "trending"
     ],
-    video: "",
-    oldPrice: 30,
-    newPrice: 20,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:94,
-    name: "Astronaut Mobile Stand",
-    name2:"Mobile Stand",
-    categories: ["home","man","woman"],
-    images: ["images/astronautmobilestand.jpg","images/astronautmobilestand2.webp","images/astronautmobilestand3.webp","images/astronautmobilestand5.webp","images/astronautmobilestand6.jpg"],
-    video: "",
-    oldPrice: 220,
-    newPrice: 150,
-    discount: "31%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:95,
-    name: "Bike Mask",
-    category: "man",
-    images: ["images/bikemask1.jpg","images/bikemask2.webp","images/bikemask3.webp","images/bikemask4.jpg"],
-    video: "https://youtube.com/watch?v=SYSwLVZEzKQ",
-    oldPrice: 300,
-    newPrice: 250,
-    discount: "16%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:96,
-    name: "Cable Protector",
-    categories: ["man","woman","handful"],
-    images: ["images/cableprotector1.jpg","images/cableprotector2.jpg"],
-    video: "",
-    oldPrice: 20,
-    newPrice: 15,
-    discount: "25%",
-    mediaCount: "2 photos",
-    inStock: true
-  },{
-    id:97,
-    name: "Coffee Mug With Bracelet handle",
-    name2:"Coffee Mug",
-    categories: ["girls","woman","gifts","trending"],
-    images: ["images/coffeemugwithbracelethandle.webp","images/coffeemugwithbracelethandle2.webp","images/coffeemugwithbracelethandle3.jpg","images/coffeemugwithbracelethandle4.jpg","images/coffeemugwithbracelethandle5.jpg"],
-    video: "",
-    oldPrice: 230,
-    newPrice: 150,
-    discount: "34%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:98,
-    name: "Coffee Tumbler",
-    categories: ["man","woman"],
-    images: ["images/coffeetumbler1.jpg","images/coffeetumbler2.jpg","images/coffeetumbler3.jpg","images/coffeetumbler4.jpg"],
-    video: "https://youtube.com/watch?v=etzSh5MHwoA?",
-    oldPrice: 250,
-    newPrice: 150,
-    discount: "40%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },
-  {
-    id:99,
-    name: "Corner Tape",
-    categories: ["kitchen","home"],
-    images: ["images/cornertape1.jpeg","images/cornertape2.jpg","images/cornertape4.webp","images/cornertape3.webp","images/cornertape5.webp","images/cornertape6.webp","images/cornertape7.webp"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 150,
-    discount: "16%",
-    mediaCount: "7 photos",
-    inStock: true
-  }
-  ,{
-    id:100,
-    name: "Crystal Ball Night Light",
-    name2:"Crystal Ball",
-    categories: ["gifts","lights","home"],
-    images: ["images/crystalballnightlight2.jpg","images/crystalballnightlight3.webp","images/crystalballnightlight4.webp","images/crystalballnightlight5.webp","images/crystalballnightlight6.webp"],
-    video: "https://youtube.com/watch?v=xWDLxhsp9L8",
-    oldPrice: 280,
-    newPrice: 200,
-    discount: "28%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },
-  {
-    id:101,
-    name: "Cute Pear Shape Lamp",
-    name2:"Cute Lamp",
-    categories: ["gifts","lights"],
-    images: ["images/cutepearshapelamp2.jpg","images/cutepearshapelamp1.webp","images/cutepearshapelamp3.webp","images/cutepearshapelamp4.webp",],
-    video: "https://youtube.com/watch?v=EXoG_pp8aQE",
-    oldPrice: 600,
-    newPrice: 500,
-    discount: "16%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:102,
-    name: "Cute Rabbit Lamp",
-    name2:"Rabbit Lamp",
-    categories: ["gifts","lights"],
-    images: ["images/cuterabbitlamp1.jpg","images/cuterabbitlamp2.jpg","images/cuterabbitlamp3.jpg","images/cuterabbitlamp4.jpg","images/cuterabbitlamp5.jpg"],
-    video: "",
-    oldPrice: 600,
-    newPrice: 500,
-    discount: "16%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:103,
-    name: "Deer Lamp ",
-    categories: ["trending","gifts","lights"],
-    images: ["images/dearlamp1.jpg","images/dearlamp2.jpg","images/dearlamp3.jpg","images/dearlamp4.webp"],
-    video: "https://youtube.com/watch?v=U6LPuIf9fE4",
-    oldPrice: 560,
-    newPrice: 500,
-    discount: "10%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:104,
-    name: "Drain Cleaner",
-    categories: ["kitchen","handful"],
-    images: ["images/draincleaner1.jpg","images/draincleaner2.webp","images/draincleaner.jpg"],
-    video: "",
-    oldPrice: 125,
-    newPrice: 60,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:105,
-    name: "Egg Boiler Poacher",
-    name2:"Egg Boiler",
-    category: "kitchen",
-    images: ["images/eggpoacher1.jpg","images/eggpoacher2.jpeg","images/eggpoacher3.jpeg","images/eggpoacher4.jpeg","images/eggpoacher5.jpeg"],
-    video: "",
-    oldPrice: 370,
-    newPrice: 300,
-    discount: "18%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:106,
-    name: "Fish Shape Pen",
-    name2:"girls",
-    categories: ["girls","kids"],
-    images: ["images/fishshapepen1.jpeg","images/fishshapepen2.webp","images/fishshapepen3.jpg"],
-    video: "",
-    oldPrice: 30,
-    newPrice: 25,
-    discount: "16%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:107,
-    name: "Girl Waist Bag",
-    categories: ["girls","woman"],
-    images: ["images/girlswaistbag1.jpeg","images/girlswaistbag2.jpg","images/girlswaistbag3.jpg","images/girlwaistbag4.jpg","images/girlwaistbag5.jpg","images/girlwaistbag6.jpg"],
-    video: "",
-    oldPrice: 280,
-    newPrice: 230,
-    discount: "17%",
-    mediaCount: "6 photos",
-    inStock: true
-  },{
-    id:108,
-    name: "Golden Kitchen Foil",
-    name2:"Kitchen Foil",
-    categories: ["kitchen","home"],
-    images: ["images/goldenkitchenfoil.webp","images/goldenkitchenfoil1.webp","images/goldenkitchenfoil2.webp"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 120,
-    discount: "33%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:109,
-    name: "Grip Tape",
-    categories: ["kitchen","home","handful","kids"],
-    images: ["images/griptape.jpeg","images/griptape1.webp","images/griptape2.webp","images/griptape3.webp","images/griptape4.webp","images/griptape5.webp","images/griptape6.webp"],
-    video: "",
-    oldPrice: 150,
-    newPrice: 120,
-    discount: "20%",
-    mediaCount: "7 photos",
-    inStock: true
-  },{
-    id:110,
-    name: "Hair Scalp Massager Brush",
-    name2:"Hair Brush",
-    categories: ["girls","woman"],
-    images: ["images/hairscalpmassagerbrush1.jpg","images/hairscalpmassagerbrush2.webp","images/hairscalpmassagerbrush3.webp","images/hairscalpmassagerbrush4.webp"],
-    video: "",
-    oldPrice: 150,
-    newPrice: 80,
-    discount: "46%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:111,
-    name: "HD Vision",
-    categories: ["man","handful"],
-    images: ["images/hdvision.webp","images/hdvision1.jpg","images/hdvision2.webp","images/hdvision3.webp"],
-    video: "",
-    oldPrice: 230,
-    newPrice: 200,
-    discount: "13%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:112,
-    name: "Hot Water Bag",
-    categories: ["man","woman","handful"],
-    images: ["images/hotwaterbag1.webp","images/hotwaterbag2.webp","images/hotwaterbag3.webp","images/hotwaterbag4.jpg","images/hotwaterbag5.webp"],
-    video: "",
-    oldPrice: 280,
-    newPrice: 200,
-    discount: "28%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:113,
-    name: "Icecream Bottle",
-    categories: ["girls","woman"],
-    images: ["images/icecreambottle1.jpeg","images/icecreambottle2.webp","images/icecreambottle3.webp","images/icecreambottle4.webp"],
-    video: "https://youtube.com/watch?v=Bz4vBcLxOEg",
-    oldPrice: 280,
-    newPrice: 250,
-    discount: "10%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:114,
-    name: "Iphone Silicon Charger Cover",
-    name2:"Iphone Charger Cover",
-    categories: ["girls","woman","man"],
-    images: ["images/iphonesiliconchargercover1.jpg","images/iphonesiliconchargercover2.jpg","images/iphonesiliconchargercover3.jpg","images/iphonesiliconchargercover4.jpg","images/iphonesiliconchargercover5.webp"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 150,
-    discount: "16%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:115,
-    name: "Karaoke Set",
-    name2:"Karaoke Set",
-    categories: ["girls","speaker"],
-    images: ["images/k12speakerwithmike.jpg","images/k12speakerwithmike3.webp","images/k12speakerwithmike4.jpg","images/k12speakerwithmike5.jpg"],
-    video: "https://youtube.com/watch?v=K0BYTLdpyeI",
-    oldPrice: 550,
-    newPrice: 450,
-    discount: "18%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:116,
-    name: "Keychain Mini Flashlight",
-    name2:"Keychain Light",
-    categories: ["man","lights"],
-    images: ["images/keychainminiflashlight1.jpeg","images/keychainminiflashlight2.jpeg","images/keychainminiflashlight3.jpg","images/keychainminiflashlight4.jpg"],
-    video: "",
-    oldPrice: 150,
-    newPrice: 120,
-    discount: "20%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:117,
-    name: "Kitchen Cleaner",
-    name2:"Kitchen Cleaner",
-    category: "kitchen",
-    images: ["images/kitchencleanerfoamspray1.jpg","images/kitchencleanerfoamspray2.jpg"],
-    video: "",
-    oldPrice: 185,
-    newPrice: 150,
-    discount: "18%",
-    mediaCount: "2 photos",
-    inStock: true
-  },{
-    id:118,
-    name: "Knife Sharpener",
-    category: "kitchen",
-    images: ["images/knifesharpener1.webp","images/knifesharpener2.webp","images/knifesharpener3.webp","images/knifesharpener4.jpg"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 150,
-    discount: "16%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:119,
-    name: "Laptop Stand",
-    categories: ["man","handful","woman"],
-    images: ["images/laptopstand1.webp","images/laptopstand2.jpg","images/laptopstand3.webp"],
-    video: "",
-    oldPrice: 400,
-    newPrice: 350,
-    discount: "12%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:120,
-    name: "Leaf Shape Chutney Plate",
-    name2:"Chutney Plate",
-    category: "kitchen",
-    images: ["images/leafshapechutneyplate1.webp","images/leafshapechutneyplate2.jpg","images/leafshapechutneyplate3.webp","images/leafshapechutneyplate4.jpeg"],
-    video: "https://youtube.com/watch?v=pmPd-h_zQIo",
-    oldPrice: 25,
-    newPrice: 10,
-    discount: "60%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:121,
-    name: "LED Music Bulb",
-    categories: ["lights","speaker"],
-    images: ["images/ledmusicbulb.webp","images/ledmusicbulb2.jpg","images/ledmusicbulb3.jpg","images/ledmusicbulb4.webp","images/ledmusicbulb5.jpg","images/ledmusicbulb1.jpg"],
-    video: "",
-    oldPrice: 220,
-    newPrice: 150,
-    discount: "31%",
-    mediaCount: "6 photos",
-    inStock: true
-  },{
-    id:122,
-    name: "Marble Kitchen Foil",
-    categories: ["kitchen","home"],
-    images: ["images/marblekitchenfoil1.jpg","images/marblekitchenfoil2.webp","images/marblekitchenfoil3.webp","images/marblekitchenfoil4.webp"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 120,
-    discount: "33%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:123,
-    name: "Mini Hair Straightner",
-    name2:"Hair Straightner",
-    categories: ["girls","woman"],
-    images: ["images/minihairstraightner1.jpg","images/minihairstraightner2.webp","images/minihairstraightner3.jpg",],
-    video: "",
-    oldPrice: 230,
-    newPrice: 150,
-    discount: "34%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:124,
-    name: "Mirror Acrylic Sticker",
-    category: "home",
-    images: ["images/mirroracrylicsticker1.jpg","images/mirroracrylicsticker2.jpg","images/mirroracrylicsticker3.webp","images/mirroracrylicsticker4.jpg","images/mirroracrylicsticker5.jpg","images/mirroracrylicsticker6.webp","images/mirroracrylicsticker7.jpg"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 100,
-    discount: "44%",
-    mediaCount: "7 photos",
-    inStock: true
-  },{
-    id:125,
-    name: "Mushroom Sensor Light",
-    name2:"Mushroom Light",
-    category: "lights",
-    images: ["images/mushroomsensorlight1.jpg","images/mushroomsensorlight2.jpg","images/mushroomsensorlight3.jpg","images/mushroomsensorlight4.jpg","images/mushroomsensorlight5.webp","images/mushroomsensorlight6.jpg"],
-    video: "https://youtube.com/watch?v=kMWuuRXShR4",
-    oldPrice: 150,
-    newPrice: 100,
-    discount: "33%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:126,
-    name: "Neck Fan",
-    categories: ["man","woman"],
-    images: ["images/neckfan1.jpg","images/neckfan2.jpg","images/neckfan3.jpg","images/neckfan4.jpg"],
-    video: "https://youtube.com/watch?v=ipQ1kk79Ve8",
-    oldPrice: 350,
-    newPrice: 300,
-    discount: "14%",
-    mediaCount: "4 photos + video",
-    inStock: false
-  },{
-    id:127,
-    name: "Panda Lamp",
-    categories:["trending","gifts","lights"],
-    images: ["images/pandalamp1.jpg","images/pandalamp2.jpg","images/pandalamp3.webp","images/pandalamp4.jpg","images/pandalamp5.jpg"],
-    video: "https://youtube.com/watch?v=w5jwOxhi33U",
-    oldPrice: 550,
-    newPrice: 450,
-    discount: "18%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },{
-    id:128,
-    name: "Petrol Transfer Pipe",
-    categories: ["man","handful","kitchen"],
-    images: ["images/petroltransferpipe1.webp","images/petroltransferpipe2.webp","images/petroltransferpipe3.webp","images/petroltransferpipe4.webp","images/petroltransferpipe5.webp","images/petroltransferpipe6.webp"],
-    video: "https://youtube.com/watch?v=izBm5egFBEQ",
-    oldPrice: 220,
-    newPrice: 150,
-    discount: "31%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:129,
-    name: "Portable Fan",
-    categories: ["man","woman","girls","kids","trending"],
-    images: ["images/portablefan.jpg","images/portablefan1.jpg","images/portablefan3.jpg","images/portablefan4.webp"],
-    video: "https://youtube.com/watch?v=0qwohlDIjJI",
-    oldPrice: 280,
-    newPrice: 230,
-    discount: "17%",
-    mediaCount: "4 photos + video",
-    inStock: false
-  },{
-    id:130,
-    name: "Rechargeable Folding Fan",
-    name2:"Folding Fan",
-    categories: ["man","woman","home"],
-    images: ["images/rechargeablefoldingfan1.webp","images/rechargeablefoldingfan2.webp","images/rechargeablefoldingfan3.jpg","images/rechargeablefoldingfan4.jpg"],
-    video: "",
-    oldPrice: 450,
-    newPrice: 350,
-    discount: "22%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:131,
-    name: "Portable Sealing Machine",
-    name2:"Sealing Machine",
-    categories: ["kitchen","handful"],
-    images: ["images/portablesealingmachine1.jpeg","images/portablesealingmachine2.jpg","images/portablesealingmachine3.webp","images/portablesealingmachine6.jpg","images/portablesealingmachine5.jpg"],
-    video: "",
-    oldPrice: 300,
-    newPrice: 250,
-    discount: "16%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:132,
-    name: "Rechargeable Lighter",
-    categories: ["kitchen","handful"],
-    images: ["images/richargeablelighter4.webp","images/rechargeablelighter2.jpg","images/rechargeablelighter3.webp","images/rechargeablelighter1.webp"],
-    video: "",
-    oldPrice: 280,
-    newPrice: 250,
-    discount: "10%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:133,
-    name: "Sank Magic",
-    categories: ["girls","kids"],
-    images: ["images/sankmagic1.webp","images/sankmagic2.webp","images/sankmagic3.webp","images/sankmagic4.webp","images/sankmagic5.webp"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 120,
-    discount: "33%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:134,
-    name: "Silicon Bath Body Scrubber",
-    name2:"Body Scrubber",
-    categories: ["woman","girls"],
-    images: ["images/siliconbathbodyscrubber1.jpg","images/siliconbathbodyscrubber2.webp","images/siliconbathbodyscrubber3.webp","images/siliconbathbodyscrubber4.webp","images/siliconbathbodyscrubber5.webp"],
-    video: "",
-    oldPrice: 150,
-    newPrice: 80,
-    discount: "46%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:135,
-    name: "Silicon Lid Set",
-    category: "kitchen",
-    images: ["images/siliconlidset1.jpg","images/siliconlidset2.webp","images/siliconlidset3.jpg","images/siliconlidset4.webp"],
-    video: "https://youtube.com/watch?v=RTQ4AVCmXr0",
-    oldPrice: 180,
-    newPrice: 100,
-    discount: "44%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:136,
-    name: "Unicorn Pen",
-    categories: ["girls","kids"],
-    images: ["images/unicornpen.jpeg","images/unicornpen1.jpeg"],
-    video: "",
-    oldPrice: 30,
-    newPrice: 25,
-    discount: "16%",
-    mediaCount: "2 photos",
-    inStock: true
-  },{
-    id:137,
-    name: "Spectacle Case",
-    categories: ["girls","woman","handful"],
-    images: ["images/spectaclecase1.jpeg","images/spectaclecase4.webp"],
-    video: "",
-    oldPrice: 200,
-    newPrice: 150,
-    discount: "25%",
-    mediaCount: "2 photos",
-    inStock: true
-  },{
-    id:138,
-    name: "Sponge Holder Liquid Dispenser",
-    name2:"Sponge Holder",
-    category: "kitchen",
-    images: ["images/spongeholderliquiddispenser1.jpeg","images/spongeholderliquiddispenser2.webp","images/spongeholderliquiddispenser3.webp","images/spongeholderliquiddispenser4.jpg"],
-    video: "https://youtube.com/watch?v=VccLfLcnIDA",
-    oldPrice: 180,
-    newPrice: 120,
-    discount: "33%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:139,
-    name: "Star Master Light",
-    category: "lights",
-    images: ["images/starmaster1.webp","images/starmaster2.jpg","images/starmaster3.webp","images/starmaster4.webp","images/starmaster5.webp"],
-    video: "",
-    oldPrice: 420,
-    newPrice: 320,
-    discount: "31%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:140,
-    name: "Steam Iron",
-    name2:"Iron",
-    categories: ["home","handful"],
-    images: ["images/steamiron1.webp","images/steamiron2.jpg","images/steamiron3.jpg","images/steamiron4.jpeg"],
-    video: "",
-    oldPrice: 480,
-    newPrice: 350,
-    discount: "27%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:141,
-    name: "Zero-Kaata Puzzle Game",
-    name2:"Zero-Cross Game",
-    categories: ["girls","kids"],
-    images: ["images/zeerocrosspuzzlegame.webp","images/zerocrosspuzzlegame1.jpeg","images/zerocrosspuzzlegame2.webp"],
-    video: "https://youtube.com/watch?v=2wmgmuSUz1c",
-    oldPrice: 150,
-    newPrice: 100,
-    discount: "33%",
-    mediaCount: "3 photos + video",
-    inStock: true
-  },{
-    id:142,
-    name: "Wall Clock",
-    category: "home",
-    images: ["images/wallclock1.jpg","images/wallclock2.webp","images/wallclock3.webp"],
-    video: "",
-    oldPrice: 370,
-    newPrice: 250,
-    discount: "32%",
-    mediaCount: "3 photos",
-    inStock: true
-  },{
-    id:143,
-    name: "1200ML Steel Tumbler",
-    name2:"Steel Tumbler",
-    categories: ["trending","gift","man","woman","girls"],
-    images: ["images/tumbler1.jpeg","images/tumbler2.webp","images/tumbler3.webp","images/steeltumbler5.webp"],
-    video: "https://youtube.com/watch?v=cXqngtMVBDw",
-    oldPrice: 650,
-    newPrice: 550,
-    discount: "15%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:144,
-    name: "Sweat Pads",
-    categories: ["girls","woman"],
-    images: ["images/sweatpads1.webp","images/sweatpads2.webp","images/sweatpads3.webp","images/sweatpads4.webp","images/sweatpads5.webp"],
-    video: "",
-    oldPrice: 150,
-    newPrice: 100,
-    discount: "33%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:145,
-    name: "Unicorn Eraser",
-    categories: ["girls","kids"],
-    images: ["images/unicorneraser1.jpeg","images/unicorneraser2.jpg"],
-    video: "",
-    oldPrice: 25,
-    newPrice: 15,
-    discount: "40%",
-    mediaCount: "2 photos",
-    inStock: true
-  },
-  {
-    id:146,
-    name: "G Shape Speaker with clock",
-    category: "speaker",
-    images: ["images/googleshapespeaker1.webp","images/googleshapespeaker2.webp","images/googleshapespeaker3.jpg","images/googleshapespeaker4.webp","images/googleshapespeaker6.webp"],
-    video: "https://www.youtube.com/watch?v=mUuVIdE3pLE",
-    oldPrice: 1050,
-    newPrice: 850,
-    discount: "19%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },{
-    id:147,
-    name: "Rose Lamp",
-    category: "lights",
-    images: ["images/roselamp1.webp","images/roselamp2.webp","images/roselamp3.webp","images/roselamp4.webp","images/roselamp5.webp"],
-    video: "",
-    oldPrice: 480,
-    newPrice: 350,
-    discount: "27%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:148,
-    name: "Dancing Cactus",
-    categories: ["girls","kids","trending"],
-    images: ["images/dancingcactus1.webp","images/dancingcactus2.webp","images/dancingcactus3.webp","images/dancingcactus4.webp","images/dancingcactus5.webp"],
-    video: "",
-    oldPrice: 375,
-    newPrice: 270,
-    discount: "28%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:149,
-    name: "Realme Neckband",
-    category: "earphone",
-    images: ["images/realmeneckband1.jpg","images/realmeneckband2.webp","images/realmeneckband3.jpg","images/realmeneckband4.webp","images/realmeneckband6.webp"],
-    video: "",
-    oldPrice: 650,
-    newPrice: 400,
-    discount: "38%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:150,
-    name: "Marshall Headphone",
-    category: "earphone",
-    images: ["images/marshallheadphone1.webp","images/marshallheadphone2.jpg","images/marshallheadphone3.webp","images/marshallheadphone4.webp","images/marshallheadphone5.webp","images/marshallheadphone6.jpg"],
-    video: "",
-    oldPrice: 2000,
-    newPrice: 1500,
-    discount: "25%",
-    mediaCount: "6 photos",
-    inStock: true
-  },
-  {
-    id:151,
-    name: "Airpods Pro 2",
-    category: "earphone",
-    images: ["images/airpods1.webp","images/airpods2.webp","images/airpods3.webp","images/airpods4.webp","images/airpods5.webp","images/airpods6.webp"],
-    video: "",
-    oldPrice: 900,
-    newPrice: 600,
-    discount: "33%",
-    mediaCount: "6 photos",
-    inStock: true
-  },{
-    id:152,
-    name: "Bunny Lamp Projector",
-    category: "lights",
-    images: ["images/bunnylampprojector1.jpg","images/bunnylampprojector2.webp","images/bunnylampprojector5.jpg","images/bunnylampprojector3.webp","images/bunnylampprojector6.webp"],
-    video: "https://youtube.com/watch?v=kb-ubcFcj0U",
-    oldPrice: 1150,
-    newPrice: 900,
-    discount: "21%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },{
-    id:153,
-    name: "Car Shape Speaker 5W",
-    name2:"Car Speaker",
-    category: "speaker",
-    images: ["images/carshapespeaker10w5.jpg","images/carshapespeaker5w1.webp","images/carshapespeaker5w2.webp","images/carshapespeaker5w3.jpg","images/carshapespeaker5w4.webp"],
-    video: "",
-    oldPrice: 850,
-    newPrice: 700,
-    discount: "17%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:154,
-    name: "Car Shape Speaker 10W",
-    name2:"Car Speaker 10W",
-    category: "speaker",
-    images: ["images/carshapespeaker10w1.jpg","images/carshapespeaker10w2.webp","images/carshapespeaker10w3.jpg","images/carshapespeaker10w4.webp","images/carshapespeaker5w5.jpg"],
-    video: "",
-    oldPrice: 1150,
-    newPrice: 900,
-    discount: "21%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:155,
-    name: "Robo 2 Speaker",
-    category: "speaker",
-    images: ["images/robo2speaker4.webp","images/robo2speaker2.jpg","images/robo2speaker3.webp","images/robo2speaker1.webp","images/robo2speaker5.jpg","images/robo2speaker6.jpg"],
-    video: "https://www.youtube.com/watch?v=qRj85muMtz0",
-    oldPrice: 780,
-    newPrice: 600,
-    discount: "23%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:156,
-    name: "Scalp Massager",
-    categories: ["trending","woman","girls"],
-    images: ["images/scalpmassager1.webp","images/scalpmassager2.webp","images/scalpmassager3.webp","images/scalpmassager4.webp","images/scalpmassager5.webp"],
-    video: "https://youtube.com/watch?v=GPeAfQVibsY",
-    oldPrice: 950,
-    newPrice: 750,
-    discount: "21%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },
-  {
-    id:157,
-    name: "Kapoor Dani",
-    categories: ["trending","home","woman"],
-    images: ["images/kapoordani5.webp","images/kapoordani1.webp","images/kapoordani2.webp","images/kapoordani3.webp","images/kapoordani.webp","images/kapoordani4.webp"],
-    video: "https://youtube.com/watch?v=TDinwZ_OUZY",
-    oldPrice: 350,
-    newPrice: 270,
-    discount: "22%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:158,
-    name: "Crystal Lamp",
-    categories:["gifts","home","lights"],
-    images: ["images/crystallamp3.jpg","images/crystallamp1.webp","images/crystallamp2.webp","images/crystallamp.webp","images/crystallamp4.webp","images/crystallamp5.jpg"],
-    video: "https://youtube.com/watch?v=81pKFlyphb4",
-    oldPrice: 580,
-    newPrice: 450,
-    discount: "22%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:159,
-    name: "Anime Poster",
-    categories: ["anime","trending"],
-    images: ["images/animeposter1.webp","images/animeposter2.webp","images/animeposter3.jpg","images/animeposter4.webp","images/animeposter5.webp","images/animeposter6.webp","images/animeposter7.webp","images/animeposter8.webp","images/animeposter9.webp","images/animeposter10.webp"
+    "images": [
+      "images/moonlamp1.jpg",
+      "images/moonlamp2.jpg",
+      "images/moonlamp3.jpg"
     ],
-    video: "",
-    oldPrice: 100,
-    newPrice: 50,
-    discount: "50%",
-    mediaCount: "10 photos",
-    inStock: true
-  },{
-    id:160,
-    name: "Harry Potter figurines(per piece)",
-    name2:"Harry Potter figures",
-    category: "anime",
-    images: ["images/harrypotter2.webp","images/harrypotter3.webp","images/harrypotter1.jpg","images/harrypotter4.webp","images/harrypotter5.webp"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice:250,
-    newPrice:160,
-    discount: "36%",
-    mediaCount: "5 photos + video",
-    inStock: true
+    "video": "https://youtube.com/watch?v=TcAZwTE0dDI",
+    "oldPrice": 450,
+    "newPrice": 400,
+    "discount": "11%",
+    "mediaCount": "3 photos + video",
+    "inStock": true
   },
   {
-    id:161,
-    name: "Laptop Skin",
-    categories: ["anime","trending"],
-    images: ["images/laptopskin1.webp","images/laptopskin2.jpg","images/laptopskin3.jpg","images/laptopskin4.webp","images/laptopskin5.jpg","images/laptopskin6.jpg","images/laptopskin7.jpg","images/laptopskin8.jpg","images/laptopskin9.jpg"],
-    video: "",
-    oldPrice: 300,
-    newPrice: 200,
-    discount: "15%",
-    mediaCount: "4 photos",
-    inStock: true
+    "id": 2,
+    "name": "Mimo Massager",
+    "categories": [
+      "man",
+      "woman"
+    ],
+    "images": [
+      "images/mimomassager.jpg",
+      "images/mimomassager2.jpg",
+      "images/mimomassager3.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=4OUZPAkSx68",
+    "oldPrice": 180,
+    "newPrice": 150,
+    "discount": "16%",
+    "mediaCount": "3 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 3,
+    "name": "Sunset Lamp",
+    "category": "lights",
+    "images": [
+      "images/sunsetlamp1.jpg",
+      "images/sunsetlamp2.jpg",
+      "images/sunsetlamp3.webp",
+      "images/sunsetlamp4.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=BdDP_0cDxzc",
+    "oldPrice": 350,
+    "newPrice": 300,
+    "discount": "14%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 4,
+    "name": "T12 BT Ear Buds",
+    "name2": "Ear Buds",
+    "category": "earphone",
+    "images": [
+      "images/t12btcarbuds1.jpg",
+      "images/t12btearbuds2.jpg",
+      "images/t12btearbuds3.jpg",
+      "images/t12btearbuds4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 350,
+    "newPrice": 300,
+    "discount": "14%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 5,
+    "name": "Rabbit Guitarist",
+    "category": "kids",
+    "images": [
+      "images/rabbitguitarist1.jpg",
+      "images/rabbitguitarist2.jpg",
+      "images/rabbitguitarist3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 900,
+    "newPrice": 800,
+    "discount": "11%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 6,
+    "name": "Round dry fruit cutter",
+    "name2": "dry fruit cutter",
+    "category": "kitchen",
+    "categories": [
+      "kitchen",
+      "woman"
+    ],
+    "images": [
+      "images/rounddryfruitcutter.jpg",
+      "images/rounddryfruitcutter2.jpg",
+      "images/rounddryfruitcutter3.webp",
+      "images/rounddryfruitcutter4.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=7ko2F4oocgc",
+    "oldPrice": 130,
+    "newPrice": 100,
+    "discount": "23%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 7,
+    "name": "Sealing Clip Set",
+    "categories": [
+      "kitchen",
+      "woman"
+    ],
+    "images": [
+      "images/sealingclipset1.webp",
+      "images/sealingclipset2.jpg",
+      "images/sealingclipset3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 125,
+    "newPrice": 90,
+    "discount": "29%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 8,
+    "name": "Stationery Kitty Gift Rencic Box",
+    "name2": "Stationery kitty box",
+    "categories": [
+      "kids",
+      "gifts",
+      "girls"
+    ],
+    "images": [
+      "images/stationarykitty1.jpg",
+      "images/stationarykitty2.jpg",
+      "images/stationarykitty3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 220,
+    "newPrice": 150,
+    "discount": "30%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 9,
+    "name": "Super Soft Bath Sponge",
+    "name2": "Bath Sponge",
+    "categories": [
+      "woman",
+      "girls"
+    ],
+    "images": [
+      "images/supersoftbathsponge1.jpg",
+      "images/supersoftbathsponge2.jpg",
+      "images/supersoftbathsponge3.jpg",
+      "images/supersoftbathsponge4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 85,
+    "newPrice": 60,
+    "discount": "31%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 10,
+    "name": "Needle Threader",
+    "categories": [
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/needlethreader.JPG",
+      "images/needlethreader2.JPG",
+      "images/needlethreader3.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=aBCBgc5D-x8",
+    "oldPrice": 22,
+    "newPrice": 10,
+    "discount": "54%",
+    "mediaCount": "3 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 11,
+    "name": "Motion Sensor Solar Light",
+    "name2": "Solar Light",
+    "categories": [
+      "home",
+      "lights"
+    ],
+    "images": [
+      "images/motionsensorsolarlight1.jpg",
+      "images/motionsensorsolarlight2.webp",
+      "images/motionsensorsolarlight3.webp",
+      "images/motionsensorsolarlight4.webp",
+      "images/motionsensorsolarlight5.webp",
+      "images/motionsensorsolarlight6.webp"
+    ],
+    "video": "https://youtube.com/watch?v=3hvp_tdYzPg",
+    "oldPrice": 250,
+    "newPrice": 200,
+    "discount": "20%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 12,
+    "name": "Lint Remover",
+    "categories": [
+      "trending",
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/lintremover.webp",
+      "images/lintremover1.jpg",
+      "images/lintremover2.jpg",
+      "images/lintremover4.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=iWwuVFnNLXU",
+    "oldPrice": 350,
+    "newPrice": 270,
+    "discount": "23%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 13,
+    "name": "Intelligence Book",
+    "category": "kids",
+    "images": [
+      "images/intelligencebook1.webp",
+      "images/intelligencebook2.webp",
+      "images/intelligencebook3.webp",
+      "images/intelligencebook4.webp",
+      "images/intelligencebook5.webp"
+    ],
+    "video": "",
+    "oldPrice": 530,
+    "newPrice": 420,
+    "discount": "20%",
+    "mediaCount": "5 photos",
+    "inStock": false
+  },
+  {
+    "id": 14,
+    "name": "Cartoon Travel Toothbrush Holder",
+    "name2": "Toothbrush Holder",
+    "categories": [
+      "man",
+      "woman",
+      "kids",
+      "girls",
+      "handful"
+    ],
+    "images": [
+      "images/cartoontraveltoothbrushholder1.jpg",
+      "images/cartoontraveltoothbrushholder2.jpg",
+      "images/cartoontraveltoothbrushholder3.jpg",
+      "images/cartoontraveltoothbrushholder4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 120,
+    "newPrice": 70,
+    "discount": "41%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 15,
+    "name": "12 Pocket UG Organiser",
+    "name2": "UG Organiser",
+    "categories": [
+      "woman",
+      "man",
+      "home"
+    ],
+    "images": [
+      "images/12pocketugorganiser(imp).jpg",
+      "images/12pocketugorganiser.jpg",
+      "images/12pocketugorganiser2.jpg",
+      "images/12pocketugorganiser4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 270,
+    "newPrice": 220,
+    "discount": "18%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 16,
+    "name": "Adhesive Wall Hook Sticker",
+    "name2": "Wall Sticker",
+    "categories": [
+      "home",
+      "woman",
+      "handful"
+    ],
+    "images": [
+      "images/adhesivewallhooksticker1.jpg",
+      "images/adhesivewallhooksticker2.jpg",
+      "images/adhesivewallhooksticker3.jpg",
+      "images/adhesivewallhooksticker4.jpg",
+      "images/adhesivewallhooksticker5.webp",
+      "images/adhesivewallhooksticker6.jpg"
+    ],
+    "video": "",
+    "oldPrice": 20,
+    "newPrice": 10,
+    "discount": "50%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 17,
+    "name": "6 Layer Shoe rack",
+    "name2": "Shoe rack",
+    "categories": [
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/6layershoerack1.webp",
+      "images/6layershoerack2.webp",
+      "images/6layershoerack3.webp",
+      "images/6layershoerack4.webp",
+      "images/6layershoerack5.webp"
+    ],
+    "video": "",
+    "oldPrice": 430,
+    "newPrice": 350,
+    "discount": "18%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 18,
+    "name": "All Color Stain Remover",
+    "name2": "Stain Remover",
+    "categories": [
+      "man",
+      "woman",
+      "kitchen"
+    ],
+    "images": [
+      "images/allcolorstainremover.webp",
+      "images/allcolorstainremover2.webp",
+      "images/allcolorstainremover3.webp",
+      "images/allcolorstainremover4.webp",
+      "images/allcolorstainremover5.webp",
+      "images/allcolorstainremover6.webp"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 100,
+    "discount": "33%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 19,
+    "name": "Chargable Remote Control Car",
+    "name2": "Remote Control Car",
+    "categories": [
+      "kids",
+      "girls"
+    ],
+    "images": [
+      "images/chargableremotecontrolcar1.jpg",
+      "images/chargableremotecontrolcar2.jpg",
+      "images/chargableremotecontrolcar3.jpg",
+      "images/chargableremotecontrolcar4.jpg",
+      "images/chargableremotecontrolcar5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 550,
+    "newPrice": 400,
+    "discount": "27%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 20,
+    "name": "Color Changing Purse",
+    "categories": [
+      "woman",
+      "girls"
+    ],
+    "images": [
+      "images/colorchangingpurse1.jpg",
+      "images/colorchangepurse2.jpg",
+      "images/colorchangepurse3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 300,
+    "newPrice": 200,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 21,
+    "name": "Mini Silicon Laundry Ball(4 piece)",
+    "name2": "Laundry Ball",
+    "categories": [
+      "handful",
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/minisiliconlaundryball1.jpg",
+      "images/minisiliconlaundryball2.jpg",
+      "images/minisiliconlaundryball3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 80,
+    "newPrice": 50,
+    "discount": "37%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 22,
+    "name": "Astronaut Projector",
+    "categories": [
+      "trending",
+      "gifts",
+      "lights",
+      "home"
+    ],
+    "images": [
+      "images/astronautprojector(imp).jpg",
+      "images/astronautprojector1.jpg",
+      "images/astronautprojector2.webp",
+      "images/astronautprojector3.jpg",
+      "images/astronautprojector4.jpg",
+      "images/astronautprojector5.jpg",
+      "images/astronautprojector6.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=aFL2pNeuHhw",
+    "oldPrice": 900,
+    "newPrice": 700,
+    "discount": "22%",
+    "mediaCount": "7 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 23,
+    "name": "Camping Rechargeable bulb",
+    "name2": "Camping Bulb",
+    "categories": [
+      "lights",
+      "man"
+    ],
+    "images": [
+      "images/campingricharablebulb1.jpg",
+      "images/campingricharablebulb2.jpg",
+      "images/campingricharablebulb3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 250,
+    "newPrice": 180,
+    "discount": "28%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 24,
+    "name": "Advance Oil Bottle",
+    "categories": [
+      "kitchen",
+      "woman",
+      "home"
+    ],
+    "images": [
+      "images/advanceoilbottle.jpg",
+      "images/advanceoilbottle2.jpg",
+      "images/advanceoilbottle3.jpg",
+      "images/advanceoilbottle4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 200,
+    "newPrice": 150,
+    "discount": "22%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 25,
+    "name": "Color Changing Clock",
+    "categories": [
+      "lights",
+      "kids"
+    ],
+    "images": [
+      "images/colorchangingclock1.jpg",
+      "images/colorchangingclock2.jpg",
+      "images/colorchangingclock3.webp",
+      "images/colorchangingclock4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 300,
+    "newPrice": 250,
+    "discount": "16%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 26,
+    "name": "Fridge Cover",
+    "categories": [
+      "kitchen",
+      "woman",
+      "home"
+    ],
+    "images": [
+      "images/fridgecover1.jpg",
+      "images/fridgecover2.jpg",
+      "images/fridgecover3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 200,
+    "newPrice": 120,
+    "discount": "40%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 27,
+    "name": "Holi Refill (Set of 16)",
+    "name2": "Holi Refill",
+    "category": "man",
+    "images": [
+      "images/holirefill1.jpg",
+      "images/holirefill2.jpg",
+      "images/holirefill3.jpg",
+      "images/holirefill4.jpg",
+      "images/holirefill5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 900,
+    "newPrice": 800,
+    "discount": "21%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 28,
+    "name": "Cookware Cleaner Paste",
+    "name2": "Cookware Cleaner",
+    "category": "kitchen",
+    "images": [
+      "images/cookwarecleanerpaste1.jpg",
+      "images/cookwarecleanerpaste2.jpg",
+      "images/cookwarecleanerpaste3.jpg",
+      "images/cookwarecleanerpaste4.webp"
+    ],
+    "video": "",
+    "oldPrice": "",
+    "newPrice": 80,
+    "discount": "22%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 29,
+    "name": "Cute Little Night Lamp",
+    "name2": "Night Lamp",
+    "categories": [
+      "gifts",
+      "lights"
+    ],
+    "images": [
+      "images/cutelittlenightlamp.jpg",
+      "images/cutelittlenightlamp2.jpg",
+      "images/cutelittlenightlamp3.jpg",
+      "images/cutelittlenightlamp4.jpg",
+      "images/cutelittlenightlamp5.jpg",
+      "images/cutelittlenightlamp6.jpg",
+      "images/cutelittlenightlamp7.jpg"
+    ],
+    "video": "",
+    "oldPrice": 300,
+    "newPrice": 200,
+    "discount": "33%",
+    "mediaCount": "7 photos",
+    "inStock": false
+  },
+  {
+    "id": 30,
+    "name": "Fridge Storage Divider 4pc Set(4 piece)",
+    "name2": "Fridge Storage divider",
+    "category": "kitchen",
+    "images": [
+      "images/fridgestoragedivider4pcset.jpg",
+      "images/fridgestoragedivider4pcset2.jpg",
+      "images/fridgestoragedivider4pcset3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 90,
+    "newPrice": 50,
+    "discount": "44%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 31,
+    "name": "3d Massager",
+    "categories": [
+      "man",
+      "woman"
+    ],
+    "images": [
+      "images/3dmassager.jpg",
+      "images/3dmassager2.jpg",
+      "images/3dmassager3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 220,
+    "newPrice": 150,
+    "discount": "31%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 32,
+    "name": "3 Hook Rotary Sticker(1 pc)",
+    "name2": "Rotary Sticker",
+    "categories": [
+      "kitchen",
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/3hookrotarysticker3.jpg",
+      "images/3hookrotarysticker2.jpg",
+      "images/3hookrotarysticker.jpg",
+      "images/3hookrotarysticker4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 70,
+    "newPrice": 50,
+    "discount": "28%",
+    "mediaCount": "4 photos",
+    "inStock": false
+  },
+  {
+    "id": 33,
+    "name": "3 Layer MultiPurpose Organiser",
+    "name2": "Multipurpose Organiser",
+    "categories": [
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/3layermultipurposeorganiser.jpg",
+      "images/3layermultipurposeorganise2.jpg",
+      "images/3layermultipurposeorganiser3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 750,
+    "newPrice": 600,
+    "discount": "20%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 34,
+    "name": "30pc Plant Climbing Fixing Clip",
+    "name2": "Plant fixing Clip",
+    "categories": [
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/30pcplantclimbingfixingclip.jpg",
+      "images/30pcplantclimbingfixingclip2.jpg",
+      "images/30pcplantclimbingfixingclip3.webp"
+    ],
+    "video": "https://youtube.com/watch?v=4RnCWLS0PLQ",
+    "oldPrice": 140,
+    "newPrice": 100,
+    "discount": "28%",
+    "mediaCount": "3 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 35,
+    "name": "Baby Projector Torch",
+    "categories": [
+      "kids",
+      "girls"
+    ],
+    "images": [
+      "images/babyprojectortorch.jpg",
+      "images/babyprojectortorch2.jpg",
+      "images/babyprojectortorch3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 200,
+    "newPrice": 150,
+    "discount": "25%",
+    "mediaCount": "3 photos",
+    "inStock": false
+  },
+  {
+    "id": 36,
+    "name": "Flash Drum Toy",
+    "category": "kids",
+    "images": [
+      "images/flashdrumtoy.jpg",
+      "images/flashdrumtoy1.webp",
+      "images/flashdrumtoy2.webp",
+      "images/flashdrumtoy3.webp",
+      "images/flashdrumtoy4.webp"
+    ],
+    "video": "",
+    "oldPrice": 450,
+    "newPrice": 350,
+    "discount": "22%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 37,
+    "name": "P9 Wireless Headphones",
+    "name2": "Wireless Headphones",
+    "category": "earphone",
+    "images": [
+      "images/p9wirelessheadphones1.jpg",
+      "images/p9wirelessheadphones2.jpg",
+      "images/p9wirelessheadphones3.jpg",
+      "images/p9wirelessheadphones4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 700,
+    "newPrice": 500,
+    "discount": "28%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 38,
+    "name": "Storage Peeler",
+    "categories": [
+      "kitchen",
+      "home"
+    ],
+    "images": [
+      "images/storagepeeler.jpg",
+      "images/storagepeeler2.webp",
+      "images/storagepeeler3.webp",
+      "images/storagepeeler4.webp"
+    ],
+    "video": "",
+    "oldPrice": 80,
+    "newPrice": 50,
+    "discount": "37%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 39,
+    "name": "Vaccum Flask Set",
+    "categories": [
+      "kitchen",
+      "man",
+      "woman",
+      "gifts"
+    ],
+    "images": [
+      "images/vacuumflaskset1.webp",
+      "images/vacuumflaskset2.webp",
+      "images/vacuumflaskset3.jpg",
+      "images/vaccumflaskset4.webp"
+    ],
+    "video": "",
+    "oldPrice": 380,
+    "newPrice": 300,
+    "discount": "21%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 40,
+    "name": "Wave Lamp",
+    "categories": [
+      "lights",
+      "home"
+    ],
+    "images": [
+      "images/wavelamp1.webp",
+      "images/wavelamp2.webp",
+      "images/wavelamp3.webp",
+      "images/wavelamp4.jpg",
+      "images/wavelamp5.webp",
+      "images/wavelamp6.webp"
+    ],
+    "video": "https://youtube.com/watch?v=bK0T5ny-otU",
+    "oldPrice": 430,
+    "newPrice": 325,
+    "discount": "24%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 41,
+    "name": "Washing Machine Stand",
+    "categories": [
+      "kitchen",
+      "home"
+    ],
+    "images": [
+      "images/wasingmachinestand1.jpg",
+      "images/wasingmachinestand2.webp",
+      "images/wasingmachinestand3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 100,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 42,
+    "name": "Wooden Saving Counter",
+    "categories": [
+      "trending",
+      "woman",
+      "kids",
+      "girls",
+      "handful"
+    ],
+    "images": [
+      "images/woodensavingcounter5.webp",
+      "images/woodensavingcounter2.webp",
+      "images/woodensavingcounter1.webp",
+      "images/woodensavingcounter3.webp",
+      "images/woodensavingcounter4.webp"
+    ],
+    "video": "",
+    "oldPrice": 300,
+    "newPrice": 230,
+    "discount": "23%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 43,
+    "name": "Paper Soap",
+    "categories": [
+      "kids",
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/travelsoapbox1.webp",
+      "images/travelsoapbox2.webp",
+      "images/travelsoapbox3.jpg",
+      "images/travelsoapbox4.jpg",
+      "images/travelsoapbox3jpg.jpg"
+    ],
+    "video": "",
+    "oldPrice": 60,
+    "newPrice": 30,
+    "discount": "50%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 44,
+    "name": "Triangle Squeezing Mop",
+    "name2": "Squeezing Mop",
+    "categories": [
+      "kitchen",
+      "home"
+    ],
+    "images": [
+      "images/trianglesqueezingmop1.webp",
+      "images/trianglesqueezingmop.jpg",
+      "images/trianglesqueezingmop2.jpg"
+    ],
+    "video": "",
+    "oldPrice": 380,
+    "newPrice": 300,
+    "discount": "21%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 45,
+    "name": "Temperature Bottle",
+    "categories": [
+      "woman",
+      "man",
+      "kids",
+      "girls"
+    ],
+    "images": [
+      "images/temperaturebottle.jpeg",
+      "images/temperaturebottle1.webp",
+      "images/temperaturebottle2.jpg",
+      "images/temperaturebottle3.webp"
+    ],
+    "video": "",
+    "oldPrice": 330,
+    "newPrice": 230,
+    "discount": "30%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 46,
+    "name": "Travel Bag",
+    "category": "woman",
+    "images": [
+      "images/travelbag1.webp",
+      "images/travelbag2.webp",
+      "images/travelbag3.webp"
+    ],
+    "video": "https://youtube.com/watch?v=CMwqUXuLlvc",
+    "oldPrice": 400,
+    "newPrice": 320,
+    "discount": "15%",
+    "mediaCount": "3 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 47,
+    "name": "Super Observant Towel(Size:40cm*40cm)",
+    "name2": "Super Towel",
+    "categories": [
+      "home",
+      "kitchen",
+      "woman"
+    ],
+    "images": [
+      "images/superobservanttowel1.webp",
+      "images/superobservanttowel2.jpg",
+      "images/superobservanttowel3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 130,
+    "newPrice": 80,
+    "discount": "38%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 48,
+    "name": "Steel Gym Shaker",
+    "category": "man",
+    "images": [
+      "images/steelgymshaker.jpeg",
+      "images/steelgymshaker2.webp",
+      "images/steelgymshaker3.webp",
+      "images/steelgymshaker4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 400,
+    "newPrice": 350,
+    "discount": "12.5%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 49,
+    "name": "Silver Gas Saver",
+    "categories": [
+      "kitchen",
+      "handful"
+    ],
+    "images": [
+      "images/silvergassaver1.jpg",
+      "images/silvergassaver2.jpg",
+      "images/silvergassaver3.webp"
+    ],
+    "video": "https://youtube.com/watch?v=YUvFZiHz5d4",
+    "oldPrice": 150,
+    "newPrice": 120,
+    "discount": "20%",
+    "mediaCount": "3 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 50,
+    "name": "Sparkle Gun",
+    "category": "man",
+    "images": [
+      "images/sparklegun1.jpg",
+      "images/sparklegun2.jpg",
+      "images/sparklegun3.jpg",
+      "images/sparklegun4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=8nn2tSsYdb8",
+    "oldPrice": 280,
+    "newPrice": 200,
+    "discount": "27%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 51,
+    "name": "Silicon Shoe Cover",
+    "categories": [
+      "woman",
+      "man",
+      "handful",
+      "home"
+    ],
+    "images": [
+      "images/siliconshoecover1.jpg",
+      "images/siliconshoecover2.jpg",
+      "images/siliconshoecover3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 120,
+    "newPrice": 80,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 52,
+    "name": "Shoe Cleaning Brush",
+    "categories": [
+      "man",
+      "woman",
+      "handful"
+    ],
+    "images": [
+      "images/shoecleaningbrush1.jpg",
+      "images/shoecleaningbrush2.webp",
+      "images/shoecleaningbrush3.jpg",
+      "images/shoecleaningbrush4.webp",
+      "images/shoecleaningbrush5.webp"
+    ],
+    "video": "",
+    "oldPrice": 120,
+    "newPrice": 80,
+    "discount": "33%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 53,
+    "name": "Roll-up Bag",
+    "category": "woman",
+    "images": [
+      "images/rollupbag1.jpg",
+      "images/rollupbag2.jpg",
+      "images/rollupbag3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 140,
+    "newPrice": 100,
+    "discount": "28%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 54,
+    "name": "Rain Card",
+    "categories": [
+      "woman",
+      "man",
+      "handful"
+    ],
+    "images": [
+      "images/raincard.jpg",
+      "images/raincard1.webp",
+      "images/raincard2.jpg",
+      "images/raincard3.jpg",
+      "images/raincard4.webp"
+    ],
+    "video": "",
+    "oldPrice": 50,
+    "newPrice": 25,
+    "discount": "50%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 55,
+    "name": "Portable Juicer",
+    "categories": [
+      "kitchen",
+      "woman",
+      "man"
+    ],
+    "images": [
+      "images/portablejuicer1.webp",
+      "images/portablejuicer2.webp",
+      "images/portablejuicer3.webp",
+      "images/portablejuicer4.webp",
+      "images/portablejuicer5.webp"
+    ],
+    "video": "",
+    "oldPrice": 450,
+    "newPrice": 350,
+    "discount": "22%",
+    "mediaCount": "5 photos",
+    "inStock": false
+  },
+  {
+    "id": 56,
+    "name": "Moving Titanic Liquid Ship",
+    "categories": [
+      "gifts",
+      "man",
+      "home"
+    ],
+    "images": [
+      "images/movingtitanicliquidship1.jpg",
+      "images/movingtitanicliquidship2.webp",
+      "images/movingtitanicliquidship3.jpg",
+      "images/movingtitanicliquidship4.jpg",
+      "images/movingtitanicliquidship23.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=c7gFyV11bNs",
+    "oldPrice": 450,
+    "newPrice": 300,
+    "discount": "26%",
+    "mediaCount": "5 photos + video",
+    "inStock": false
+  },
+  {
+    "id": 57,
+    "name": "Moving Sand Art",
+    "categories": [
+      "gifts",
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/movinglandslide1.webp",
+      "images/movinglandslide2.webp",
+      "images/movinglandslide3.jpg",
+      "images/movinglandslide4.webp",
+      "images/movinglandslide.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=4iLtaVz1WzY",
+    "oldPrice": 420,
+    "newPrice": 350,
+    "discount": "16%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 58,
+    "name": "Motivational Bottle(1L)",
+    "categories": [
+      "gifts",
+      "girls",
+      "woman",
+      "man",
+      "kids"
+    ],
+    "images": [
+      "images/motivationalbottle5.webp",
+      "images/motivationalbottle2.jpg",
+      "images/motivationalbottle3.jpg",
+      "images/motivationalbottle4.jpg",
+      "images/motivationalbottle5.webp",
+      "images/motivationalbottle6.jpg",
+      "images/motivationalbottle1.jpg",
+      "images/motivationalbottle7.jpg"
+    ],
+    "video": "",
+    "oldPrice": 280,
+    "newPrice": 200,
+    "discount": "28%",
+    "mediaCount": "8 photos",
+    "inStock": true
+  },
+  {
+    "id": 59,
+    "name": "2 Litre Motivational Bottle",
+    "name2": "2L Bottle",
+    "categories": [
+      "gifts",
+      "girls",
+      "woman",
+      "man",
+      "kids"
+    ],
+    "images": [
+      "images/motivationalbottle4.jpg",
+      "images/2lmotivationalbottle.jpg",
+      "images/motivationalbottle6.jpg",
+      "images/motivationalbottle1.jpg",
+      "images/motivationalbottle7.jpg",
+      "images/2lmotivationalbottle1.webp",
+      "images/2lmotivationalbottle4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=DgoozRpbtDQ",
+    "oldPrice": 300,
+    "newPrice": 250,
+    "discount": "16%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 60,
+    "name": "Mobile Stand Cute",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/mobilestandcute1.jpg",
+      "images/mobilestandcute2.jpg",
+      "images/mobilestandcute3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 100,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 61,
+    "name": "Metal Plant Stick",
+    "categories": [
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/metelplantstick1.webp",
+      "images/metelplantstick2.webp",
+      "images/metelplantstick3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 30,
+    "newPrice": 20,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 62,
+    "name": "Magic Water Book",
+    "categories": [
+      "kids",
+      "girls"
+    ],
+    "images": [
+      "images/magicwaterbook1.webp",
+      "images/magicwaterbook2.webp",
+      "images/magicwaterbook3.webp",
+      "images/magicwaterbook4.webp"
+    ],
+    "video": "",
+    "oldPrice": 80,
+    "newPrice": 50,
+    "discount": "37.5%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 63,
+    "name": "Magic Umbrella",
+    "categories": [
+      "woman",
+      "girls"
+    ],
+    "images": [
+      "images/magicumbrella1.jpg",
+      "images/magicumbrella2.webp",
+      "images/magicumbrella3.jpg",
+      "images/magicumbrella4.jpg",
+      "images/magicumbrella5.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=YuOTOW_7flo",
+    "oldPrice": 350,
+    "newPrice": 250,
+    "discount": "28%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 64,
+    "name": "Magic Towel (Size:40*30cm)",
+    "name2": "Magic Towel",
+    "categories": [
+      "handful",
+      "girls",
+      "woman",
+      "man",
+      "kids"
+    ],
+    "images": [
+      "images/magictowel1.jpg",
+      "images/magictowel2.jpg",
+      "images/magictowel3.jpg",
+      "images/magictowel4.webp"
+    ],
+    "video": "",
+    "oldPrice": 100,
+    "newPrice": 70,
+    "discount": "30%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 65,
+    "name": "LED 3W Torch",
+    "categories": [
+      "lights",
+      "home",
+      "man"
+    ],
+    "images": [
+      "images/led3wtorch1.webp",
+      "images/led3wtorch2.webp",
+      "images/led3wtorch3.webp",
+      "images/led3wtorch4.webp"
+    ],
+    "video": "",
+    "oldPrice": 200,
+    "newPrice": 150,
+    "discount": "25%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 66,
+    "name": "Kids Digital Camera",
+    "name2": "Kids Camera",
+    "categories": [
+      "kids",
+      "girls",
+      "gifts"
+    ],
+    "images": [
+      "images/kidsdigitalcamera.jpeg",
+      "images/kidsdigitalcamera1.webp",
+      "images/kidsdigitalcamera3.webp",
+      "images/kidsdigitalcamera4.webp",
+      "images/kidsdigitalcamera2.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=X7Y7DZfyakY",
+    "oldPrice": 700,
+    "newPrice": 550,
+    "discount": "21%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 67,
+    "name": "Ice Bag",
+    "categories": [
+      "woman",
+      "man"
+    ],
+    "images": [
+      "images/icebag1.webp",
+      "images/icebag2.webp",
+      "images/icebag3.webp",
+      "images/icebag4.webp",
+      "images/icebag5.webp"
+    ],
+    "video": "",
+    "oldPrice": 235,
+    "newPrice": 150,
+    "discount": "36%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 68,
+    "name": "Garden Tool Set",
+    "categories": [
+      "handful",
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/gardentoolset1.jpg",
+      "images/gardentoolset2.jpg",
+      "images/gardentoolset3.jpg",
+      "images/gardentoolset4.webp"
+    ],
+    "video": "",
+    "oldPrice": 185,
+    "newPrice": 120,
+    "discount": "35%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 69,
+    "name": "Foldable Bag With Wheels",
+    "name2": "Foldable Bag",
+    "category": "woman",
+    "images": [
+      "images/foldablebagwithwheels.jpg",
+      "images/foldablebagwithwheels2.jpg",
+      "images/foldablebagwithwheels1.jpg"
+    ],
+    "video": "",
+    "oldPrice": 680,
+    "newPrice": 450,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": false
+  },
+  {
+    "id": 70,
+    "name": "Garlic Crusher",
+    "category": "kitchen",
+    "images": [
+      "images/garliccrusher.jpeg",
+      "images/garliccrusher1.webp",
+      "images/garliccrusher2.jpg",
+      "images/garliccrusher3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 280,
+    "newPrice": 200,
+    "discount": "28%",
+    "mediaCount": "4 photos",
+    "inStock": false
+  },
+  {
+    "id": 71,
+    "name": "Floating Pen",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/floatingpen.jpeg",
+      "images/floatingpen2.webp",
+      "images/floatingpen3.webp",
+      "images/floatingpen1.jpg"
+    ],
+    "video": "",
+    "oldPrice": 200,
+    "newPrice": 150,
+    "discount": "25%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 72,
+    "name": "Compressed Towel(Size:140*77cm)",
+    "name2": "Compressed Towel",
+    "categories": [
+      "handful",
+      "kids",
+      "woman",
+      "man"
+    ],
+    "images": [
+      "images/compressedtowel1.jpg",
+      "images/compressedtowel2.webp",
+      "images/compressedtowel3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 120,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 73,
+    "name": "Cloth Line (Multipurpose With 12 Clips)",
+    "name2": "Cloth Line",
+    "categories": [
+      "home",
+      "woman",
+      "handful"
+    ],
+    "images": [
+      "images/clothline1.jpg",
+      "images/clothline2.jpg",
+      "images/clothline3.webp",
+      "images/clothline4.webp"
+    ],
+    "video": "",
+    "oldPrice": 220,
+    "newPrice": 150,
+    "discount": "31%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 74,
+    "name": "Chair Shape Mobile Stand",
+    "name2": "Chair Mobile Stand",
+    "categories": [
+      "man",
+      "handful"
+    ],
+    "images": [
+      "images/chaiershapemobilestand1.jpg",
+      "images/chaiershapemobilestand2.jpg",
+      "images/chaiershapemobilestand3.webp",
+      "images/chaiershapemobilestand4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 50,
+    "newPrice": 30,
+    "discount": "40%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 75,
+    "name": "Bottle Umbrella",
+    "categories": [
+      "woman",
+      "girls",
+      "handful"
+    ],
+    "images": [
+      "images/bottelumbrella1.jpg",
+      "images/bottelumbrella2.jpg",
+      "images/bottelumbrella3.jpg",
+      "images/bottelumbrella4.jpg",
+      "images/bottelumbrella5.jpg",
+      "images/bottleumbrella4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=OtKDVLZp_tQ",
+    "oldPrice": 320,
+    "newPrice": 250,
+    "discount": "21%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 76,
+    "name": "Mini Gap Cleaning Brush",
+    "categories": [
+      "kitchen",
+      "home"
+    ],
+    "images": [
+      "images/minigapcleaningbrush1.jpg",
+      "images/minigapcleaningbrush2.jpg",
+      "images/minigapcleaningbrush3.webp",
+      "images/minigapcleaningbrush4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 40,
+    "newPrice": 20,
+    "discount": "50%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 77,
+    "name": "Bottle Cleaning Brush",
+    "categories": [
+      "woman",
+      "kitchen",
+      "handful"
+    ],
+    "images": [
+      "images/bottelcleaningbrush1.jpg",
+      "images/bottelcleaningbrush2.jpg",
+      "images/bottelcleaningbrush3.jpg",
+      "images/bottelcleaningbrush4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 50,
+    "newPrice": 30,
+    "discount": "40%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 78,
+    "name": "Banana Case",
+    "category": "kids",
+    "images": [
+      "images/bananacase3.webp",
+      "images/bananacase1.webp",
+      "images/bananacase2.webp",
+      "images/bananacase4.jpg",
+      "images/bananacase.jpg"
+    ],
+    "video": "",
+    "oldPrice": 50,
+    "newPrice": 30,
+    "discount": "40%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 79,
+    "name": "Air Cooler Fan",
+    "categories": [
+      "man",
+      "woman",
+      "handful",
+      "home"
+    ],
+    "images": [
+      "images/aircoolerfan.webp",
+      "images/aircoolerfan4.webp",
+      "images/aircoolerfan3.webp",
+      "images/aircoolerfan2.jpg",
+      "images/aircoolerfan1.webp"
+    ],
+    "video": "https://youtube.com/watch?v=GtCCT6MQZlY",
+    "oldPrice": 830,
+    "newPrice": 600,
+    "discount": "27%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 80,
+    "name": "360 Mosquito Killing Lamp",
+    "name2": "Mosquito Killing Lamp",
+    "categories": [
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/360masquitokillinglamp1.webp",
+      "images/360masquitokillinglamp2.webp",
+      "images/360masquitokillinglamp3.webp",
+      "images/360masquitokillinglamp4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 280,
+    "newPrice": 150,
+    "discount": "46%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 81,
+    "name": "120 LED Sensor Light",
+    "name2": "LED Sensor Light",
+    "categories": [
+      "lights",
+      "home"
+    ],
+    "images": [
+      "images/120ledsensorlight.jpeg",
+      "images/120ledsensorlight1.webp",
+      "images/120ledsensorlight2.jpg",
+      "images/120ledsensorlight4.webp",
+      "images/120ledsensorlight5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 280,
+    "newPrice": 230,
+    "discount": "17%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 82,
+    "name": "66 Liter Storage Bag",
+    "name2": "66L Storage Bag",
+    "categories": [
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/66literstoragebag1.webp",
+      "images/66literstoragebag2.webp",
+      "images/66literstoragebag3.jpg",
+      "images/66literstoragebag4.jpg",
+      "images/66literstoragebag5.jpg",
+      "images/66literstoragebag7.jpg",
+      "images/66literstoragebag8.webp",
+      "images/66literstoragebag9.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=l69mTxmefqU",
+    "oldPrice": 480,
+    "newPrice": 300,
+    "discount": "37%",
+    "mediaCount": "8 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 83,
+    "name": "Unicorn Pencil",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/5pcsetuniqornpencil.webp",
+      "images/5pcsetuniqornpencil5.jpg",
+      "images/5pcsetuniqornpencil3.webp",
+      "images/5pcsetuniqornpencil4.webp"
+    ],
+    "video": "",
+    "oldPrice": 20,
+    "newPrice": 15,
+    "discount": "25%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 84,
+    "name": "Kitchen Cleaner Foam Spray",
+    "category": "kitchen",
+    "images": [
+      "images/kitchencleaner1.webp",
+      "images/kitchencleaner2.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=ENV90ugwcmU",
+    "oldPrice": 230,
+    "newPrice": 200,
+    "discount": "34%",
+    "mediaCount": "2 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 85,
+    "name": "Tube Paper Soap",
+    "categories": [
+      "girls",
+      "kids",
+      "trending"
+    ],
+    "images": [
+      "images/4pctubepapersoap1.webp",
+      "images/4pctubepapersoap2.webp",
+      "images/4pctubepapersoap3.webp",
+      "images/4pctubepapersoap.jpg"
+    ],
+    "video": "",
+    "oldPrice": 50,
+    "newPrice": 40,
+    "discount": "20%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 86,
+    "name": "Lipstick Pen",
+    "category": "girls",
+    "images": [
+      "images/3pclipstickpen1.webp",
+      "images/3pclipstickpen2.webp",
+      "images/3pclipstickpen.jpg"
+    ],
+    "video": "",
+    "oldPrice": 30,
+    "newPrice": 25,
+    "discount": "20%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 87,
+    "name": "3 Drawer Cosmic Storage Organiser",
+    "name2": "Cosmic Organiser",
+    "categories": [
+      "girls",
+      "woman",
+      "home"
+    ],
+    "images": [
+      "images/3drawercosmicstorageorganiser.webp",
+      "images/3drawercosmicstorageorganiser2.webp",
+      "images/3drawercosmicstorageorganiser3.jpg",
+      "images/3drawercosmicstorageorganiser4.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=U28HusqQ4sw",
+    "oldPrice": 650,
+    "newPrice": 500,
+    "discount": "23%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 88,
+    "name": "Trash(Polythene) Bag",
+    "categories": [
+      "kitchen",
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/2pcsettrashbag.jpg",
+      "images/2pcsettrashbag2.jpeg",
+      "images/2pcsettrashbag3.jpeg",
+      "images/2pcsettrashbag1.webp"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 100,
+    "discount": "44%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 89,
+    "name": "3 in 1 Portable Vaccum",
+    "category": "home",
+    "images": [
+      "images/3in1portablevaccum.webp",
+      "images/3in1portablevaccum2.webp",
+      "images/3in1portablevaccum3.webp",
+      "images/3in1portablevaccum4.webp"
+    ],
+    "video": "",
+    "oldPrice": 480,
+    "newPrice": 350,
+    "discount": "27%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 90,
+    "name": "Acrylic Sticker Mirror",
+    "category": "home",
+    "images": [
+      "images/acrylicstickermirror1.jpg",
+      "images/acrylicstickermirror2.webp",
+      "images/acrylicstickermirror3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 175,
+    "newPrice": 120,
+    "discount": "31%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 91,
+    "name": "Anti Crack Heel",
+    "category": "woman",
+    "images": [
+      "images/anticrackheel.jpg",
+      "images/anticrackheel2.jpg",
+      "images/anticrackheel3.jpg",
+      "images/anticrackheel4.jpg",
+      "images/anticrackheel5.webp"
+    ],
+    "video": "",
+    "oldPrice": 100,
+    "newPrice": 60,
+    "discount": "40%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 92,
+    "name": "Anti Slip Clothes Line",
+    "categories": [
+      "woman",
+      "home"
+    ],
+    "images": [
+      "images/antislipclothesline.webp",
+      "images/antislipclothesline1.webp",
+      "images/antislipclothesline2.webp"
+    ],
+    "video": "",
+    "oldPrice": 80,
+    "newPrice": 50,
+    "discount": "60%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 93,
+    "name": "Astronaut Shape Pen",
+    "name2": "Astronaut Pen",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/astroanautshapegelpen.jpeg",
+      "images/astronautshapegelpen2.jpg",
+      "images/astroanautshapegelpen3.jpg",
+      "images/astroanautshapegelpen2.webp"
+    ],
+    "video": "",
+    "oldPrice": 30,
+    "newPrice": 20,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 94,
+    "name": "Astronaut Mobile Stand",
+    "name2": "Mobile Stand",
+    "categories": [
+      "home",
+      "man",
+      "woman"
+    ],
+    "images": [
+      "images/astronautmobilestand.jpg",
+      "images/astronautmobilestand2.webp",
+      "images/astronautmobilestand3.webp",
+      "images/astronautmobilestand5.webp",
+      "images/astronautmobilestand6.jpg"
+    ],
+    "video": "",
+    "oldPrice": 220,
+    "newPrice": 150,
+    "discount": "31%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 95,
+    "name": "Bike Mask",
+    "category": "man",
+    "images": [
+      "images/bikemask1.jpg",
+      "images/bikemask2.webp",
+      "images/bikemask3.webp",
+      "images/bikemask4.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=SYSwLVZEzKQ",
+    "oldPrice": 300,
+    "newPrice": 250,
+    "discount": "16%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 96,
+    "name": "Cable Protector",
+    "categories": [
+      "man",
+      "woman",
+      "handful"
+    ],
+    "images": [
+      "images/cableprotector1.jpg",
+      "images/cableprotector2.jpg"
+    ],
+    "video": "",
+    "oldPrice": 20,
+    "newPrice": 15,
+    "discount": "25%",
+    "mediaCount": "2 photos",
+    "inStock": true
+  },
+  {
+    "id": 97,
+    "name": "Coffee Mug With Bracelet handle",
+    "name2": "Coffee Mug",
+    "categories": [
+      "girls",
+      "woman",
+      "gifts",
+      "trending"
+    ],
+    "images": [
+      "images/coffeemugwithbracelethandle.webp",
+      "images/coffeemugwithbracelethandle2.webp",
+      "images/coffeemugwithbracelethandle3.jpg",
+      "images/coffeemugwithbracelethandle4.jpg",
+      "images/coffeemugwithbracelethandle5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 230,
+    "newPrice": 150,
+    "discount": "34%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 98,
+    "name": "Coffee Tumbler",
+    "categories": [
+      "man",
+      "woman"
+    ],
+    "images": [
+      "images/coffeetumbler1.jpg",
+      "images/coffeetumbler2.jpg",
+      "images/coffeetumbler3.jpg",
+      "images/coffeetumbler4.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=etzSh5MHwoA?",
+    "oldPrice": 250,
+    "newPrice": 150,
+    "discount": "40%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 99,
+    "name": "Corner Tape",
+    "categories": [
+      "kitchen",
+      "home"
+    ],
+    "images": [
+      "images/cornertape1.jpeg",
+      "images/cornertape2.jpg",
+      "images/cornertape4.webp",
+      "images/cornertape3.webp",
+      "images/cornertape5.webp",
+      "images/cornertape6.webp",
+      "images/cornertape7.webp"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 150,
+    "discount": "16%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 100,
+    "name": "Crystal Ball Night Light",
+    "name2": "Crystal Ball",
+    "categories": [
+      "gifts",
+      "lights",
+      "home"
+    ],
+    "images": [
+      "images/crystalballnightlight2.jpg",
+      "images/crystalballnightlight3.webp",
+      "images/crystalballnightlight4.webp",
+      "images/crystalballnightlight5.webp",
+      "images/crystalballnightlight6.webp"
+    ],
+    "video": "https://youtube.com/watch?v=xWDLxhsp9L8",
+    "oldPrice": 280,
+    "newPrice": 200,
+    "discount": "28%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 101,
+    "name": "Cute Pear Shape Lamp",
+    "name2": "Cute Lamp",
+    "categories": [
+      "gifts",
+      "lights"
+    ],
+    "images": [
+      "images/cutepearshapelamp2.jpg",
+      "images/cutepearshapelamp1.webp",
+      "images/cutepearshapelamp3.webp",
+      "images/cutepearshapelamp4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=EXoG_pp8aQE",
+    "oldPrice": 600,
+    "newPrice": 500,
+    "discount": "16%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 102,
+    "name": "Cute Rabbit Lamp",
+    "name2": "Rabbit Lamp",
+    "categories": [
+      "gifts",
+      "lights"
+    ],
+    "images": [
+      "images/cuterabbitlamp1.jpg",
+      "images/cuterabbitlamp2.jpg",
+      "images/cuterabbitlamp3.jpg",
+      "images/cuterabbitlamp4.jpg",
+      "images/cuterabbitlamp5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 600,
+    "newPrice": 500,
+    "discount": "16%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 103,
+    "name": "Deer Lamp ",
+    "categories": [
+      "trending",
+      "gifts",
+      "lights"
+    ],
+    "images": [
+      "images/dearlamp1.jpg",
+      "images/dearlamp2.jpg",
+      "images/dearlamp3.jpg",
+      "images/dearlamp4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=U6LPuIf9fE4",
+    "oldPrice": 560,
+    "newPrice": 500,
+    "discount": "10%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 104,
+    "name": "Drain Cleaner",
+    "categories": [
+      "kitchen",
+      "handful"
+    ],
+    "images": [
+      "images/draincleaner1.jpg",
+      "images/draincleaner2.webp",
+      "images/draincleaner.jpg"
+    ],
+    "video": "",
+    "oldPrice": 125,
+    "newPrice": 60,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 105,
+    "name": "Egg Boiler Poacher",
+    "name2": "Egg Boiler",
+    "category": "kitchen",
+    "images": [
+      "images/eggpoacher1.jpg",
+      "images/eggpoacher2.jpeg",
+      "images/eggpoacher3.jpeg",
+      "images/eggpoacher4.jpeg",
+      "images/eggpoacher5.jpeg"
+    ],
+    "video": "",
+    "oldPrice": 370,
+    "newPrice": 300,
+    "discount": "18%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 106,
+    "name": "Fish Shape Pen",
+    "name2": "girls",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/fishshapepen1.jpeg",
+      "images/fishshapepen2.webp",
+      "images/fishshapepen3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 30,
+    "newPrice": 25,
+    "discount": "16%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 107,
+    "name": "Girl Waist Bag",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/girlswaistbag1.jpeg",
+      "images/girlswaistbag2.jpg",
+      "images/girlswaistbag3.jpg",
+      "images/girlwaistbag4.jpg",
+      "images/girlwaistbag5.jpg",
+      "images/girlwaistbag6.jpg"
+    ],
+    "video": "",
+    "oldPrice": 280,
+    "newPrice": 230,
+    "discount": "17%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 108,
+    "name": "Golden Kitchen Foil",
+    "name2": "Kitchen Foil",
+    "categories": [
+      "kitchen",
+      "home"
+    ],
+    "images": [
+      "images/goldenkitchenfoil.webp",
+      "images/goldenkitchenfoil1.webp",
+      "images/goldenkitchenfoil2.webp"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 120,
+    "discount": "33%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 109,
+    "name": "Grip Tape",
+    "categories": [
+      "kitchen",
+      "home",
+      "handful",
+      "kids"
+    ],
+    "images": [
+      "images/griptape.jpeg",
+      "images/griptape1.webp",
+      "images/griptape2.webp",
+      "images/griptape3.webp",
+      "images/griptape4.webp",
+      "images/griptape5.webp",
+      "images/griptape6.webp"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 120,
+    "discount": "20%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 110,
+    "name": "Hair Scalp Massager Brush",
+    "name2": "Hair Brush",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/hairscalpmassagerbrush1.jpg",
+      "images/hairscalpmassagerbrush2.webp",
+      "images/hairscalpmassagerbrush3.webp",
+      "images/hairscalpmassagerbrush4.webp"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 80,
+    "discount": "46%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 111,
+    "name": "HD Vision",
+    "categories": [
+      "man",
+      "handful"
+    ],
+    "images": [
+      "images/hdvision.webp",
+      "images/hdvision1.jpg",
+      "images/hdvision2.webp",
+      "images/hdvision3.webp"
+    ],
+    "video": "",
+    "oldPrice": 230,
+    "newPrice": 200,
+    "discount": "13%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 112,
+    "name": "Hot Water Bag",
+    "categories": [
+      "man",
+      "woman",
+      "handful"
+    ],
+    "images": [
+      "images/hotwaterbag1.webp",
+      "images/hotwaterbag2.webp",
+      "images/hotwaterbag3.webp",
+      "images/hotwaterbag4.jpg",
+      "images/hotwaterbag5.webp"
+    ],
+    "video": "",
+    "oldPrice": 280,
+    "newPrice": 200,
+    "discount": "28%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 113,
+    "name": "Icecream Bottle",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/icecreambottle1.jpeg",
+      "images/icecreambottle2.webp",
+      "images/icecreambottle3.webp",
+      "images/icecreambottle4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=Bz4vBcLxOEg",
+    "oldPrice": 280,
+    "newPrice": 250,
+    "discount": "10%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 114,
+    "name": "Iphone Silicon Charger Cover",
+    "name2": "Iphone Charger Cover",
+    "categories": [
+      "girls",
+      "woman",
+      "man"
+    ],
+    "images": [
+      "images/iphonesiliconchargercover1.jpg",
+      "images/iphonesiliconchargercover2.jpg",
+      "images/iphonesiliconchargercover3.jpg",
+      "images/iphonesiliconchargercover4.jpg",
+      "images/iphonesiliconchargercover5.webp"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 150,
+    "discount": "16%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 115,
+    "name": "Karaoke Set",
+    "name2": "Karaoke Set",
+    "categories": [
+      "girls",
+      "speaker"
+    ],
+    "images": [
+      "images/k12speakerwithmike.jpg",
+      "images/k12speakerwithmike3.webp",
+      "images/k12speakerwithmike4.jpg",
+      "images/k12speakerwithmike5.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=K0BYTLdpyeI",
+    "oldPrice": 550,
+    "newPrice": 450,
+    "discount": "18%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 116,
+    "name": "Keychain Mini Flashlight",
+    "name2": "Keychain Light",
+    "categories": [
+      "man",
+      "lights"
+    ],
+    "images": [
+      "images/keychainminiflashlight1.jpeg",
+      "images/keychainminiflashlight2.jpeg",
+      "images/keychainminiflashlight3.jpg",
+      "images/keychainminiflashlight4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 120,
+    "discount": "20%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 117,
+    "name": "Kitchen Cleaner",
+    "name2": "Kitchen Cleaner",
+    "category": "kitchen",
+    "images": [
+      "images/kitchencleanerfoamspray1.jpg",
+      "images/kitchencleanerfoamspray2.jpg"
+    ],
+    "video": "",
+    "oldPrice": 185,
+    "newPrice": 150,
+    "discount": "18%",
+    "mediaCount": "2 photos",
+    "inStock": true
+  },
+  {
+    "id": 118,
+    "name": "Knife Sharpener",
+    "category": "kitchen",
+    "images": [
+      "images/knifesharpener1.webp",
+      "images/knifesharpener2.webp",
+      "images/knifesharpener3.webp",
+      "images/knifesharpener4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 150,
+    "discount": "16%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 119,
+    "name": "Laptop Stand",
+    "categories": [
+      "man",
+      "handful",
+      "woman"
+    ],
+    "images": [
+      "images/laptopstand1.webp",
+      "images/laptopstand2.jpg",
+      "images/laptopstand3.webp"
+    ],
+    "video": "",
+    "oldPrice": 400,
+    "newPrice": 350,
+    "discount": "12%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 120,
+    "name": "Leaf Shape Chutney Plate",
+    "name2": "Chutney Plate",
+    "category": "kitchen",
+    "images": [
+      "images/leafshapechutneyplate1.webp",
+      "images/leafshapechutneyplate2.jpg",
+      "images/leafshapechutneyplate3.webp",
+      "images/leafshapechutneyplate4.jpeg"
+    ],
+    "video": "https://youtube.com/watch?v=pmPd-h_zQIo",
+    "oldPrice": 25,
+    "newPrice": 10,
+    "discount": "60%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 121,
+    "name": "LED Music Bulb",
+    "categories": [
+      "lights",
+      "speaker"
+    ],
+    "images": [
+      "images/ledmusicbulb.webp",
+      "images/ledmusicbulb2.jpg",
+      "images/ledmusicbulb3.jpg",
+      "images/ledmusicbulb4.webp",
+      "images/ledmusicbulb5.jpg",
+      "images/ledmusicbulb1.jpg"
+    ],
+    "video": "",
+    "oldPrice": 220,
+    "newPrice": 150,
+    "discount": "31%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 122,
+    "name": "Marble Kitchen Foil",
+    "categories": [
+      "kitchen",
+      "home"
+    ],
+    "images": [
+      "images/marblekitchenfoil1.jpg",
+      "images/marblekitchenfoil2.webp",
+      "images/marblekitchenfoil3.webp",
+      "images/marblekitchenfoil4.webp"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 120,
+    "discount": "33%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 123,
+    "name": "Mini Hair Straightner",
+    "name2": "Hair Straightner",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/minihairstraightner1.jpg",
+      "images/minihairstraightner2.webp",
+      "images/minihairstraightner3.jpg"
+    ],
+    "video": "",
+    "oldPrice": 230,
+    "newPrice": 150,
+    "discount": "34%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 124,
+    "name": "Mirror Acrylic Sticker",
+    "category": "home",
+    "images": [
+      "images/mirroracrylicsticker1.jpg",
+      "images/mirroracrylicsticker2.jpg",
+      "images/mirroracrylicsticker3.webp",
+      "images/mirroracrylicsticker4.jpg",
+      "images/mirroracrylicsticker5.jpg",
+      "images/mirroracrylicsticker6.webp",
+      "images/mirroracrylicsticker7.jpg"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 100,
+    "discount": "44%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 125,
+    "name": "Mushroom Sensor Light",
+    "name2": "Mushroom Light",
+    "category": "lights",
+    "images": [
+      "images/mushroomsensorlight1.jpg",
+      "images/mushroomsensorlight2.jpg",
+      "images/mushroomsensorlight3.jpg",
+      "images/mushroomsensorlight4.jpg",
+      "images/mushroomsensorlight5.webp",
+      "images/mushroomsensorlight6.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=kMWuuRXShR4",
+    "oldPrice": 150,
+    "newPrice": 100,
+    "discount": "33%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 126,
+    "name": "Neck Fan",
+    "categories": [
+      "man",
+      "woman"
+    ],
+    "images": [
+      "images/neckfan1.jpg",
+      "images/neckfan2.jpg",
+      "images/neckfan3.jpg",
+      "images/neckfan4.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=ipQ1kk79Ve8",
+    "oldPrice": 350,
+    "newPrice": 300,
+    "discount": "14%",
+    "mediaCount": "4 photos + video",
+    "inStock": false
+  },
+  {
+    "id": 127,
+    "name": "Panda Lamp",
+    "categories": [
+      "trending",
+      "gifts",
+      "lights"
+    ],
+    "images": [
+      "images/pandalamp1.jpg",
+      "images/pandalamp2.jpg",
+      "images/pandalamp3.webp",
+      "images/pandalamp4.jpg",
+      "images/pandalamp5.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=w5jwOxhi33U",
+    "oldPrice": 550,
+    "newPrice": 450,
+    "discount": "18%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 128,
+    "name": "Petrol Transfer Pipe",
+    "categories": [
+      "man",
+      "handful",
+      "kitchen"
+    ],
+    "images": [
+      "images/petroltransferpipe1.webp",
+      "images/petroltransferpipe2.webp",
+      "images/petroltransferpipe3.webp",
+      "images/petroltransferpipe4.webp",
+      "images/petroltransferpipe5.webp",
+      "images/petroltransferpipe6.webp"
+    ],
+    "video": "https://youtube.com/watch?v=izBm5egFBEQ",
+    "oldPrice": 220,
+    "newPrice": 150,
+    "discount": "31%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 129,
+    "name": "Portable Fan",
+    "categories": [
+      "man",
+      "woman",
+      "girls",
+      "kids",
+      "trending"
+    ],
+    "images": [
+      "images/portablefan.jpg",
+      "images/portablefan1.jpg",
+      "images/portablefan3.jpg",
+      "images/portablefan4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=0qwohlDIjJI",
+    "oldPrice": 280,
+    "newPrice": 230,
+    "discount": "17%",
+    "mediaCount": "4 photos + video",
+    "inStock": false
+  },
+  {
+    "id": 130,
+    "name": "Rechargeable Folding Fan",
+    "name2": "Folding Fan",
+    "categories": [
+      "man",
+      "woman",
+      "home"
+    ],
+    "images": [
+      "images/rechargeablefoldingfan1.webp",
+      "images/rechargeablefoldingfan2.webp",
+      "images/rechargeablefoldingfan3.jpg",
+      "images/rechargeablefoldingfan4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 450,
+    "newPrice": 350,
+    "discount": "22%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 131,
+    "name": "Portable Sealing Machine",
+    "name2": "Sealing Machine",
+    "categories": [
+      "kitchen",
+      "handful"
+    ],
+    "images": [
+      "images/portablesealingmachine1.jpeg",
+      "images/portablesealingmachine2.jpg",
+      "images/portablesealingmachine3.webp",
+      "images/portablesealingmachine6.jpg",
+      "images/portablesealingmachine5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 300,
+    "newPrice": 250,
+    "discount": "16%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 132,
+    "name": "Rechargeable Lighter",
+    "categories": [
+      "kitchen",
+      "handful"
+    ],
+    "images": [
+      "images/richargeablelighter4.webp",
+      "images/rechargeablelighter2.jpg",
+      "images/rechargeablelighter3.webp",
+      "images/rechargeablelighter1.webp"
+    ],
+    "video": "",
+    "oldPrice": 280,
+    "newPrice": 250,
+    "discount": "10%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 133,
+    "name": "Sank Magic",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/sankmagic1.webp",
+      "images/sankmagic2.webp",
+      "images/sankmagic3.webp",
+      "images/sankmagic4.webp",
+      "images/sankmagic5.webp"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 120,
+    "discount": "33%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 134,
+    "name": "Silicon Bath Body Scrubber",
+    "name2": "Body Scrubber",
+    "categories": [
+      "woman",
+      "girls"
+    ],
+    "images": [
+      "images/siliconbathbodyscrubber1.jpg",
+      "images/siliconbathbodyscrubber2.webp",
+      "images/siliconbathbodyscrubber3.webp",
+      "images/siliconbathbodyscrubber4.webp",
+      "images/siliconbathbodyscrubber5.webp"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 80,
+    "discount": "46%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 135,
+    "name": "Silicon Lid Set",
+    "category": "kitchen",
+    "images": [
+      "images/siliconlidset1.jpg",
+      "images/siliconlidset2.webp",
+      "images/siliconlidset3.jpg",
+      "images/siliconlidset4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=RTQ4AVCmXr0",
+    "oldPrice": 180,
+    "newPrice": 100,
+    "discount": "44%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 136,
+    "name": "Unicorn Pen",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/unicornpen.jpeg",
+      "images/unicornpen1.jpeg"
+    ],
+    "video": "",
+    "oldPrice": 30,
+    "newPrice": 25,
+    "discount": "16%",
+    "mediaCount": "2 photos",
+    "inStock": true
+  },
+  {
+    "id": 137,
+    "name": "Spectacle Case",
+    "categories": [
+      "girls",
+      "woman",
+      "handful"
+    ],
+    "images": [
+      "images/spectaclecase1.jpeg",
+      "images/spectaclecase4.webp"
+    ],
+    "video": "",
+    "oldPrice": 200,
+    "newPrice": 150,
+    "discount": "25%",
+    "mediaCount": "2 photos",
+    "inStock": true
+  },
+  {
+    "id": 138,
+    "name": "Sponge Holder Liquid Dispenser",
+    "name2": "Sponge Holder",
+    "category": "kitchen",
+    "images": [
+      "images/spongeholderliquiddispenser1.jpeg",
+      "images/spongeholderliquiddispenser2.webp",
+      "images/spongeholderliquiddispenser3.webp",
+      "images/spongeholderliquiddispenser4.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=VccLfLcnIDA",
+    "oldPrice": 180,
+    "newPrice": 120,
+    "discount": "33%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 139,
+    "name": "Star Master Light",
+    "category": "lights",
+    "images": [
+      "images/starmaster1.webp",
+      "images/starmaster2.jpg",
+      "images/starmaster3.webp",
+      "images/starmaster4.webp",
+      "images/starmaster5.webp"
+    ],
+    "video": "",
+    "oldPrice": 420,
+    "newPrice": 320,
+    "discount": "31%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 140,
+    "name": "Steam Iron",
+    "name2": "Iron",
+    "categories": [
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/steamiron1.webp",
+      "images/steamiron2.jpg",
+      "images/steamiron3.jpg",
+      "images/steamiron4.jpeg"
+    ],
+    "video": "",
+    "oldPrice": 480,
+    "newPrice": 350,
+    "discount": "27%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 141,
+    "name": "Zero-Kaata Puzzle Game",
+    "name2": "Zero-Cross Game",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/zeerocrosspuzzlegame.webp",
+      "images/zerocrosspuzzlegame1.jpeg",
+      "images/zerocrosspuzzlegame2.webp"
+    ],
+    "video": "https://youtube.com/watch?v=2wmgmuSUz1c",
+    "oldPrice": 150,
+    "newPrice": 100,
+    "discount": "33%",
+    "mediaCount": "3 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 142,
+    "name": "Wall Clock",
+    "category": "home",
+    "images": [
+      "images/wallclock1.jpg",
+      "images/wallclock2.webp",
+      "images/wallclock3.webp"
+    ],
+    "video": "",
+    "oldPrice": 370,
+    "newPrice": 250,
+    "discount": "32%",
+    "mediaCount": "3 photos",
+    "inStock": true
+  },
+  {
+    "id": 143,
+    "name": "1200ML Steel Tumbler",
+    "name2": "Steel Tumbler",
+    "categories": [
+      "trending",
+      "gift",
+      "man",
+      "woman",
+      "girls"
+    ],
+    "images": [
+      "images/tumbler1.jpeg",
+      "images/tumbler2.webp",
+      "images/tumbler3.webp",
+      "images/steeltumbler5.webp"
+    ],
+    "video": "https://youtube.com/watch?v=cXqngtMVBDw",
+    "oldPrice": 650,
+    "newPrice": 550,
+    "discount": "15%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 144,
+    "name": "Sweat Pads",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/sweatpads1.webp",
+      "images/sweatpads2.webp",
+      "images/sweatpads3.webp",
+      "images/sweatpads4.webp",
+      "images/sweatpads5.webp"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 100,
+    "discount": "33%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 145,
+    "name": "Unicorn Eraser",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/unicorneraser1.jpeg",
+      "images/unicorneraser2.jpg"
+    ],
+    "video": "",
+    "oldPrice": 25,
+    "newPrice": 15,
+    "discount": "40%",
+    "mediaCount": "2 photos",
+    "inStock": true
+  },
+  {
+    "id": 146,
+    "name": "G Shape Speaker with clock",
+    "category": "speaker",
+    "images": [
+      "images/googleshapespeaker1.webp",
+      "images/googleshapespeaker2.webp",
+      "images/googleshapespeaker3.jpg",
+      "images/googleshapespeaker4.webp",
+      "images/googleshapespeaker6.webp"
+    ],
+    "video": "https://www.youtube.com/watch?v=mUuVIdE3pLE",
+    "oldPrice": 1050,
+    "newPrice": 850,
+    "discount": "19%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 147,
+    "name": "Rose Lamp",
+    "category": "lights",
+    "images": [
+      "images/roselamp1.webp",
+      "images/roselamp2.webp",
+      "images/roselamp3.webp",
+      "images/roselamp4.webp",
+      "images/roselamp5.webp"
+    ],
+    "video": "",
+    "oldPrice": 480,
+    "newPrice": 350,
+    "discount": "27%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 148,
+    "name": "Dancing Cactus",
+    "categories": [
+      "girls",
+      "kids",
+      "trending"
+    ],
+    "images": [
+      "images/dancingcactus1.webp",
+      "images/dancingcactus2.webp",
+      "images/dancingcactus3.webp",
+      "images/dancingcactus4.webp",
+      "images/dancingcactus5.webp"
+    ],
+    "video": "",
+    "oldPrice": 375,
+    "newPrice": 270,
+    "discount": "28%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 149,
+    "name": "Realme Neckband",
+    "category": "earphone",
+    "images": [
+      "images/realmeneckband1.jpg",
+      "images/realmeneckband2.webp",
+      "images/realmeneckband3.jpg",
+      "images/realmeneckband4.webp",
+      "images/realmeneckband6.webp"
+    ],
+    "video": "",
+    "oldPrice": 650,
+    "newPrice": 400,
+    "discount": "38%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 150,
+    "name": "Marshall Headphone",
+    "category": "earphone",
+    "images": [
+      "images/marshallheadphone1.webp",
+      "images/marshallheadphone2.jpg",
+      "images/marshallheadphone3.webp",
+      "images/marshallheadphone4.webp",
+      "images/marshallheadphone5.webp",
+      "images/marshallheadphone6.jpg"
+    ],
+    "video": "",
+    "oldPrice": 2000,
+    "newPrice": 1500,
+    "discount": "25%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 151,
+    "name": "Airpods Pro 2",
+    "category": "earphone",
+    "images": [
+      "images/airpods1.webp",
+      "images/airpods2.webp",
+      "images/airpods3.webp",
+      "images/airpods4.webp",
+      "images/airpods5.webp",
+      "images/airpods6.webp"
+    ],
+    "video": "",
+    "oldPrice": 900,
+    "newPrice": 600,
+    "discount": "33%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 152,
+    "name": "Bunny Lamp Projector",
+    "category": "lights",
+    "images": [
+      "images/bunnylampprojector1.jpg",
+      "images/bunnylampprojector2.webp",
+      "images/bunnylampprojector5.jpg",
+      "images/bunnylampprojector3.webp",
+      "images/bunnylampprojector6.webp"
+    ],
+    "video": "https://youtube.com/watch?v=kb-ubcFcj0U",
+    "oldPrice": 1150,
+    "newPrice": 900,
+    "discount": "21%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 153,
+    "name": "Car Shape Speaker 5W",
+    "name2": "Car Speaker",
+    "category": "speaker",
+    "images": [
+      "images/carshapespeaker10w5.jpg",
+      "images/carshapespeaker5w1.webp",
+      "images/carshapespeaker5w2.webp",
+      "images/carshapespeaker5w3.jpg",
+      "images/carshapespeaker5w4.webp"
+    ],
+    "video": "",
+    "oldPrice": 850,
+    "newPrice": 700,
+    "discount": "17%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 154,
+    "name": "Car Shape Speaker 10W",
+    "name2": "Car Speaker 10W",
+    "category": "speaker",
+    "images": [
+      "images/carshapespeaker10w1.jpg",
+      "images/carshapespeaker10w2.webp",
+      "images/carshapespeaker10w3.jpg",
+      "images/carshapespeaker10w4.webp",
+      "images/carshapespeaker5w5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 1150,
+    "newPrice": 900,
+    "discount": "21%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 155,
+    "name": "Robo 2 Speaker",
+    "category": "speaker",
+    "images": [
+      "images/robo2speaker4.webp",
+      "images/robo2speaker2.jpg",
+      "images/robo2speaker3.webp",
+      "images/robo2speaker1.webp",
+      "images/robo2speaker5.jpg",
+      "images/robo2speaker6.jpg"
+    ],
+    "video": "https://www.youtube.com/watch?v=qRj85muMtz0",
+    "oldPrice": 780,
+    "newPrice": 600,
+    "discount": "23%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 156,
+    "name": "Scalp Massager",
+    "categories": [
+      "trending",
+      "woman",
+      "girls"
+    ],
+    "images": [
+      "images/scalpmassager1.webp",
+      "images/scalpmassager2.webp",
+      "images/scalpmassager3.webp",
+      "images/scalpmassager4.webp",
+      "images/scalpmassager5.webp"
+    ],
+    "video": "https://youtube.com/watch?v=GPeAfQVibsY",
+    "oldPrice": 950,
+    "newPrice": 750,
+    "discount": "21%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 157,
+    "name": "Kapoor Dani",
+    "categories": [
+      "trending",
+      "home",
+      "woman"
+    ],
+    "images": [
+      "images/kapoordani5.webp",
+      "images/kapoordani1.webp",
+      "images/kapoordani2.webp",
+      "images/kapoordani3.webp",
+      "images/kapoordani.webp",
+      "images/kapoordani4.webp"
+    ],
+    "video": "https://youtube.com/watch?v=TDinwZ_OUZY",
+    "oldPrice": 350,
+    "newPrice": 270,
+    "discount": "22%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 158,
+    "name": "Crystal Lamp",
+    "categories": [
+      "gifts",
+      "home",
+      "lights"
+    ],
+    "images": [
+      "images/crystallamp3.jpg",
+      "images/crystallamp1.webp",
+      "images/crystallamp2.webp",
+      "images/crystallamp.webp",
+      "images/crystallamp4.webp",
+      "images/crystallamp5.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=81pKFlyphb4",
+    "oldPrice": 580,
+    "newPrice": 450,
+    "discount": "22%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 159,
+    "name": "Anime Poster",
+    "categories": [
+      "anime",
+      "trending"
+    ],
+    "images": [
+      "images/animeposter1.webp",
+      "images/animeposter2.webp",
+      "images/animeposter3.jpg",
+      "images/animeposter4.webp",
+      "images/animeposter5.webp",
+      "images/animeposter6.webp",
+      "images/animeposter7.webp",
+      "images/animeposter8.webp",
+      "images/animeposter9.webp",
+      "images/animeposter10.webp"
+    ],
+    "video": "",
+    "oldPrice": 100,
+    "newPrice": 50,
+    "discount": "50%",
+    "mediaCount": "10 photos",
+    "inStock": true
+  },
+  {
+    "id": 160,
+    "name": "Harry Potter figurines(per piece)",
+    "name2": "Harry Potter figures",
+    "category": "anime",
+    "images": [
+      "images/harrypotter2.webp",
+      "images/harrypotter3.webp",
+      "images/harrypotter1.jpg",
+      "images/harrypotter4.webp",
+      "images/harrypotter5.webp"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 250,
+    "newPrice": 160,
+    "discount": "36%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 161,
+    "name": "Laptop Skin",
+    "categories": [
+      "anime",
+      "trending"
+    ],
+    "images": [
+      "images/laptopskin1.webp",
+      "images/laptopskin2.jpg",
+      "images/laptopskin3.jpg",
+      "images/laptopskin4.webp",
+      "images/laptopskin5.jpg",
+      "images/laptopskin6.jpg",
+      "images/laptopskin7.jpg",
+      "images/laptopskin8.jpg",
+      "images/laptopskin9.jpg"
+    ],
+    "video": "",
+    "oldPrice": 300,
+    "newPrice": 200,
+    "discount": "15%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 162,
+    "name": "Face Massager",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/facemassager.jpg",
+      "images/facemassager2.webp",
+      "images/facemassager3.jpg",
+      "images/facemassager4.jpg",
+      "images/facemassager5.jpg",
+      "images/facemassager6.jpg",
+      "images/facemassager1.jpg"
+    ],
+    "video": "",
+    "oldPrice": 180,
+    "newPrice": 120,
+    "discount": "33%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 163,
+    "name": "2PC organiser Heavy set",
+    "categories": [
+      "woman",
+      "handful",
+      "home"
+    ],
+    "images": [
+      "images/2pcorganiserset.webp",
+      "images/2pcorganiserset2.webp",
+      "images/2pcorganiserset3.webp",
+      "images/2pcorganiserset4.webp",
+      "images/2pcorganiserset1.webp",
+      "images/2pcorganiserset6.webp"
+    ],
+    "video": "",
+    "oldPrice": 450,
+    "newPrice": 350,
+    "discount": "22%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 164,
+    "name": "Bokomo Head Massager",
+    "name2": "Head Massager",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/bokomomassager1.jpg",
+      "images/bokomomassager2.jpg",
+      "images/bokomomassager3.webp",
+      "images/bokomomassager4.webp",
+      "images/bokomassager5.webp",
+      "images/bokomomassager.webp"
+    ],
+    "video": "",
+    "oldPrice": 70,
+    "newPrice": 40,
+    "discount": "42%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 165,
+    "name": "Colour Astronaut Projector",
+    "name2": "Colour Astronaut",
+    "categories": [
+      "lights",
+      "gifts",
+      "trending"
+    ],
+    "images": [
+      "images/colourastronautprojector1.jpg",
+      "images/colorastronautprojector2.jpg",
+      "images/colourastronautprojector3.jpg",
+      "images/colourastronautprojector4.jpg",
+      "images/colourastronautprojector5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 940,
+    "newPrice": 750,
+    "discount": "20%",
+    "mediaCount": "5 photos",
+    "inStock": false
+  },
+  {
+    "id": 166,
+    "name": "Rabbit Lamp",
+    "categories": [
+      "gifts",
+      "lights"
+    ],
+    "images": [
+      "images/rabbitlamp1.jpg",
+      "images/rabbitlamp2.jpg",
+      "images/rabbitlamp3.jpg",
+      "images/rabbitlamp4.jpg",
+      "images/rabbitlamp5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 600,
+    "newPrice": 500,
+    "discount": "16%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 167,
+    "name": "Demon Slayer Action Figures(per piece)",
+    "name2": "Demon Slayer Figures",
+    "category": "anime",
+    "images": [
+      "images/demonslayer.jpg",
+      "images/demonslayer2.jpg",
+      "images/demonslayer3.webp",
+      "images/demonslayer4.webp",
+      "images/demonslayer1.jpg",
+      "images/demonslayer5.jpg"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 280,
+    "newPrice": 170,
+    "discount": "39%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 168,
+    "name": "Keychain (Per Piece)",
+    "categories": [
+      "anime",
+      "trending"
+    ],
+    "images": [
+      "images/challa1.webp",
+      "images/challa2.webp",
+      "images/challa3.webp",
+      "images/challa4.webp",
+      "images/challa5.webp",
+      "images/challa6.webp",
+      "images/chhale7.webp",
+      "images/challa8.webp"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 200,
+    "newPrice": 100,
+    "discount": "50%",
+    "mediaCount": "8 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 169,
+    "name": "Dragon Ball Z(Per Piece)",
+    "name2": "Dragon Ball",
+    "category": "anime",
+    "images": [
+      "images/dragonballz5.jpg",
+      "images/dragonballz2.webp",
+      "images/dragonballz6.webp",
+      "images/dragonballz4.webp",
+      "images/dragonballz1.webp",
+      "images/dragonballz3.webp"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 600,
+    "newPrice": 400,
+    "discount": "33%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 170,
+    "name": "Luffy Action Figures",
+    "category": "anime",
+    "images": [
+      "images/luffy1.jpg",
+      "images/luffy2.webp",
+      "images/luffy3.jpg",
+      "images/luffy4.webp",
+      "images/luffy5.jpg"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 400,
+    "newPrice": 270,
+    "discount": "33%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 171,
+    "name": "One Piece Action Figures",
+    "name2": "One Piece Figures",
+    "categories": [
+      "anime",
+      "trending"
+    ],
+    "images": [
+      "images/luffyonepiece1.jpg",
+      "images/luffyonepiece2.jpg",
+      "images/luffyonepiece3.webp",
+      "images/luffyonepiece4.webp"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 1200,
+    "newPrice": 800,
+    "discount": "33%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 172,
+    "name": "Gojo Demon Slayer Action Figures",
+    "name2": "Gojo Figures",
+    "category": "anime",
+    "images": [
+      "images/gojodemonslayer1.jpg",
+      "images/gojodemonslayer2.jpg",
+      "images/gojodemonslayer3.jpg",
+      "images/gojodemonslayer4.webp"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 530,
+    "newPrice": 350,
+    "discount": "33%",
+    "mediaCount": "4 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 173,
+    "name": "Naruto Action Figures(per piece)",
+    "name2": "Naruto Figures",
+    "category": "anime",
+    "images": [
+      "images/naruto1.jpg",
+      "images/naruto2.webp",
+      "images/naruto3.webp",
+      "images/naruto4.webp",
+      "images/naruto5.webp"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 300,
+    "newPrice": 150,
+    "discount": "50%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 174,
+    "name": "Action Figures",
+    "category": "anime",
+    "images": [
+      "images/actionfigures1.jpg",
+      "images/actionfigures2.jpg",
+      "images/actionfigures3.jpg"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 320,
+    "newPrice": 170,
+    "discount": "46%",
+    "mediaCount": "3 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 175,
+    "name": "Shinchan Action Figures",
+    "name2": "Shinchan Figurines",
+    "category": "anime",
+    "images": [
+      "images/shinchan1.jpg",
+      "images/shinchan2.webp",
+      "images/shinchan3.webp",
+      "images/shinchan4.webp",
+      "images/shinchan5.jpg"
+    ],
+    "video": "https://www.youtube.com/watch?v=IExFKJN8v3A",
+    "oldPrice": 250,
+    "newPrice": 150,
+    "discount": "40%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 176,
+    "name": "Steel Khujli Stick",
+    "category": "handful",
+    "images": [
+      "images/steelkhujlistick1.jpg",
+      "images/steelkhujlistick2.webp",
+      "images/steelkhujlistick3.webp",
+      "images/steelkhujlistick4.webp",
+      "images/steelkhujlistick5.jpg",
+      "images/steelkhujlistick6.jpg"
+    ],
+    "video": "",
+    "oldPrice": 70,
+    "newPrice": 40,
+    "discount": "42%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 177,
+    "name": "Plastic Khujli Stick",
+    "category": "handful",
+    "images": [
+      "images/plastickhujlistick1.jpg",
+      "images/plastickhujlistick2.jpg",
+      "images/plastickhujlistick3.webp",
+      "images/plastickhujlistick4.jpg"
+    ],
+    "video": "",
+    "oldPrice": 40,
+    "newPrice": 20,
+    "discount": "50%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 178,
+    "name": "500ML Kids Steel Bottle",
+    "name2": "Kids Bottle",
+    "categories": [
+      "girls",
+      "woman",
+      "kids"
+    ],
+    "images": [
+      "images/kidssteelbottle1.jpg",
+      "images/kidssteelbottle2.webp",
+      "images/kidssteelbottle3.webp",
+      "images/kidssteelbottle4.webp",
+      "images/kidssteelbottle5.webp"
+    ],
+    "video": "",
+    "oldPrice": 270,
+    "newPrice": 200,
+    "discount": "25%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 179,
+    "name": "LCD Writing Tablet( 8.5 Inch)",
+    "name2": "8.5Inch Writing Tablet",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/lcdwritingtablet1.webp",
+      "images/lcdwritingtablet7.webp",
+      "images/lcdwritingtablet8.webp",
+      "images/lcdwritingtablet9.webp",
+      "images/lcdwritingtablet4.jpg",
+      "images/lcdwritingtablet5.jpg",
+      "images/lcdwritingtablet6.jpg"
+    ],
+    "video": "",
+    "oldPrice": 250,
+    "newPrice": 120,
+    "discount": "44%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 180,
+    "name": "Purse Style Water Proof Picnic Mat",
+    "name2": "Picnic Mat",
+    "categories": [
+      "handful",
+      "woman"
+    ],
+    "images": [
+      "images/picnicmet1.webp",
+      "images/picnicmet2.webp",
+      "images/picnicmet3.jpg",
+      "images/picnetmet4.webp",
+      "images/picnetmet5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 250,
+    "newPrice": 150,
+    "discount": "40%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 181,
+    "name": "LCD Writing Tablet( 12 Inch)",
+    "name2": "12Inch Writing Tablet ",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/lcdwritingtablet11.webp",
+      "images/lcdwritingtablet10.webp",
+      "images/lcdwritingtablet7.webp",
+      "images/lcdwritingtablet8.webp",
+      "images/lcdwritingtablet6.jpg",
+      "images/lcdwritingtablet1.webp"
+    ],
+    "video": "https://youtube.com/watch?v=9ersBj_olGM",
+    "oldPrice": 300,
+    "newPrice": 200,
+    "discount": "33%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 182,
+    "name": "Car diffuser Air Freshener",
+    "name2": "Car Perfume",
+    "categories": [
+      "man",
+      "handful",
+      "gifts"
+    ],
+    "images": [
+      "images/carperfume1.jpg",
+      "images/carperfume2.webp",
+      "images/carperfume3.jpg",
+      "images/carperfume4.webp",
+      "images/carperfume.webp"
+    ],
+    "video": "https://youtube.com/watch?v=r0Evn6HfNog",
+    "oldPrice": 270,
+    "newPrice": 200,
+    "discount": "25%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 183,
+    "name": "Talking Flash Card",
+    "category": "kids",
+    "images": [
+      "images/talkingflashcard1.jpg",
+      "images/talkingflashcard2.jpg",
+      "images/talkingflashcard3.webp",
+      "images/talkingflashcard4.webp",
+      "images/talkingflashcard5.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=9ynbq8Zsk8o",
+    "oldPrice": 450,
+    "newPrice": 350,
+    "discount": "22%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 184,
+    "name": "Bath Towel",
+    "categories": [
+      "woman",
+      "girls"
+    ],
+    "images": [
+      "images/bathtowel1.jpg",
+      "images/bathtowel2.jpg",
+      "images/bathtowel3.webp",
+      "images/bathtowel4.webp",
+      "images/bathtowel5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 250,
+    "newPrice": 200,
+    "discount": "20%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 185,
+    "name": "Battleground Gun",
+    "category": "kids",
+    "images": [
+      "images/battlegroundgun1.jpg",
+      "images/battlegroundgun2.webp",
+      "images/battlegroundgun3.webp",
+      "images/battlegroundgun4.jpg",
+      "images/battlegroundgun5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 270,
+    "newPrice": 200,
+    "discount": "25%",
+    "mediaCount": "5 photos",
+    "inStock": false
+  },
+  {
+    "id": 186,
+    "name": "Lufa Brush",
+    "categories": [
+      "woman",
+      "girls"
+    ],
+    "images": [
+      "images/lufabrush2.jpg",
+      "images/lufabrush.webp",
+      "images/lufabrush3.webp",
+      "images/lufabrush4.webp",
+      "images/lufabrush1.webp"
+    ],
+    "video": "",
+    "oldPrice": 120,
+    "newPrice": 70,
+    "discount": "41%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 187,
+    "name": "Coffee Stencil(Per Piece)",
+    "name2": "Coffee Stencils",
+    "categories": [
+      "kitchen",
+      "handful"
+    ],
+    "images": [
+      "images/coffeestencil1.webp",
+      "images/coffeestencil2.jpg",
+      "images/coffeestencil3.jpg",
+      "images/coffeestencil4.jpg",
+      "images/coffeestencil5.webp"
+    ],
+    "video": "",
+    "oldPrice": 25,
+    "newPrice": 10,
+    "discount": "60%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 188,
+    "name": "Screen Enlarger",
+    "categories": [
+      "handful",
+      "man"
+    ],
+    "images": [
+      "images/screenenlarger1.jpg",
+      "images/screenenlarger2.jpg",
+      "images/screenenlarger3.webp",
+      "images/screenenlarger4.webp",
+      "images/screenenlarger5.webp"
+    ],
+    "video": "",
+    "oldPrice": 150,
+    "newPrice": 100,
+    "discount": "33%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 189,
+    "name": "60 PC Double Sided Tape",
+    "name2": "Double Sided Tape",
+    "categories": [
+      "woman",
+      "kitchen",
+      "home"
+    ],
+    "images": [
+      "images/doublesidedtape1.webp",
+      "images/doublesidedtape2.webp",
+      "images/doublesidedtape3.webp",
+      "images/doublesidedtape4.webp"
+    ],
+    "video": "",
+    "oldPrice": 80,
+    "newPrice": 50,
+    "discount": "37%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 190,
+    "name": "Fruit Shape Plastic Drawing Ruler",
+    "name2": "Plastic Ruler",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/fruitshaperuler1.jpg",
+      "images/fruitshaperuler2.jpg",
+      "images/fruitshaperuler3.webp",
+      "images/fruitshaperuler4.webp",
+      "images/fruitshaperuler5.jpg"
+    ],
+    "video": "",
+    "oldPrice": 35,
+    "newPrice": 25,
+    "discount": "28%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 191,
+    "name": "4 PC Solar Garden Railing Light",
+    "name2": "Solar Garden light ",
+    "categories": [
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/gardenrailinglight1.jpg",
+      "images/gardenrailinglight2.jpg",
+      "images/gardenrailinglight3.jpg",
+      "images/gardenrailinglight4.jpg",
+      "images/gardenrailinglight5.webp"
+    ],
+    "video": "",
+    "oldPrice": 350,
+    "newPrice": 250,
+    "discount": "28%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 192,
+    "name": "Cylinder Trolley",
+    "categories": [
+      "kitchen",
+      "woman",
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/cylindertrolley1.jpg",
+      "images/cylindertrolley2.webp",
+      "images/cylindertrolley3.jpg",
+      "images/cylindertrolley4.webp"
+    ],
+    "video": "",
+    "oldPrice": 220,
+    "newPrice": 150,
+    "discount": "31%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 193,
+    "name": "Kids Stationery Pouch",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/kidsstationarypouch1.webp",
+      "images/kidsstationarypouch2.webp",
+      "images/kidsstationarypouch3.webp",
+      "images/kidsstationarypouch4.webp",
+      "images/kidsstationarypouch5.webp"
+    ],
+    "video": "",
+    "oldPrice": 330,
+    "newPrice": 250,
+    "discount": "24%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 194,
+    "name": "OHO Glass Coffee Mug",
+    "name2": "OHO Coffee Mug",
+    "categories": [
+      "gifts",
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/ohoglassmug1.jpg",
+      "images/ohoglassmug2.webp",
+      "images/ohoglassmug3.webp",
+      "images/ohoglassmug4.webp"
+    ],
+    "video": "",
+    "oldPrice": 160,
+    "newPrice": 120,
+    "discount": "25%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 195,
+    "name": "3D Creative Lamp",
+    "name2": "Creative Lamp",
+    "categories": [
+      "gifts",
+      "lights"
+    ],
+    "images": [
+      "images/3dcreativelamp1.jpg",
+      "images/3dcreativelamp2.webp",
+      "images/3dcreativelamp3.jpg",
+      "images/3dcreativelamp4.jpg",
+      "images/3dcreativelamp5.webp"
+    ],
+    "video": "https://youtube.com/watch?v=2ODQN-gDkoY",
+    "oldPrice": 350,
+    "newPrice": 270,
+    "discount": "22%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 196,
+    "name": "24 Pocket UG Organiser",
+    "name2": "UG Organiser",
+    "categories": [
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/24pocketugorganiser1.jpg",
+      "images/24pocketugorganiser2.webp",
+      "images/24pocketugorganiser3.webp",
+      "images/24pocketugorganiser4.jpg",
+      "images/24pocketugorganiser5.jpg"
+    ],
+    "oldPrice": 400,
+    "newPrice": 300,
+    "discount": "25%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 197,
+    "name": "Rotatable Mobile Stand",
+    "name2": "Mobile Stand ",
+    "categories": [
+      "man",
+      "woman",
+      "trending",
+      "handful",
+      "girls"
+    ],
+    "images": [
+      "images/mobilestand2.webp",
+      "images/mobilestand5.webp",
+      "images/mobilestand4.jpeg",
+      "images/mobilestand3.jpg",
+      "images/mobilestand6.webp"
+    ],
+    "oldPrice": 160,
+    "newPrice": 120,
+    "discount": "25%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 198,
+    "name": "Breathing Teddy",
+    "categories": [
+      "gifts",
+      "girls",
+      "woman",
+      "trending"
+    ],
+    "images": [
+      "images/breathingteddy1.webp",
+      "images/breathingteddy2.jpg",
+      "images/breathingteddy3.webp",
+      "images/breathingteddy4.webp",
+      "images/breathingteddy5.webp",
+      "images/breathingteddy6.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=68-HLRUgc50",
+    "oldPrice": 600,
+    "newPrice": 500,
+    "discount": "16%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 199,
+    "name": "Study Lamp",
+    "categories": [
+      "kids",
+      "girls",
+      "lights"
+    ],
+    "images": [
+      "images/studylamp.webp",
+      "images/studylamp1.jpg",
+      "images/studylamp2.jpg",
+      "images/studylamp4.webp",
+      "images/studylamp5.webp",
+      "images/studylamp3.jpg"
+    ],
+    "oldPrice": 270,
+    "newPrice": 200,
+    "discount": "25%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 200,
+    "name": "Sling Waterproof Bag With Lock",
+    "name2": "Sling Bag",
+    "categories": [
+      "man",
+      "woman"
+    ],
+    "images": [
+      "images/slingbag1.jpg",
+      "images/slingbag2.webp",
+      "images/slingbag3.webp",
+      "images/slingbag4.webp",
+      "images/slingbag5.webp",
+      "images/slingbag6a.webp",
+      "images/slingbag7.webp",
+      "images/slingbag8.webp",
+      "images/slingbag9.webp"
+    ],
+    "oldPrice": 600,
+    "newPrice": 450,
+    "discount": "25%",
+    "mediaCount": "9 photos",
+    "inStock": true
+  },
+  {
+    "id": 201,
+    "name": "8 Layer Foldable Shoe Rack",
+    "name2": "Shoe Rack",
+    "categories": [
+      "men",
+      "woman",
+      "home",
+      "trending"
+    ],
+    "images": [
+      "images/8layerrack1.jpg",
+      "images/8layerrack2.webp",
+      "images/8layerrack3.webp",
+      "images/8layerrack4.webp",
+      "images/8layerrack5.webp",
+      "images/8layerrack6.webp",
+      "images/8layerrack7.webp"
+    ],
+    "oldPrice": 650,
+    "newPrice": 550,
+    "discount": "15%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 202,
+    "name": "Touch Lamp Speaker",
+    "category": "speaker",
+    "images": [
+      "images/touchlampspeaker1.webp",
+      "images/touchlampspeaker2.jpg",
+      "images/touchlampspeaker3.webp",
+      "images/touchlampspeaker4.jpg",
+      "images/touchlampspeaker5.jpg",
+      "images/touchlampspeaker6.webp",
+      "images/touchlampspeaker7.jpg"
+    ],
+    "oldPrice": 450,
+    "newPrice": 350,
+    "discount": "22%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 203,
+    "name": "Thar Car Speaker",
+    "category": "Speaker",
+    "images": [
+      "images/tharcarspeaker1.jpeg",
+      "images/tharcarspeaker2.webp",
+      "images/tharcarspeaker3.webp",
+      "images/tharcarspeaker4.jpg",
+      "images/tharcarspeaker5.jpg"
+    ],
+    "oldPrice": 850,
+    "newPrice": 700,
+    "discount": "17%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 204,
+    "name": "Tyre Speaker",
+    "category": "Speaker",
+    "images": [
+      "images/tyrespeaker1.webp",
+      "images/tyrespeaker3.webp",
+      "images/tyrespeaker.webp",
+      "images/tyrespeaker2.jpg",
+      "images/tyrespeaker4.jpg",
+      "images/tyrespeaker6.jpg",
+      "images/tyrespeaker5.jpg"
+    ],
+    "oldPrice": 800,
+    "newPrice": 700,
+    "discount": "12%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 205,
+    "name": "White Mosquito Killer Lamp",
+    "name2": "Mosquito Lamp",
+    "categories": [
+      "home",
+      "handful"
+    ],
+    "images": [
+      "images/whitemosquitolamp1.jpg",
+      "images/whitemosquitolamp2.jpg",
+      "images/whitemosquitolamp3.jpg",
+      "images/whitemosquitolamp4.webp",
+      "images/whitemosquitolamp5.webp"
+    ],
+    "video": "https://youtube.com/watch?v=tUTEBUJnA-A",
+    "oldPrice": 400,
+    "newPrice": 250,
+    "discount": "37%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 206,
+    "name": "X1 Mini BT Speaker",
+    "name2": "Mini Speaker",
+    "category": "speaker",
+    "images": [
+      "images/x1speaker1.jpg",
+      "images/x1speaker2.webp",
+      "images/x1speaker3.jpg",
+      "images/x1speaker4.webp",
+      "images/x1speaker5.jpg",
+      "images/x1speaker6.jpg"
+    ],
+    "video": "https://youtube.com/watch?v=XNWc2hc-I64",
+    "oldPrice": 300,
+    "newPrice": 200,
+    "discount": "33%",
+    "mediaCount": "6 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 207,
+    "name": "Shoe Wet Wipes(80 Wipes)",
+    "name2": "Shoe Wet Wipes",
+    "categories": [
+      "man",
+      "woman",
+      "handful"
+    ],
+    "images": [
+      "images/shoewetwipes1.webp",
+      "images/shoewetwipes2.jpeg",
+      "images/shoewetwipes3.jpg",
+      "images/shoewetwipes4.jpg",
+      "images/shoewetwipes5.webp"
+    ],
+    "video": "https://youtube.com/watch?v=h1zUEVADa74",
+    "oldPrice": 200,
+    "newPrice": 120,
+    "discount": "40%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 208,
+    "name": "Can Shape Sipper",
+    "categories": [
+      "man",
+      "girls",
+      "woman"
+    ],
+    "images": [
+      "images/canshapesipper1.webp",
+      "images/canshapesipper2.jpg",
+      "images/canshapesipper3.jpg",
+      "images/canshapesipper4.jpg",
+      "images/canshapesipper5.webp"
+    ],
+    "oldPrice": 400,
+    "newPrice": 240,
+    "discount": "40%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 209,
+    "name": "Chapati Box",
+    "categories": [
+      "kitchen",
+      "woman"
+    ],
+    "images": [
+      "images/chapatibox1.jpeg",
+      "images/chapatibox2.jpg",
+      "images/chapatibox3.jpg",
+      "images/chapatibox4.webp"
+    ],
+    "oldPrice": 150,
+    "newPrice": 100,
+    "discount": "33%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 210,
+    "name": "Shoe Wet Wipes(30 Wipes)",
+    "name2": "Shoe Wet Wipes",
+    "categories": [
+      "woman",
+      "man",
+      "handful"
+    ],
+    "images": [
+      "images/shoewetwipes2.jpeg",
+      "images/shoewetwipes3.jpg",
+      "images/shoewetwipes4.jpg",
+      "images/shoewetwipes1.webp",
+      "images/shoewetwipes5.webp"
+    ],
+    "video": "https://youtube.com/watch?v=h1zUEVADa74",
+    "oldPrice": 100,
+    "newPrice": 70,
+    "discount": "30%",
+    "mediaCount": "5 photos + video",
+    "inStock": true
+  },
+  {
+    "id": 211,
+    "name": "Mini BT Speaker",
+    "category": "Speaker",
+    "images": [
+      "images/minibtspeaker1.jpg",
+      "images/minibtspeaker2.jpg",
+      "images/minibtspeaker4.jpg",
+      "images/minibtspeaker3.webp",
+      "images/minibtspeaker5.jpg",
+      "images/minibtspeaker6.jpg",
+      "images/minibtspeaker7.jpg"
+    ],
+    "oldPrice": 500,
+    "newPrice": 350,
+    "discount": "30%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 212,
+    "name": "Apple Case",
+    "category": "kids",
+    "images": [
+      "images/applecase1.jpg",
+      "images/applecase2.webp",
+      "images/applecase3.webp",
+      "images/applecase4.webp",
+      "images/applecase5.webp"
+    ],
+    "oldPrice": 70,
+    "newPrice": 30,
+    "discount": "57%",
+    "mediaCount": "5 photos",
+    "inStock": true
+  },
+  {
+    "id": 213,
+    "name": "Kitchen Scale",
+    "categories": [
+      "kitchen",
+      "man",
+      "woman",
+      "handful"
+    ],
+    "images": [
+      "images/kitchenscale2.jpg",
+      "images/kitchenscale4.jpg",
+      "images/kitchenscale3.jpg",
+      "images/kitchenscale8.webp",
+      "images/kitchenscale5.jpg",
+      "images/kitchenscale6.jpg",
+      "images/kitchenscale7.jpg"
+    ],
+    "oldPrice": 400,
+    "newPrice": 300,
+    "discount": "25%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 214,
+    "name": "Cling Film",
+    "category": "kitchen",
+    "images": [
+      "images/clingfilm.webp",
+      "images/clingfilm1.jpg",
+      "images/clingfilm4.jpg",
+      "images/clingfilm2.webp",
+      "images/clingfilm3.webp",
+      "images/clingfilm8.jpg"
+    ],
+    "oldPrice": 130,
+    "newPrice": 80,
+    "discount": "38%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 215,
+    "name": "Ultrasonic Aroma Humidifier",
+    "name2": "Aroma Humidifier",
+    "categories": [
+      "home",
+      "trending",
+      "woman"
+    ],
+    "images": [
+      "images/ultrasonicaromahumidifier1.jpg",
+      "images/ultrasonicaromahumidifier2.jpg",
+      "images/ultrasonicaromahumidifier6.jpg",
+      "images/ultrasonicaromahumidifier4.jpg",
+      "images/ultrasonicaromahumidifier5.jpg",
+      "images/ultrasonicaromahumidifier8.jpg",
+      "images/ultrasonicaromahumidifier9.jpg"
+    ],
+    "oldPrice": 400,
+    "newPrice": 300,
+    "discount": "25%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 216,
+    "name": "Tennis Trainer Rebound Ball",
+    "name2": "Tennis Trainer",
+    "categories": [
+      "kids",
+      "man",
+      "girls"
+    ],
+    "images": [
+      "images/tennistrainerreboundball.webp",
+      "images/tennistrainerreboundball1.jpg",
+      "images/tennistrainerreboundball3.webp",
+      "images/tennistrainerreboundball4.webp",
+      "images/tennistrainerreboundball5.jpg",
+      "images/tennistrainerreboundball6.webp",
+      "images/tennistrainerreboundball2.webp"
+    ],
+    "oldPrice": 300,
+    "newPrice": 150,
+    "discount": "50%",
+    "mediaCount": "7 photos",
+    "inStock": true
+  },
+  {
+    "id": 217,
+    "name": "Kids Map Puzzle",
+    "categories": [
+      "kids",
+      "girls"
+    ],
+    "images": [
+      "images/kidsmapfoamtray1.webp",
+      "images/kidsmapfoamtray2.webp",
+      "images/kidsmapfoamtray3.webp",
+      "images/kidsmapfoamtray4.jpg"
+    ],
+    "oldPrice": 180,
+    "newPrice": 120,
+    "discount": "33%",
+    "mediaCount": "4 photos",
+    "inStock": true
+  },
+  {
+    "id": 218,
+    "name": "Table Mat",
+    "categories": [
+      "kitchen",
+      "woman",
+      "home"
+    ],
+    "images": [
+      "images/tablemat1.webp",
+      "images/tablemat2.jpg",
+      "images/tablemat3.jpg",
+      "images/tablemat4.jpg",
+      "images/tablemat5.jpg",
+      "images/tablemat6.webp"
+    ],
+    "oldPrice": 400,
+    "newPrice": 200,
+    "discount": "50%",
+    "mediaCount": "6 photos",
+    "inStock": true
+  },
+  {
+    "id": 219,
+    "name": "Tangram Puzzle",
+    "categories": [
+      "girls",
+      "kids"
+    ],
+    "images": [
+      "images/tangrampuzzel1.webp",
+      "images/tangrampuzzel2.webp",
+      "images/tangrampuzzel3.webp",
+      "images/tangrampuzzel4.webp",
+      "images/tangrampuzzel5.webp",
+      "images/tangrampuzzel6.webp",
+      "images/tangrampuzzel7.webp",
+      "images/tangrampuzzel8.webp"
+    ],
+    "oldPrice": 180,
+    "newPrice": 100,
+    "discount": "44%",
+    "mediaCount": "8 photos",
+    "inStock": true
   }
-  ,
-  {
-    id:162,
-    name: "Face Massager",
-    categories: ["girls","woman"],
-    images: ["images/facemassager.jpg","images/facemassager2.webp","images/facemassager3.jpg","images/facemassager4.jpg","images/facemassager5.jpg","images/facemassager6.jpg","images/facemassager1.jpg"],
-    video: "",
-    oldPrice: 180,
-    newPrice: 120,
-    discount: "33%",
-    mediaCount: "7 photos",
-    inStock: true
-  },
-  {
-    id:163,
-    name: "2PC organiser Heavy set",
-    categories: ["woman","handful","home"],
-    images: ["images/2pcorganiserset.webp","images/2pcorganiserset2.webp","images/2pcorganiserset3.webp","images/2pcorganiserset4.webp","images/2pcorganiserset1.webp","images/2pcorganiserset6.webp"],
-    video: "",
-    oldPrice: 450,
-    newPrice: 350,
-    discount: "22%",
-    mediaCount: "6 photos",
-    inStock: true
-  },
-  {
-    id:164,
-    name: "Bokomo Head Massager",
-    name2:"Head Massager",
-    categories: ["girls","woman"],
-    images: ["images/bokomomassager1.jpg","images/bokomomassager2.jpg","images/bokomomassager3.webp","images/bokomomassager4.webp","images/bokomassager5.webp","images/bokomomassager.webp"],
-    video: "",
-    oldPrice: 70,
-    newPrice: 40,
-    discount: "42%",
-    mediaCount: "6 photos",
-    inStock: true
-  },
-  {
-    id:165,
-    name: "Colour Astronaut Projector",
-    name2:"Colour Astronaut",
-    categories: ["lights","gifts","trending"],
-    images: ["images/colourastronautprojector1.jpg","images/colorastronautprojector2.jpg","images/colourastronautprojector3.jpg","images/colourastronautprojector4.jpg","images/colourastronautprojector5.jpg"],
-    video: "",
-    oldPrice: 940,
-    newPrice: 750,
-    discount: "20%",
-    mediaCount: "5 photos",
-    inStock: false
-  },
-  {
-    id:166,
-    name: "Rabbit Lamp",
-    categories: ["gifts","lights"],
-    images: ["images/rabbitlamp1.jpg","images/rabbitlamp2.jpg","images/rabbitlamp3.jpg","images/rabbitlamp4.jpg","images/rabbitlamp5.jpg"],
-    video: "",
-    oldPrice: 600,
-    newPrice: 500,
-    discount: "16%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-  {
-    id:167,
-    name: "Demon Slayer Action Figures(per piece)",
-    name2: "Demon Slayer Figures",
-    category: "anime",
-    images: ["images/demonslayer.jpg","images/demonslayer2.jpg","images/demonslayer3.webp","images/demonslayer4.webp","images/demonslayer1.jpg","images/demonslayer5.jpg"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 280,
-    newPrice: 170,
-    discount: "39%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  }
-  ,
-  {
-    id:168,
-    name: "Keychain (Per Piece)",
-    categories:["anime","trending"],
-    images: ["images/challa1.webp","images/challa2.webp","images/challa3.webp","images/challa4.webp","images/challa5.webp","images/challa6.webp","images/chhale7.webp","images/challa8.webp"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 200,
-    newPrice: 100,
-    discount: "50%",
-    mediaCount: "8 photos + video",
-    inStock: true
-  },
-  {
-    id:169,
-    name: "Dragon Ball Z(Per Piece)",
-    name2: "Dragon Ball",
-    category: "anime",
-    images: ["images/dragonballz5.jpg","images/dragonballz2.webp","images/dragonballz6.webp","images/dragonballz4.webp","images/dragonballz1.webp","images/dragonballz3.webp"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 600,
-    newPrice: 400,
-    discount: "33%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:170,
-    name: "Luffy Action Figures",
-    category: "anime",
-    images: ["images/luffy1.jpg","images/luffy2.webp","images/luffy3.jpg","images/luffy4.webp","images/luffy5.jpg",],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 400,
-    newPrice: 270,
-    discount: "33%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },{
-    id:171,
-    name: "One Piece Action Figures",
-    name2: "One Piece Figures",
-    categories: ["anime","trending"],
-    images: ["images/luffyonepiece1.jpg","images/luffyonepiece2.jpg","images/luffyonepiece3.webp","images/luffyonepiece4.webp"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 1200,
-    newPrice: 800,
-    discount: "33%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },{
-    id:172,
-    name: "Gojo Demon Slayer Action Figures",
-    name2:"Gojo Figures",
-    category: "anime",
-    images: ["images/gojodemonslayer1.jpg","images/gojodemonslayer2.jpg","images/gojodemonslayer3.jpg","images/gojodemonslayer4.webp"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 530,
-    newPrice: 350,
-    discount: "33%",
-    mediaCount: "4 photos + video",
-    inStock: true
-  },
-  {
-    id:173,
-    name: "Naruto Action Figures(per piece)",
-    name2:"Naruto Figures",
-    category: "anime",
-    images: ["images/naruto1.jpg","images/naruto2.webp","images/naruto3.webp","images/naruto4.webp","images/naruto5.webp"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 300,
-    newPrice: 150,
-    discount: "50%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },
-  {
-    id:174,
-    name: "Action Figures",
-    category: "anime",
-    images: ["images/actionfigures1.jpg","images/actionfigures2.jpg","images/actionfigures3.jpg"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 320,
-    newPrice: 170,
-    discount: "46%",
-    mediaCount: "3 photos + video",
-    inStock: true
-  },{
-    id:175,
-    name: "Shinchan Action Figures",
-    name2: "Shinchan Figurines",
-    category: "anime",
-    images: ["images/shinchan1.jpg","images/shinchan2.webp","images/shinchan3.webp","images/shinchan4.webp","images/shinchan5.jpg"],
-    video: "https://www.youtube.com/watch?v=IExFKJN8v3A",
-    oldPrice: 250,
-    newPrice: 150,
-    discount: "40%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },
-{
-    id:176,
-    name: "Steel Khujli Stick",
-    category: "handful",
-    images: ["images/steelkhujlistick1.jpg","images/steelkhujlistick2.webp","images/steelkhujlistick3.webp","images/steelkhujlistick4.webp","images/steelkhujlistick5.jpg","images/steelkhujlistick6.jpg"],
-    video: "",
-    oldPrice: 70,
-    newPrice: 40,
-    discount: "42%",
-    mediaCount: "6 photos",
-    inStock: true
-  },
-{
-    id:177,
-    name: "Plastic Khujli Stick",
-    category: "handful",
-    images: ["images/plastickhujlistick1.jpg","images/plastickhujlistick2.jpg","images/plastickhujlistick3.webp","images/plastickhujlistick4.jpg"],
-    video: "",
-    oldPrice: 40,
-    newPrice: 20,
-    discount: "50%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:178,
-    name: "500ML Kids Steel Bottle",
-    name2: "Kids Bottle",
-    categories: ["girls","woman","kids"],
-    images: ["images/kidssteelbottle1.jpg","images/kidssteelbottle2.webp","images/kidssteelbottle3.webp","images/kidssteelbottle4.webp","images/kidssteelbottle5.webp"],
-    video: "",
-    oldPrice: 270,
-    newPrice: 200,
-    discount: "25%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-{
-    id:179,
-    name: "LCD Writing Tablet( 8.5 Inch)",
-    name2: "8.5Inch Writing Tablet",
-    categories: ["girls","kids"],
-    images: ["images/lcdwritingtablet1.webp","images/lcdwritingtablet7.webp","images/lcdwritingtablet8.webp","images/lcdwritingtablet9.webp","images/lcdwritingtablet4.jpg","images/lcdwritingtablet5.jpg","images/lcdwritingtablet6.jpg"],
-    video: "",
-    oldPrice: 250,
-    newPrice: 120,
-    discount: "44%",
-    mediaCount: "7 photos",
-    inStock: true
-  },
-{
-    id:180,
-    name: "Purse Style Water Proof Picnic Mat",
-    name2: "Picnic Mat",
-    categories: ["handful","woman"],
-    images: ["images/picnicmet1.webp","images/picnicmet2.webp","images/picnicmet3.jpg","images/picnetmet4.webp","images/picnetmet5.jpg"],
-    video: "",
-    oldPrice: 250,
-    newPrice: 150,
-    discount: "40%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-{
-    id:181,
-    name: "LCD Writing Tablet( 12 Inch)",
-    name2: "12Inch Writing Tablet ",
-    categories: ["girls","kids"],
-    images: ["images/lcdwritingtablet11.webp","images/lcdwritingtablet10.webp","images/lcdwritingtablet7.webp","images/lcdwritingtablet8.webp","images/lcdwritingtablet6.jpg","images/lcdwritingtablet1.webp"],
-    video: "https://youtube.com/watch?v=9ersBj_olGM",
-    oldPrice: 300,
-    newPrice: 200,
-    discount: "33%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  },
-  {
-    id:182,
-    name: "Car diffuser Air Freshener",
-    name2: "Car Perfume",
-    categories: ["man","handful","gifts"],
-    images: ["images/carperfume1.jpg","images/carperfume2.webp","images/carperfume3.jpg","images/carperfume4.webp","images/carperfume.webp"],
-    video: "https://youtube.com/watch?v=r0Evn6HfNog",
-    oldPrice: 270,
-    newPrice: 200,
-    discount: "25%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },
-{
-    id:183,
-    name: "Talking Flash Card",
-    category: "kids",
-    images: ["images/talkingflashcard1.jpg","images/talkingflashcard2.jpg","images/talkingflashcard3.webp","images/talkingflashcard4.webp","images/talkingflashcard5.jpg"],
-    video: "https://youtube.com/watch?v=9ynbq8Zsk8o",
-    oldPrice: 450,
-    newPrice: 350,
-    discount: "22%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  },
-{
-    id:184,
-    name: "Bath Towel",
-    categories: ["woman","girls"],
-    images: ["images/bathtowel1.jpg","images/bathtowel2.jpg","images/bathtowel3.webp","images/bathtowel4.webp","images/bathtowel5.jpg"],
-    video: "",
-    oldPrice: 250,
-    newPrice: 200,
-    discount: "20%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-{
-    id:185,
-    name: "Battleground Gun",
-    category: "kids",
-    images: ["images/battlegroundgun1.jpg","images/battlegroundgun2.webp","images/battlegroundgun3.webp","images/battlegroundgun4.jpg","images/battlegroundgun5.jpg"],
-    video: "",
-    oldPrice: 270,
-    newPrice: 200,
-    discount: "25%",
-    mediaCount: "5 photos",
-    inStock: false
-  },
-{
-    id:186,
-    name: "Lufa Brush",
-    categories: ["woman","girls"],
-    images: ["images/lufabrush2.jpg","images/lufabrush.webp","images/lufabrush3.webp","images/lufabrush4.webp","images/lufabrush1.webp"],
-    video: "",
-    oldPrice: 120,
-    newPrice: 70,
-    discount: "41%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-{
-    id:187,
-    name: "Coffee Stencil(Per Piece)",
-    name2:"Coffee Stencils",
-    categories: ["kitchen","handful"],
-    images: ["images/coffeestencil1.webp","images/coffeestencil2.jpg","images/coffeestencil3.jpg","images/coffeestencil4.jpg","images/coffeestencil5.webp"],
-    video: "",
-    oldPrice: 25,
-    newPrice: 10,
-    discount: "60%",
-    mediaCount: "5 photos",
-    inStock: true
-  },
-  {
-    id:188,
-    name: "Screen Enlarger",
-    categories: ["handful","man"],
-    images: ["images/screenenlarger1.jpg","images/screenenlarger2.jpg","images/screenenlarger3.webp","images/screenenlarger4.webp","images/screenenlarger5.webp"],
-    video: "",
-    oldPrice: 150,
-    newPrice: 100,
-    discount: "33%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:189,
-    name: "60 PC Double Sided Tape",
-    name2:"Double Sided Tape",
-    categories: ["woman","kitchen","home"],
-    images: ["images/doublesidedtape1.webp","images/doublesidedtape2.webp","images/doublesidedtape3.webp","images/doublesidedtape4.webp"],
-    video: "",
-    oldPrice: 80,
-    newPrice: 50,
-    discount: "37%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:190,
-    name: "Fruit Shape Plastic Drawing Ruler",
-    name2:"Plastic Ruler",
-    categories: ["girls","kids"],
-    images: ["images/fruitshaperuler1.jpg","images/fruitshaperuler2.jpg","images/fruitshaperuler3.webp","images/fruitshaperuler4.webp","images/fruitshaperuler5.jpg"],
-    video: "",
-    oldPrice: 35,
-    newPrice: 25,
-    discount: "28%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:191,
-    name: "4 PC Solar Garden Railing Light",
-    name2:"Solar Garden light ",
-    categories: ["home","handful"],
-    images: ["images/gardenrailinglight1.jpg","images/gardenrailinglight2.jpg","images/gardenrailinglight3.jpg","images/gardenrailinglight4.jpg","images/gardenrailinglight5.webp"],
-    video: "",
-    oldPrice: 350,
-    newPrice: 250,
-    discount: "28%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:192,
-    name: "Cylinder Trolley",
-    categories: ["kitchen","woman","home","handful"],
-    images: ["images/cylindertrolley1.jpg","images/cylindertrolley2.webp","images/cylindertrolley3.jpg","images/cylindertrolley4.webp"],
-    video: "",
-    oldPrice: 220,
-    newPrice: 150,
-    discount: "31%",
-    mediaCount: "4 photos",
-    inStock: true
-  },
-  {
-    id:193,
-    name: "Kids Stationery Pouch",
-    categories: ["girls","kids"],
-    images: ["images/kidsstationarypouch1.webp","images/kidsstationarypouch2.webp","images/kidsstationarypouch3.webp","images/kidsstationarypouch4.webp","images/kidsstationarypouch5.webp"],
-    video: "",
-    oldPrice: 330,
-    newPrice: 250,
-    discount: "24%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:194,
-    name: "OHO Glass Coffee Mug",
-    name2:"OHO Coffee Mug",
-    categories: ["gifts","girls","woman"],
-    images: ["images/ohoglassmug1.jpg","images/ohoglassmug2.webp","images/ohoglassmug3.webp","images/ohoglassmug4.webp"],
-    video: "",
-    oldPrice: 160,
-    newPrice: 120,
-    discount: "25%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:195,
-    name: "3D Creative Lamp",
-    name2:"Creative Lamp",
-    categories: ["gifts","lights"],
-    images: ["images/3dcreativelamp1.jpg","images/3dcreativelamp2.webp","images/3dcreativelamp3.jpg","images/3dcreativelamp4.jpg","images/3dcreativelamp5.webp"],
-    video: "https://youtube.com/watch?v=2ODQN-gDkoY",
-    oldPrice: 350,
-    newPrice: 270,
-    discount: "22%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:196,
-    name: "24 Pocket UG Organiser",
-    name2:"UG Organiser",
-    categories: ["girls","woman"],
-    images: ["images/24pocketugorganiser1.jpg","images/24pocketugorganiser2.webp","images/24pocketugorganiser3.webp","images/24pocketugorganiser4.jpg","images/24pocketugorganiser5.jpg"],
-    oldPrice: 400,
-    newPrice: 300,
-    discount: "25%",
-    mediaCount: "5 photos",
-    inStock: true
-  },{
-    id:197,
-    name: "Rotatable Mobile Stand",
-    name2:"Mobile Stand ",
-    categories: ["man","woman","trending","handful","girls"],
-    images: ["images/mobilestand2.webp","images/mobilestand5.webp","images/mobilestand4.jpeg","images/mobilestand3.jpg","images/mobilestand6.webp"],
-    oldPrice: 160,
-    newPrice: 120,
-    discount: "25%",
-    mediaCount: "5 photos",
-    inStock: true
-  } ,{
-    id:198,
-    name: "Breathing Teddy",
-    categories: ["gifts","girls","woman","trending"],
-    images: ["images/breathingteddy1.webp","images/breathingteddy2.jpg","images/breathingteddy3.webp","images/breathingteddy4.webp","images/breathingteddy5.webp","images/breathingteddy6.jpg"],
-    video:"https://youtube.com/watch?v=68-HLRUgc50",
-    oldPrice: 600,
-    newPrice: 500,
-    discount: "16%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  } 
-  ,{
-    id:199,
-    name: "Study Lamp",
-    categories: ["kids","girls","lights"],
-    images: ["images/studylamp.webp","images/studylamp1.jpg","images/studylamp2.jpg","images/studylamp4.webp","images/studylamp5.webp","images/studylamp3.jpg"],
-    oldPrice: 270,
-    newPrice: 200,
-    discount: "25%",
-    mediaCount: "6 photos",
-    inStock: true
-  }
-   ,{
-    id:200,
-    name: "Sling Waterproof Bag With Lock",
-    name2: "Sling Bag",
-    categories: ["man","woman"],
-    images: ["images/slingbag1.jpg","images/slingbag2.webp","images/slingbag3.webp","images/slingbag4.webp","images/slingbag5.webp","images/slingbag6a.webp","images/slingbag7.webp","images/slingbag8.webp","images/slingbag9.webp"],
-    oldPrice: 600,
-    newPrice: 450,
-    discount: "25%",
-    mediaCount: "9 photos",
-    inStock: true
-  } ,{
-    id:201,
-    name: "8 Layer Foldable Shoe Rack",
-    name2: "Shoe Rack",
-    categories: ["men","woman","home","trending"],
-    images: ["images/8layerrack1.jpg","images/8layerrack2.webp","images/8layerrack3.webp","images/8layerrack4.webp","images/8layerrack5.webp","images/8layerrack6.webp","images/8layerrack7.webp"],
-    oldPrice: 650,
-    newPrice: 550,
-    discount: "15%",
-    mediaCount: "7 photos",
-    inStock: true
-  } ,{
-    id:202,
-    name: "Touch Lamp Speaker",
-    category: "speaker",
-    images: ["images/touchlampspeaker1.webp","images/touchlampspeaker2.jpg","images/touchlampspeaker3.webp","images/touchlampspeaker4.jpg","images/touchlampspeaker5.jpg","images/touchlampspeaker6.webp","images/touchlampspeaker7.jpg"],
-    oldPrice: 450,
-    newPrice: 350,
-    discount: "22%",
-    mediaCount: "7 photos",
-    inStock: true
-  } ,{
-    id:203,
-    name: "Thar Car Speaker",
-    category: "Speaker",
-    images: ["images/tharcarspeaker1.jpeg","images/tharcarspeaker2.webp","images/tharcarspeaker3.webp","images/tharcarspeaker4.jpg","images/tharcarspeaker5.jpg"],
-    oldPrice: 850,
-    newPrice: 700,
-    discount: "17%",
-    mediaCount: "5 photos",
-    inStock: true
-  } ,{
-    id:204,
-    name: "Tyre Speaker",
-    category: "Speaker",
-    images: ["images/tyrespeaker1.webp","images/tyrespeaker3.webp","images/tyrespeaker.webp","images/tyrespeaker2.jpg","images/tyrespeaker4.jpg","images/tyrespeaker6.jpg","images/tyrespeaker5.jpg"],
-    oldPrice: 800,
-    newPrice: 700,
-    discount: "12%",
-    mediaCount: "7 photos",
-    inStock: true
-  } ,{
-    id:205,
-    name: "White Mosquito Killer Lamp",
-    name2: "Mosquito Lamp",
-    categories: ["home","handful"],
-    images: ["images/whitemosquitolamp1.jpg","images/whitemosquitolamp2.jpg","images/whitemosquitolamp3.jpg","images/whitemosquitolamp4.webp","images/whitemosquitolamp5.webp"],
-    video:"https://youtube.com/watch?v=tUTEBUJnA-A",
-    oldPrice: 400,
-    newPrice: 250,
-    discount: "37%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  } ,{
-    id:206,
-    name: "X1 Mini BT Speaker",
-    name2:"Mini Speaker",
-    category:"speaker",
-    images: ["images/x1speaker1.jpg","images/x1speaker2.webp","images/x1speaker3.jpg","images/x1speaker4.webp","images/x1speaker5.jpg","images/x1speaker6.jpg"],
-    video: "https://youtube.com/watch?v=XNWc2hc-I64",
-    oldPrice: 300,
-    newPrice: 200,
-    discount: "33%",
-    mediaCount: "6 photos + video",
-    inStock: true
-  } ,{
-    id:207,
-    name: "Shoe Wet Wipes(80 Wipes)",
-    name2: "Shoe Wet Wipes",
-    categories: ["man","woman","handful"],
-    images: ["images/shoewetwipes1.webp","images/shoewetwipes2.jpeg","images/shoewetwipes3.jpg","images/shoewetwipes4.jpg","images/shoewetwipes5.webp"],
-    video:"https://youtube.com/watch?v=h1zUEVADa74",
-    oldPrice: 200,
-    newPrice: 120,
-    discount: "40%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  } ,{
-    id:208,
-    name: "Can Shape Sipper",
-    categories: ["man","girls","woman"],
-    images: ["images/canshapesipper1.webp","images/canshapesipper2.jpg","images/canshapesipper3.jpg","images/canshapesipper4.jpg","images/canshapesipper5.webp"],
-    oldPrice: 400,
-    newPrice: 240,
-    discount: "40%",
-    mediaCount: "5 photos",
-    inStock: true
-  } ,{
-    id:209,
-    name: "Chapati Box",
-    categories: ["kitchen","woman"],
-    images: ["images/chapatibox1.jpeg","images/chapatibox2.jpg","images/chapatibox3.jpg","images/chapatibox4.webp"],
-    oldPrice: 150,
-    newPrice: 100,
-    discount: "33%",
-    mediaCount: "4 photos",
-    inStock: true
-  } ,{
-    id:210,
-    name: "Shoe Wet Wipes(30 Wipes)",
-    name2: "Shoe Wet Wipes",
-    categories: ["woman","man","handful"],
-    images: ["images/shoewetwipes2.jpeg","images/shoewetwipes3.jpg","images/shoewetwipes4.jpg","images/shoewetwipes1.webp","images/shoewetwipes5.webp"],
-    video:"https://youtube.com/watch?v=h1zUEVADa74",
-    oldPrice: 100,
-    newPrice: 70,
-    discount: "30%",
-    mediaCount: "5 photos + video",
-    inStock: true
-  } ,{
-    id:211,
-    name: "Mini BT Speaker",
-    category: "Speaker",
-    images: ["images/minibtspeaker1.jpg","images/minibtspeaker2.jpg","images/minibtspeaker4.jpg","images/minibtspeaker3.webp","images/minibtspeaker5.jpg","images/minibtspeaker6.jpg","images/minibtspeaker7.jpg"],
-    oldPrice: 500,
-    newPrice: 350,
-    discount: "30%",
-    mediaCount: "7 photos",
-    inStock: true
-  } ,{
-    id:212,
-    name: "Apple Case",
-    category: "kids",
-    images: ["images/applecase1.jpg","images/applecase2.webp","images/applecase3.webp","images/applecase4.webp","images/applecase5.webp"],
-    oldPrice: 70,
-    newPrice: 30,
-    discount: "57%",
-    mediaCount: "5 photos",
-    inStock: true
-  } ,{
-    id:213,
-    name: "Kitchen Scale",
-    categories: ["kitchen","man","woman","handful"],
-    images: ["images/kitchenscale2.jpg","images/kitchenscale4.jpg","images/kitchenscale3.jpg","images/kitchenscale8.webp","images/kitchenscale5.jpg","images/kitchenscale6.jpg","images/kitchenscale7.jpg"],
-    oldPrice: 400,
-    newPrice: 300,
-    discount: "25%",
-    mediaCount: "6 photos",
-    inStock: true
-  } ,{
-    id:214,
-    name: "Cling Film",
-    category: "kitchen",
-    images: ["images/clingfilm.webp","images/clingfilm1.jpg","images/clingfilm4.jpg","images/clingfilm2.webp","images/clingfilm3.webp","images/clingfilm8.jpg"],
-    oldPrice: 130,
-    newPrice: 80,
-    discount: "38%",
-    mediaCount: "6 photos",
-    inStock: true
-  } ,{
-    id:215,
-    name: "Ultrasonic Aroma Humidifier",
-    name2:"Aroma Humidifier",
-    categories: ["home","trending","woman"],
-    images: ["images/ultrasonicaromahumidifier1.jpg","images/ultrasonicaromahumidifier2.jpg","images/ultrasonicaromahumidifier6.jpg","images/ultrasonicaromahumidifier4.jpg","images/ultrasonicaromahumidifier5.jpg","images/ultrasonicaromahumidifier8.jpg","images/ultrasonicaromahumidifier9.jpg"],
-    oldPrice: 400,
-    newPrice: 300,
-    discount: "25%",
-    mediaCount: "7 photos",
-    inStock: true
-  } ,{
-    id:216,
-    name: "Tennis Trainer Rebound Ball",
-    name2: "Tennis Trainer",
-    categories:["kids","man","girls"],
-    images: ["images/tennistrainerreboundball.webp","images/tennistrainerreboundball1.jpg","images/tennistrainerreboundball3.webp","images/tennistrainerreboundball4.webp","images/tennistrainerreboundball5.jpg","images/tennistrainerreboundball6.webp","images/tennistrainerreboundball2.webp"],
-    oldPrice: 300,
-    newPrice: 150,
-    discount: "50%",
-    mediaCount: "7 photos",
-    inStock: true
-  } ,{
-    id:217,
-    name: "Kids Map Puzzle",
-    categories: ["kids","girls"],
-    images: ["images/kidsmapfoamtray1.webp","images/kidsmapfoamtray2.webp","images/kidsmapfoamtray3.webp","images/kidsmapfoamtray4.jpg"],
-    oldPrice: 180,
-    newPrice: 120,
-    discount: "33%",
-    mediaCount: "4 photos",
-    inStock: true
-  },{
-    id:218,
-    name: "Table Mat",
-    categories: ["kitchen","woman","home"],
-    images: ["images/tablemat1.webp","images/tablemat2.jpg","images/tablemat3.jpg","images/tablemat4.jpg","images/tablemat5.jpg","images/tablemat6.webp"],
-    oldPrice: 400,
-    newPrice: 200,
-    discount: "50%",
-    mediaCount: "6 photos",
-    inStock: true
-  },{
-    id:219,
-    name: "Tangram Puzzle",
-    categories: ["girls","kids"],
-    images: ["images/tangrampuzzel1.webp","images/tangrampuzzel2.webp","images/tangrampuzzel3.webp","images/tangrampuzzel4.webp","images/tangrampuzzel5.webp","images/tangrampuzzel6.webp","images/tangrampuzzel7.webp","images/tangrampuzzel8.webp"],
-    oldPrice: 180,
-    newPrice: 100,
-    discount: "44%",
-    mediaCount: "8 photos",
-    inStock: true
-  }
-
 ];
+
 // Works in browser
 if (typeof window !== 'undefined') {
   window.products = products;
