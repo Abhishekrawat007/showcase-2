@@ -1,4 +1,4 @@
-const { Octokit } = require("@octokit/core");
+const { Octokit } = require("@octokit/rest");
 
 exports.handler = async function (event, context) {
   if (event.httpMethod !== "POST") {
@@ -10,24 +10,17 @@ exports.handler = async function (event, context) {
   const octokit = new Octokit({ auth: token });
 
   try {
-    const file = await octokit.request(
-      `GET /repos/${owner}/${repo}/contents/${path}`,
-      { owner, repo, path }
-    );
-
+    const file = await octokit.repos.getContent({ owner, repo, path });
     const sha = file.data.sha;
 
-    const response = await octokit.request(
-      `PUT /repos/${owner}/${repo}/contents/${path}`,
-      {
-        owner,
-        repo,
-        path,
-        message: "Product data updated via editor",
-        content: Buffer.from(content).toString("base64"),
-        sha,
-      }
-    );
+    const response = await octokit.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path,
+      message: "Product data updated via editor",
+      content: Buffer.from(content).toString("base64"),
+      sha,
+    });
 
     return {
       statusCode: 200,
