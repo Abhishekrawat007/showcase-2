@@ -6,7 +6,11 @@
   <title>🛍 Product Editor - SublimeStore</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- <link rel="stylesheet" href="css/editor.css" /> -->
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -202,6 +206,64 @@ button.dark-toggle {
 body {
   transition: background 0.3s, color 0.3s;
 }
+  #successMessage {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  #successMessage.show {
+    display: block !important;
+    opacity: 1;
+    transform: translateY(0);
+  }
+.success-message {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #28a745;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 16px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 9999;
+}
+
+.success-message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.success-message.hidden {
+  display: none;
+}.success-message {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #28a745;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 16px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 9999;
+}
+
+.success-message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.success-message.hidden {
+  display: none;
+}
   </style>
 </head>
 <body>
@@ -242,7 +304,46 @@ body {
       </div>
     </div>
   </div>
+  <!-- Confirmation Modal -->
+<div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000088; z-index:999; justify-content:center; align-items:center;">
+  <div style="background:white; padding:24px; border-radius:8px; max-width:400px; width:90%; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.2);">
+    <p style="font-size:18px; margin-bottom:20px;">Are you sure you want to publish changes to GitHub?</p>
+    <button id="confirmYes" style="padding:10px 20px; margin-right:10px; background:#4caf50; color:white; border:none; border-radius:5px; cursor:pointer;">Yes</button>
+    <button id="confirmNo" style="padding:10px 20px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
+  </div>
+</div>
+<!-- Add this inside your <body> tag just before the closing </body> -->
 
+<!-- Publish Button -->
+<div style="position: sticky; bottom: 10px; text-align: center; margin-top: 2rem;">
+  <button id="submitBtn"  style="
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    font-size: 18px;
+    padding: 14px 30px;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)'" 
+     onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 14px rgba(0,0,0,0.15)'">
+    🚀 Submit & Publish
+  </button>
+</div>
+<!-- ✅ Success Modal with Close Icon and OK Button -->
+<!-- Success Modal -->
+<div id="successModal" class="modal hidden">
+  <div class="modal-content">
+    <span id="successClose" style="position:absolute; top:10px; right:15px; font-size:22px; cursor:pointer;">&times;</span>
+    <h2>✅ Success</h2>
+    <p>Product list updated successfully!</p>
+    <div class="modal-buttons">
+      <button id="successOk" style="background: #28a745; color: white;">OK</button>
+    </div>
+  </div>
+</div>
 <script>
   function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
