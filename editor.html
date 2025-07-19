@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>🛍 Product Editor - SublimeStore</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- <link rel="stylesheet" href="css/editor.css" /> -->
-
+  
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -92,17 +91,38 @@
       border: 1px solid #ccc;
     }
     .search-box {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .search-box input {
-      width: 80%;
-      max-width: 500px;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+  max-width: 600px;
+  padding: 10px;
+}
+
+.animated-search {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 30px;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  color: #fff;
+  outline: none;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.animated-search::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+/* Optional hover/focus effect */
+.animated-search:focus {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
     button.undo {
       background: #ffc107;
     }
@@ -260,6 +280,187 @@ body {
 .success-message.hidden {
   display: none;
 }
+.upload-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.spinner {
+  font-size: 18px;
+  color: #555;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.image-preview-grid img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.image-preview-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.video-preview iframe {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+.watch-video-btn {
+  margin-top: 6px;
+  padding: 6px 12px;
+  border: none;
+  background: #d62828;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.watch-video-btn:hover {
+  background: #a4161a;
+}
+button.delete {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+button.delete:hover {
+  background: #b91c1c;
+}
+
+  /* Scroll to Top Button */
+  #scrollToTopBtn {
+    position: fixed;
+    bottom: 30px;
+    right: 20px;
+    z-index: 999;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    display: none;
+    transition: opacity 0.3s ease;
+  }
+
+  #scrollToTopBtn:hover {
+    background-color: #1565c0;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+ .page-heading {
+  font-size: 3rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 10px 0 20px;
+  position: relative;
+  background: linear-gradient(90deg, #007cf0, #00dfd8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.page-heading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
+  animation: shimmer 2.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+/* Ensure placeholder text is visible in both modes */
+input.animated-search::placeholder {
+  color: #333; /* Dark text for light mode */
+  opacity: 1;
+}
+
+body.dark-mode input.animated-search::placeholder {
+  color: #ccc; /* Light text for dark mode */
+}
+input.animated-search {
+  color: #222; /* Visible text in light mode */
+  background-color: #fff; /* Optional: white background for contrast */
+}
+
+body.dark-mode input.animated-search {
+  color: #fff;
+  background-color: #121212;
+}
+.search-box input.animated-search {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #000; /* Black border for light mode */
+  border-radius: 10px;
+  font-size: 16px;
+  color: #000;
+  background-color: #fff;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-box input.animated-search::placeholder {
+  color: #555;
+}
+
+/* Focus effect */
+.search-box input.animated-search:focus {
+  border-color: #000;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode adjustments */
+body.dark-mode .search-box input.animated-search {
+  background-color: #1e1e1e;
+  border-color: #777;
+  color: #eee;
+}
+
+body.dark-mode .search-box input.animated-search::placeholder {
+  color: #aaa;
+}
   </style>
 </head>
 <body>
@@ -269,12 +470,9 @@ body {
     }
   </script>
 
-  <h1>🛠 SublimeStore Product Editor</h1>
+  <h1 class="page-heading">Product Editor Page</h1>
 
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="🔍 Search by name, category, or tag..." oninput="debouncedSearch()" />
-  </div>
-
+  
 <div class="controls">
     <button class="add" onclick="addProduct()">➕ Add New Product</button>
     <button class="export" onclick="exportProducts()">💾 Export product.js</button>
@@ -284,12 +482,15 @@ body {
     <button class="logout" onclick="logout()">🔐 Logout</button>
 
   </div>
+<div class="search-box">
+  <input type="text" id="searchInput" class="animated-search" placeholder="🔍 Search by name, category, or tag..." oninput="debouncedSearch()" />
+</div>
 
   <div class="product-list" id="productList">
-    <!-- Product cards render here -->
+ 
   </div>
 
-  <!-- 🔔 Modal Component -->
+ 
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <h2 id="modal-title">Title</h2>
@@ -300,7 +501,7 @@ body {
       </div>
     </div>
   </div>
-  <!-- Confirmation Modal -->
+ 
 <div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000088; z-index:999; justify-content:center; align-items:center;">
   <div style="background:white; padding:24px; border-radius:8px; max-width:400px; width:90%; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.2);">
     <p style="font-size:18px; margin-bottom:20px;">Are you sure you want to publish changes to GitHub?</p>
@@ -308,9 +509,9 @@ body {
     <button id="confirmNo" style="padding:10px 20px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
   </div>
 </div>
-<!-- Add this inside your <body> tag just before the closing </body> -->
 
-<!-- Publish Button -->
+
+
 <div style="position: sticky; bottom: 10px; text-align: center; margin-top: 2rem;">
   <button id="submitBtn"  style="
     background: linear-gradient(135deg, #4CAF50, #2E7D32);
@@ -328,8 +529,8 @@ body {
     🚀 Submit & Publish
   </button>
 </div>
-<!-- ✅ Success Modal with Close Icon and OK Button -->
-<!-- Success Modal -->
+
+
 <div id="successModal" class="modal hidden">
   <div class="modal-content">
     <span id="successClose" style="position:absolute; top:10px; right:15px; font-size:22px; cursor:pointer;">&times;</span>
@@ -340,19 +541,81 @@ body {
     </div>
   </div>
 </div>
+
+<div id="imageModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:1000;">
+  <span id="modalCloseBtn" style="position:absolute; top:20px; right:30px; font-size:2rem; color:white; cursor:pointer;">✖</span>
+  <img id="modalImage" src="" style="max-width:90%; max-height:90%; border-radius:8px; box-shadow:0 0 20px black;" />
+</div>
+</div>
+
+<button id="scrollToTopBtn" title="Go to top">↑</button>
+
 <script>
+    const typingPlaceholder = [
+    "🔍 Search by name...",
+    "🔍 Search by category...",
+    "🔍 Search by tag...",
+    "🔍 Find your product..."
+  ];
+
+  let typeIndex = 0;
+  let charIndex = 0;
+  let currentPlaceholder = "";
+  let isDeleting = false;
+  const searchInput = document.getElementById("searchInput");
+
+  function typeEffect() {
+    const fullText = typingPlaceholder[typeIndex];
+
+    if (isDeleting) {
+      currentPlaceholder = fullText.substring(0, charIndex--);
+    } else {
+      currentPlaceholder = fullText.substring(0, charIndex++);
+    }
+
+    searchInput.setAttribute("placeholder", currentPlaceholder);
+
+    if (!isDeleting && charIndex === fullText.length) {
+      isDeleting = true;
+      setTimeout(typeEffect, 1000);
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      typeIndex = (typeIndex + 1) % typingPlaceholder.length;
+      setTimeout(typeEffect, 500);
+    } else {
+      setTimeout(typeEffect, isDeleting ? 50 : 100);
+    }
+  }
+
+
   function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
     localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
   }
 
   // Auto-load theme on page load
-  window.addEventListener("DOMContentLoaded", () => {
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark-mode");
+ window.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+  }
+  typeEffect(); // start animation once DOM is ready
+});
+   // Scroll to top functionality
+  const scrollBtn = document.getElementById("scrollToTopBtn");
+
+  window.onscroll = function () {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+      scrollBtn.style.display = "block";
+    } else {
+      scrollBtn.style.display = "none";
     }
-  }); 
-</script><!-- Core Logic -->
+  };
+
+  scrollBtn.onclick = function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  
+</script> 
 <script src="js/product.js"></script>
 <script  src="js/editor.js"> </script>
 </body>

@@ -179,3 +179,71 @@
   }
 }
 
+.rounded-img {
+  position: relative;
+  border-radius: 50%;
+  padding: 5px;
+  background: conic-gradient(#3498db, #9b59b6, #e67e22, #2ecc71, #3498db);
+  animation: rotateBorder 4s linear infinite;
+  display: inline-block;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* subtle drop shadow */
+  transition: transform 0.3s ease;
+  overflow: hidden;
+}
+
+.rounded-img:hover {
+  transform: scale(1.05); /* elegant hover zoom */
+}
+
+.rounded-img::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.6) 30deg,
+    transparent 60deg,
+    transparent 360deg
+  );
+  border-radius: 50%;
+  animation: shineSweep 2s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.rounded-img img {
+  display: block;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #fff;
+  position: relative;
+  z-index: 2;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05); /* gentle inner shadow */
+}
+.rounded-img {
+  will-change: transform;
+}
+
+/* Border rotation */
+@keyframes rotateBorder {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Shining arc animation */
+@keyframes shineSweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

@@ -839,108 +839,116 @@ body.dark-mode .hamburger-label {
   }
 }
  /* round products card end here */
+.welcome-container {
+  text-align: center;
+  position: relative;
+  padding: 20px 10px;
+}
 
- /* welcome to sublime and typing animation style starts here */
- .welcome-container {
-   text-align: center;
-   /* margin: 50px 20px 60px; top, side, bottom */
-   position: relative;
- }
+.hero-heading {
+  font-size: 3.5rem;
+  font-weight: bold;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(120deg, #3498db, #8e44ad, #e67e22, #2ecc71);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: heroGlow 6s ease infinite;
+}
 
- .main-title {
-   font-size: 3.2rem;
-   font-family: 'Georgia', serif;
-   color: #2c3e50;
-   font-weight: 700;
- }
+.typing-text {
+  font-size: 2rem;
+  font-family: 'Courier New', monospace;
+  display: inline-block;
+  white-space: normal;
+  word-break: break-word;
+  overflow: hidden;
+  min-height: 50px;
+  margin-bottom: 10px;
+  color: transparent;
+  background: linear-gradient(90deg, #16a085, #f39c12, #d35400);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: typingGlow 3s ease-in-out infinite alternate;
+}
 
- .subtitle {
-   font-size: 2.5rem;
-   font-family: 'Georgia', serif;
-   color: #e74c3c;
-   display: inline-block;
-   margin-top: -10px;
- }
+.cursor {
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: #000;
+  animation: blink 0.7s infinite;
+}
 
- .typing-text {
-   font-size: 2rem;
-   font-family: 'Courier New', monospace;
-   display: inline-block;
-   white-space: normal;
-   /* <-- ALLOW MULTILINE WRAPPING */
-   word-break: break-word;
-   /* <-- BREAK LONG SENTENCES ON SMALL SCREENS */
-   overflow: hidden;
-   min-height: 50px;
-   /* margin-top: 30px; */
-   margin-bottom: 10px;
-   color: #34495e;
-   max-width: 90%;
-   margin-left: auto;
-   margin-right: auto;
- }
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
 
- .cursor {
-   font-weight: bold;
-   font-size: 1.4rem;
-   color: #000;
-   animation: blink 0.7s infinite;
- }
+@keyframes heroGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
- @keyframes blink {
+@keyframes typingGlow {
+  0% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 2px #f39c12);
+  }
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px #d35400);
+  }
+}
 
-   0%,
-   50% {
-     opacity: 1;
-   }
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .hero-heading {
+    font-size: 1.5rem;
+    margin-top: 0px;
+    margin-bottom: 5px;
+  }
 
-   51%,
-   100% {
-     opacity: 0;
-   }
- }
+  .main-title {
+    font-size: 2rem;
+  }
 
- .hero-heading {
-   font-size: 3.5rem;
-   font-weight: bold;
-   text-align: center;
-   color: #2c3e50;
-   margin-top: 10px;
-   margin-bottom: 10px;
-   line-height: 1.2;
- }
+  .subtitle {
+    font-size: 1.6rem;
+  }
 
+  .typing-text {
+    font-size: 1.2rem;
+    height: 50px;
+    margin-bottom: 10px;
+  }
+}
 
- /* Responsive design for welcome to sublime and typing animation */
- @media screen and (max-width: 768px) {
-   .hero-heading {
-     font-size: 1.5rem;
-     margin-top: 0px;
-     margin-bottom: 5px;
+@media screen and (max-width: 480px) {
+  .typing-text {
+    font-size: 1.2rem;
+  }
+}
+.hidden {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+}
 
-   }
-
-   .main-title {
-     font-size: 2rem;
-   }
-
-   .subtitle {
-     font-size: 1.6rem;
-   }
-
-   .typing-text {
-     font-size: 1.2rem;
-     height: 50px;
-     margin-bottom: 10px;
-   }
- }
-
- @media screen and (max-width: 480px) {
-   .typing-text {
-     font-size: 1.2rem;
-     /* line-height: 1.5; */
-   }
- }
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
  /* welcome to sublime and typing animation style end here */
 
