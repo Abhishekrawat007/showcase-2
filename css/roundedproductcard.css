@@ -12,10 +12,19 @@
 
 .rounded-scroll {
   display: flex;
-  gap: 1rem;
+  gap: 0rem;
   padding: 0.5rem;
 }
+/* Force minimal spacing between rounded cards and welcome */
+.rounded-section {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
 
+.rounded-scroll {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
 .rounded-card {
   display: flex;
   flex-direction: column;

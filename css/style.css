@@ -844,6 +844,23 @@ body.dark-mode .hamburger-label {
   position: relative;
   padding: 20px 10px;
 }
+/* Welcome block spacing fix */
+
+.welcome-container {
+  margin-top: 15px !important;
+  padding-top: 4px !important;
+}
+
+.hero-heading {
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
+}
+
+.typing-text {
+  margin-bottom: 0px !important;
+}
+
+
 
 .hero-heading {
   font-size: 3.5rem;
