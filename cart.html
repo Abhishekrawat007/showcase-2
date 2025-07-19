@@ -719,7 +719,7 @@ renderCart();
   }
 
   errorEl.style.display = "none";
-  sendOrderToFirebase(); // COD only
+ submitOrderFast(); // New function that handles Telegram + shows success // COD only
 }
 
   function updateQty(id, delta) {
@@ -752,8 +752,7 @@ function loadImageAsBase64(url) {
     img.src = url;
   });
 }
-  
-async function sendOrderToFirebase() {
+async function submitOrderFast() {
   const name = document.getElementById("customerName").value.trim();
   const phone = document.getElementById("customerPhone").value.trim();
   const errorEl = document.getElementById("phoneError");
@@ -771,173 +770,45 @@ async function sendOrderToFirebase() {
   }
 
   errorEl.style.display = "none";
-  const button = document.querySelector("#orderForm button");
-  button.disabled = true;
-  button.textContent = "Processing...";
-
   const cart = getCartFromLocalStorage();
   const totalAmount = calculateTotal(cart);
   const orderId = "ORD" + Date.now();
 
-  // 👉 Fill PDF fields
-  document.getElementById("pdfName").textContent = name;
-  document.getElementById("pdfPhone").textContent = phone;
-  document.getElementById("pdfOrderId").textContent = orderId;
-  document.getElementById("pdfDate").textContent = new Date().toLocaleString();
-  document.getElementById("pdfTotal").textContent = totalAmount;
-
- const { jsPDF } = window.jspdf;
-const pdf = new jsPDF("p", "pt", "a4");
-const pageWidth = pdf.internal.pageSize.getWidth();
-
-// 🔷 Header
-pdf.setFont("helvetica", "bold");
-pdf.setFontSize(18);
-pdf.text("Sublime Store", pageWidth / 2, 40, { align: "center" });
-
-pdf.setFontSize(10);
-pdf.setFont("helvetica", "normal");
-pdf.text("Near Variety Store, Link Road, Takana Road, Pithoragarh", pageWidth / 2, 55, { align: "center" });
-pdf.text("Phone: +91 8868839446 | Website: sublimestore.in", pageWidth / 2, 70, { align: "center" });
-
-// 🔷 Customer Info
-let y = 100;
-pdf.setFontSize(12);
-pdf.setFont("helvetica", "normal");
-pdf.text(`Customer: ${name}`, 40, y);
-pdf.text(`Phone: ${phone}`, 40, y + 18);
-pdf.text(`Order ID: ${orderId}`, 40, y + 36);
-pdf.text(`Date: ${new Date().toLocaleString()}`, 40, y + 54);
-y += 80;
-
-// 🔷 Prepare table rows with better image size
-const rows = [];
-for (let i = 0; i < cart.length; i++) {
-  const item = cart[i];
-  let imgBase64 = "";
-  try {
-    imgBase64 = await loadImageAsBase64(item.image);
-  } catch (err) {
-    imgBase64 = "";
-  }
-
-  rows.push([
-    i + 1,
-    { content: "", image: imgBase64, imageWidth: 50, imageHeight: 50 },
-    item.title,
-    item.qty,
-    `Rs. ${item.price}`,
-    `Rs. ${item.price * item.qty}`
-  ]);
-}
-rows.push([
-  { content: 'Total', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } },
-  { content: `Rs. ${totalAmount}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } }
-]);
-
-
-// 🔷 Draw Table with borders + images
-pdf.autoTable({
-  startY: y,
-  head: [["No.", "Image", "Product", "Qty", "Price", "Subtotal"]],
-  body: rows,
-  styles: {
-    fontSize: 10,
-    lineWidth: 0.1,
-    lineColor: [0, 0, 0],
-    valign: 'middle',
-  },
-  bodyStyles: {
-    minCellHeight: 60, // for 50x50 images
-  },
-  columnStyles: {
-    0: { cellWidth: 35 },      // No.
-    1: { cellWidth: 65 },      // Image
-    2: { cellWidth: 210 },     // Product
-    3: { cellWidth: 50 },      // Qty
-    4: { cellWidth: 70 },      // Price
-    5: { cellWidth: 80 },      // Subtotal
-  },
-  tableWidth: 'auto', // Important: Let it auto-fit your defined widths
-  didDrawCell: function (data) {
-    if (data.column.index === 1 && data.cell.raw?.image) {
-      const imgSize = 50;
-      const xCenter = data.cell.x + (data.cell.width - imgSize) / 2;
-      const yCenter = data.cell.y + (data.cell.height - imgSize) / 2;
-      pdf.addImage(data.cell.raw.image, "JPEG", xCenter, yCenter, imgSize, imgSize);
-    }
-  }
-});
-
-// 🔷 Total Amount
-let finalY = pdf.lastAutoTable.finalY + 20;
-pdf.setFont("helvetica", "bold");
-pdf.setFontSize(14);
-pdf.text(`Total: Rs. ${totalAmount}`, pageWidth - 150, finalY);
-
-// 🔷 Footer
-pdf.setFont("times", "italic");
-pdf.setFontSize(11);
-pdf.setTextColor(60);
-pdf.text("Thank you for shopping at Sublime Store.\nWe’ll call or WhatsApp you to confirm your order.", pageWidth / 2, finalY + 30, { align: "center" });
-
-// 🔷 Output
-const pdfBlob = pdf.output("blob");
-
-
-
-  // 👉 Send to Telegram as document
+  // 🔔 Telegram message first
   const TELEGRAM_BOT_TOKEN = "7658138886:AAGGfB0KOK3IVuJcQcG3Z7kG0xlJMkGTLaA";
   const TELEGRAM_CHAT_IDS = [6020806530, 5056028508, 5310057351];
 
- // 🧾 Message text with full item list
-const itemLines = cart.map(item =>
-  `• ${item.title} (x${item.qty}) - Rs. ${item.price * item.qty}`
-).join('\n');
+  const itemLines = cart.map(item =>
+    `• ${item.title} (x${item.qty}) - Rs. ${item.price * item.qty}`
+  ).join('\n');
 
-const messageText = `🧾 *New Order Received*\n` +
-  `*Order ID:* ${orderId}\n` +
-  `👤 *Name:* ${name}\n` +
-  `📞 *Phone:* ${phone}\n` +
-  `💬 *WhatsApp:* [Chat](https://wa.me/91${phone})\n` +
-  `💰 *Total:* Rs. ${totalAmount}\n` +
-  `📦 *Items:*\n${itemLines}`;
+  const messageText = `🧾 *New Order Received*\n` +
+    `*Order ID:* ${orderId}\n` +
+    `👤 *Name:* ${name}\n` +
+    `📞 *Phone:* ${phone}\n` +
+    `💬 *WhatsApp:* [Chat](https://wa.me/91${phone})\n` +
+    `💰 *Total:* Rs. ${totalAmount}\n` +
+    `📦 *Items:*\n${itemLines}`;
 
-// ✅ First send the message as plain text
-await Promise.all(
-  TELEGRAM_CHAT_IDS.map(chatId => {
-    return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: messageText,
-        parse_mode: "Markdown"
-      })
-    });
-  })
-);
+  await Promise.all(
+    TELEGRAM_CHAT_IDS.map(chatId => {
+      return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: messageText,
+          parse_mode: "Markdown"
+        })
+      });
+    })
+  );
 
-// ✅ Then send the PDF document without a caption
-const cleanName = name.toLowerCase().replace(/\s+/g, "") || "order";
-
-await Promise.all(
-  TELEGRAM_CHAT_IDS.map(chatId => {
-    const formData = new FormData();
-    formData.append("chat_id", chatId);
-    formData.append("document", pdfBlob, `${cleanName}.pdf`);
-    return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, {
-      method: "POST",
-      body: formData
-    }).catch(err => console.error("Telegram PDF send failed", err));
-  })
-);
-
-  // ✅ Confirmation UI
-  document.getElementById("orderForm").innerHTML = `
-    <div style="padding: 20px; text-align: center; color: green;">
+  // ✅ Show user confirmation immediately
+  document.getElementById("orderForm").innerHTML = 
+    `<div style="padding: 20px; text-align: center; color: green;">
       <h3>✓ Order Confirmed</h3>
       <p><strong>Order ID:</strong> ${orderId}</p>
       <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
@@ -947,7 +818,114 @@ await Promise.all(
   document.getElementById("cartSummary").style.display = "none";
   document.getElementById("cartTopBar").style.display = "none";
   document.title = "Order Confirmed";
+
+  // ⚙️ Now generate + send PDF in background
+  setTimeout(() => {
+    generateAndSendPDF({ name, phone, orderId, cart, totalAmount });
+  }, 300); // slight delay for UX smoothness
 }
+async function generateAndSendPDF({ name, phone, orderId, cart, totalAmount }) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "pt", "a4");
+  const pageWidth = pdf.internal.pageSize.getWidth();
+
+  let y = 100;
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(18);
+  pdf.text("Sublime Store", pageWidth / 2, 40, { align: "center" });
+  pdf.setFontSize(10);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Near Variety Store, Link Road, Takana Road, Pithoragarh", pageWidth / 2, 55, { align: "center" });
+  pdf.text("Phone: +91 8868839446 | Website: sublimestore.in", pageWidth / 2, 70, { align: "center" });
+
+  pdf.setFontSize(12);
+  pdf.text(`Customer: ${name}`, 40, y);
+  pdf.text(`Phone: ${phone}`, 40, y + 18);
+  pdf.text(`Order ID: ${orderId}`, 40, y + 36);
+  pdf.text(`Date: ${new Date().toLocaleString()}`, 40, y + 54);
+  y += 80;
+
+  const rows = [];
+  for (let i = 0; i < cart.length; i++) {
+    const item = cart[i];
+    let imgBase64 = "";
+    try {
+      imgBase64 = await loadImageAsBase64(item.image);
+    } catch (err) {}
+    rows.push([
+      i + 1,
+      { content: "", image: imgBase64, imageWidth: 50, imageHeight: 50 },
+      item.title,
+      item.qty,
+      `Rs. ${item.price}`,
+      `Rs. ${item.price * item.qty}`
+    ]);
+  }
+  rows.push([
+    { content: 'Total', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } },
+    { content: `Rs. ${totalAmount}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } }
+  ]);
+
+  pdf.autoTable({
+    startY: y,
+    head: [["No.", "Image", "Product", "Qty", "Price", "Subtotal"]],
+    body: rows,
+    styles: {
+      fontSize: 10,
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+      valign: 'middle',
+    },
+    bodyStyles: {
+      minCellHeight: 60,
+    },
+    columnStyles: {
+      0: { cellWidth: 35 },
+      1: { cellWidth: 65 },
+      2: { cellWidth: 210 },
+      3: { cellWidth: 50 },
+      4: { cellWidth: 70 },
+      5: { cellWidth: 80 },
+    },
+    tableWidth: 'auto',
+    didDrawCell: function (data) {
+      if (data.column.index === 1 && data.cell.raw?.image) {
+        const imgSize = 50;
+        const xCenter = data.cell.x + (data.cell.width - imgSize) / 2;
+        const yCenter = data.cell.y + (data.cell.height - imgSize) / 2;
+        pdf.addImage(data.cell.raw.image, "JPEG", xCenter, yCenter, imgSize, imgSize);
+      }
+    }
+  });
+
+  const finalY = pdf.lastAutoTable.finalY + 20;
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(14);
+  pdf.text(`Total: Rs. ${totalAmount}`, pageWidth - 150, finalY);
+
+  pdf.setFont("times", "italic");
+  pdf.setFontSize(11);
+  pdf.setTextColor(60);
+  pdf.text("Thank you for shopping at Sublime Store.\nWe’ll call or WhatsApp you to confirm your order.", pageWidth / 2, finalY + 30, { align: "center" });
+
+  const pdfBlob = pdf.output("blob");
+  const TELEGRAM_BOT_TOKEN = "7658138886:AAGGfB0KOK3IVuJcQcG3Z7kG0xlJMkGTLaA";
+  const TELEGRAM_CHAT_IDS = [6020806530, 5056028508, 5310057351];
+  const cleanName = name.toLowerCase().replace(/\s+/g, "") + "order";
+
+  await Promise.all(
+    TELEGRAM_CHAT_IDS.map(chatId => {
+      const formData = new FormData();
+      formData.append("chat_id", chatId);
+      formData.append("document", pdfBlob, `${cleanName}.pdf`);
+      return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, {
+        method: "POST",
+        body: formData
+      });
+    })
+  );
+}
+  
 
 
 
