@@ -191,7 +191,7 @@
 .rounded-img {
   position: relative;
   border-radius: 50%;
-  padding: 5px;
+  padding: 3px;
   background: conic-gradient(#3498db, #9b59b6, #e67e22, #2ecc71, #3498db);
   animation: rotateBorder 4s linear infinite;
   display: inline-block;
@@ -237,15 +237,6 @@
   will-change: transform;
 }
 
-/* Border rotation */
-@keyframes rotateBorder {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
 /* Shining arc animation */
 @keyframes shineSweep {
