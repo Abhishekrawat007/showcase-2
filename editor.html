@@ -461,14 +461,220 @@ body.dark-mode .search-box input.animated-search {
 body.dark-mode .search-box input.animated-search::placeholder {
   color: #aaa;
 }
+/* Base Modal Styles */
+.custom-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.custom-modal .btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+  margin: 0 5px;
+}
+
+.custom-modal .btn-yes {
+  background-color: #4caf50;
+}
+
+.custom-modal .btn-cancel {
+  background-color: #f44336;
+}
+
+/* Dark Mode Override */
+body.dark-mode .custom-modal-content {
+  background: #1e1e1e;
+  color: #f1f1f1;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.6);
+}
+
+body.dark-mode .btn-yes {
+  background-color: #388e3c;
+}
+
+body.dark-mode .btn-cancel {
+  background-color: #d32f2f;
+}
+/* Add this to your stylesheet */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
+
+.shake-warning {
+  animation: shake 0.4s;
+  border: 2px solid red !important;
+}
+.bottom-add-btn {
+  background-color: #28a745;   /* Green color */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 20px auto;
+  display: block;
+  transition: background-color 0.3s ease;
+}
+
+.bottom-add-btn:hover {
+  background-color: #218838;
+}
   </style>
+  <script src="js/config.js"></script>
+<script src="js/init-firebase.js"></script>
+
+<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
+<script>
+(function(){
+  // alias for new code
+  window.db = window.database || null;
+
+  // expose window.database getter so other code can read window.database even if they read it later
+  try {
+    Object.defineProperty(window, 'database', {
+      get: function() { return window.db; },
+      configurable: true
+    });
+  } catch (e) {
+    // fallback if defineProperty blocked
+    if (!window.database) window.database = window.db;
+  }
+
+  // Monkey-patch firebase.database() so old code keeps working.
+  // Ensure firebase SDK is loaded and only patch once.
+  if (window.firebase && !firebase.__dbPatched) {
+    firebase.__dbPatched = true;
+    // Preserve original if present (for safety)
+    firebase.__originalDatabaseFn = firebase.database || null;
+    firebase.database = function() {
+      // return underlying db reference created by init-firebase.js
+      if (window.db) return window.db;
+      // fallback: if original exists, call it
+      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
+      // otherwise return null to avoid throwing in caller
+      return null;
+    };
+    // Helpful console info for debugging
+    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
+  } else {
+    // still log so you can diagnose missing init
+    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
+  }
+})();
+</script>
 </head>
 <body>
-  <script>
-    if (localStorage.getItem("isAdmin") !== "true") {
-      window.location.href = "admin.html";
+<script>
+(async function verifyAuthOnLoad(){
+  const token = sessionStorage.getItem("adminToken");
+  if (!token) {
+    alert("Unauthorized. Please login.");
+    window.location.href = "kunnu.html"; // or admin.html
+    return;
+  }
+  try {
+    const res = await fetch("/.netlify/functions/verify", {
+      method: "GET",
+      headers: { Authorization: "Bearer " + token }
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      sessionStorage.removeItem("adminToken");
+      alert("Session expired or invalid. Please login.");
+      window.location.href = "kunnu.html";
+      return;
     }
-  </script>
+    // authenticated — you're good to continue
+  } catch (err) {
+    console.error("Auth check failed:", err);
+    alert("Network error while verifying authentication.");
+    window.location.href = "kunnu.html";
+  }
+})();
+function decodeJwt(token) {
+  // JWT parts: header.payload.signature
+  const payload = token.split('.')[1];
+  // JWT payload is base64url encoded, replace URL-safe chars and decode
+  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+      .join('')
+  );
+  return JSON.parse(jsonPayload);
+}
+
+function setupTokenExpiryWarning(token) {
+  const payload = decodeJwt(token);
+  if (!payload.exp) {
+    console.warn("Token has no expiry");
+    return;
+  }
+
+  const expiryTime = payload.exp * 1000; // convert to ms
+  const now = Date.now();
+  const warningTime = expiryTime - 5 * 60 * 1000; // 5 minutes before expiry
+
+  if (now > expiryTime) {
+    alert("Your session has already expired. Please login again.");
+    sessionStorage.removeItem("adminToken");
+    window.location.href = "kunnu.html";
+    return;
+  }
+
+  if (now > warningTime) {
+    // If less than 5 minutes remain, show warning immediately
+    showExpiryWarning(expiryTime);
+  } else {
+    // Otherwise, set a timeout to warn at warningTime
+    setTimeout(() => showExpiryWarning(expiryTime), warningTime - now);
+  }
+}
+
+function showExpiryWarning(expiryTime) {
+  const timeLeft = Math.round((expiryTime - Date.now()) / 1000 / 60);
+  if (confirm(`⚠️ Your session will expire in about ${timeLeft} minutes.\nDo you want to stay logged in?`)) {
+    // User wants to stay logged in - redirect to login or refresh token
+    window.location.href = "kunnu.html";
+  } else {
+    // User ignores or cancels - do nothing or log out after expiry
+    // Optional: you can auto-logout after expiry time here if you want
+  }
+}
+
+// Run this after successful token verification on editor page load
+const token = sessionStorage.getItem("adminToken");
+if (token) {
+  setupTokenExpiryWarning(token);
+}
+
+</script>
+
 
   <h1 class="page-heading">Product Editor Page</h1>
 
@@ -480,6 +686,10 @@ body.dark-mode .search-box input.animated-search::placeholder {
     <button class="exit" onclick="exitEditor()">🚪 Exit Editor</button>
     <button class="dark-toggle" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
     <button class="logout" onclick="logout()">🔐 Logout</button>
+    <button id="btn-broadcast" class="broadcast" style="background:#6f42c1;">🔔 Broadcast</button>
+    <button id="btn-newarrival" class="newarrival" style="background:#17a2b8;">🆕 New Arrival</button>
+    <button id="btn-stylish" style="background:#ff7b00;">🎨 Stylish Pages</button>
+
 
   </div>
 <div class="search-box">
@@ -502,11 +712,11 @@ body.dark-mode .search-box input.animated-search::placeholder {
     </div>
   </div>
  
-<div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000088; z-index:999; justify-content:center; align-items:center;">
-  <div style="background:white; padding:24px; border-radius:8px; max-width:400px; width:90%; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.2);">
-    <p style="font-size:18px; margin-bottom:20px;">Are you sure you want to publish changes to GitHub?</p>
-    <button id="confirmYes" style="padding:10px 20px; margin-right:10px; background:#4caf50; color:white; border:none; border-radius:5px; cursor:pointer;">Yes</button>
-    <button id="confirmNo" style="padding:10px 20px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
+<div id="confirmModal" class="custom-modal">
+  <div class="custom-modal-content">
+    <p>Are you sure you want to <strong>submit and publish the new updates</strong>? This will make the changes live on your website.</p>
+    <button id="confirmYes" class="btn btn-yes">Yes</button>
+    <button id="confirmNo" class="btn btn-cancel">Cancel</button>
   </div>
 </div>
 
@@ -549,6 +759,73 @@ body.dark-mode .search-box input.animated-search::placeholder {
 </div>
 
 <button id="scrollToTopBtn" title="Go to top">↑</button>
+<!-- Broadcast modal & backdrop (ADD just before </body>) -->
+<div id="broadcast-backdrop" class="broadcast-backdrop hidden" aria-hidden="true"></div>
+
+<div id="broadcast-modal" class="broadcast-modal hidden" role="dialog" aria-modal="true" aria-labelledby="broadcast-title" aria-hidden="true">
+  <div class="broadcast-modal-inner">
+    <h3 id="broadcast-title">Send push to all subscribers</h3>
+
+    <label style="display:block; margin-top:10px; font-weight:600;">Title
+      <input id="broadcast-input-title" type="text" maxlength="90" style="width:100%; padding:8px; border-radius:6px; margin-top:6px;" />
+    </label>
+
+    <label style="display:block; margin-top:10px; font-weight:600;">Message
+      <textarea id="broadcast-input-body" rows="3" maxlength="240" style="width:100%; padding:8px; border-radius:6px; margin-top:6px;"></textarea>
+    </label>
+
+    <label style="display:block; margin-top:10px; font-weight:600;">Link (optional)
+      <input id="broadcast-input-url" type="text" placeholder="/" style="width:100%; padding:8px; border-radius:6px; margin-top:6px;" />
+    </label>
+
+    <div class="broadcast-actions" style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+      <button id="broadcast-cancel" class="btn-ghost" style="padding:8px 12px; border-radius:8px; border:none; background:#eee; cursor:pointer;">Cancel</button>
+      <button id="broadcast-send" class="btn-primary" style="padding:8px 12px; border-radius:8px; border:none; background:#0A84FF; color:#fff; cursor:pointer;">Send to all</button>
+    </div>
+
+    <div id="broadcast-result" class="broadcast-result" aria-live="polite" style="margin-top:10px; font-size:13px;"></div>
+  </div>
+</div>
+
+<style>
+/* Broadcast modal styles (add with the HTML block) */
+.broadcast-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1200; display:block; }
+.broadcast-modal { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1201; width:94%; max-width:560px; border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,0.25); }
+.broadcast-modal.hidden, .broadcast-backdrop.hidden { display:none; }
+.broadcast-modal-inner { background:#fff; padding:18px; border-radius:12px; }
+.broadcast-modal-inner h3 { margin:0 0 6px; font-size:18px; color:#222; }
+
+/* result message colors */
+.broadcast-result.success { color: #2e7d32; }
+.broadcast-result.error { color: #c62828; }
+
+/* Dark mode */
+body.dark-mode .broadcast-modal-inner { background:#1e1e1e; color:#eaeaea; border: 1px solid rgba(255,255,255,0.04); }
+body.dark-mode .btn-ghost { background:#2b2b2b; color:#eee; border:none; }
+body.dark-mode input, body.dark-mode textarea { background:#2b2b2b; color:#eee; border:1px solid #444; }
+</style>
+<!-- 🆕 New Arrival Modal -->
+<div id="newarrival-backdrop" class="broadcast-backdrop hidden" aria-hidden="true"></div>
+
+<div id="newarrival-modal" class="broadcast-modal hidden" role="dialog" aria-modal="true" aria-labelledby="newarrival-title" aria-hidden="true">
+  <div class="broadcast-modal-inner">
+    <h3 id="newarrival-title">🆕 Add New Arrivals</h3>
+
+    <label style="display:block; margin-top:10px; font-weight:600;">Enter Product IDs</label>
+    <input id="newarrival-input" type="text" placeholder="e.g. 223,225,224,227" 
+           style="width:100%; padding:8px; border-radius:6px; margin-top:6px;" />
+
+    <p style="font-size:13px; color:#666; margin-top:5px;">Enter comma-separated product IDs you want to appear on the <b>New Arrivals</b> page.</p>
+
+    <div class="broadcast-actions" style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+      <button id="newarrival-cancel" class="btn-ghost" style="padding:8px 12px; border-radius:8px; border:none; background:#eee; cursor:pointer;">Cancel</button>
+      <button id="newarrival-save" class="btn-primary" style="padding:8px 12px; border-radius:8px; border:none; background:#0A84FF; color:#fff; cursor:pointer;">Save</button>
+      <button id="newarrival-publish" class="btn-primary" style="padding:8px 12px; border-radius:8px; border:none; background:#28a745; color:#fff; cursor:pointer;">Submit & Publish</button>
+    </div>
+
+    <div id="newarrival-result" class="broadcast-result" aria-live="polite" style="margin-top:10px; font-size:13px;"></div>
+  </div>
+</div>
 
 <script>
     const typingPlaceholder = [

@@ -1,6 +1,11 @@
 [build]
+  command = "node scripts/generate-config.js"
   functions = "netlify/functions"
   publish = "."
 
 [functions]
   node_bundler = "esbuild"
+
+# optional: explicit Node version for Netlify build image
+[build.environment]
+  NODE_VERSION = "22"

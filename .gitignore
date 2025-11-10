@@ -1,2 +1,25 @@
-# Local Netlify folder
+# 🧱 Root-level .gitignore for frontend
+
+# Local Netlify build folder
 .netlify
+
+# Node dependencies (in root)
+node_modules
+
+# Local env files (contains secrets)
+.env
+.env.local
+.env.production
+.env.development
+
+# Auto-generated config file (contains Firebase + Cloudinary keys at build time)
+js/config.js
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

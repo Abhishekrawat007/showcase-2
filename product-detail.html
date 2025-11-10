@@ -11,54 +11,606 @@
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 />
+
   <link rel="stylesheet" href="css/style.css" />
   <!-- <link rel="stylesheet" href="css/autoslideshow.css"> -->
-  <link rel="stylesheet" href="css/product-card.css">
+  <link rel="stylesheet" href="css/product-card.css"/>
+  <!-- <link rel="stylesheet" href="css/product-detail-enhanced.css">z -->
+  <style>
+    /* Thumbnail Row */
+/* Product Detail Styles */
+.product-detail-container {
+  max-width: 1100px;
+  margin: 0px auto;
+  padding: 16px;
+  font-family: 'Inter', sans-serif;
+  color: #222;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Image Slideshow */
+.slideshow {
+  position: relative;
+  overflow: hidden;
+}
+.slide {
+  display: none;
+  text-align: center;
+}
+.slide img.product-main-img {
+  width: 100%;
+  max-height: 450px;
+  object-fit: contain;
+  transition: transform 0.3s;
+  border-radius: 8px;
+  cursor: zoom-in;
+}
+.slide img.product-main-img:hover {
+  transform: scale(1.05);
+}
+
+/* Thumbnails */
+.thumbnail-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 0 10px;
+}
+
+.thumbnail {
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.thumbnail.active,
+.thumbnail:hover {
+  border-color: #007bff; /* Use your primary color */
+  transform: scale(1.05);
+  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
+}
+
+/* On mobile, make thumbnails slightly larger and spacing more comfortable */
+@media screen and (max-width: 600px) {
+  .thumbnail {
+    width: 76px;
+    height: 76px;
+  }
+
+  .thumbnail-row {
+    gap: 12px;
+  }
+}
+.thumbnail-row {
+  margin-bottom: 12px; /* Creates gap between thumbnails and product title */
+}
+
+@media (max-width: 768px) {
+  .thumbnail-row {
+    margin-bottom: 16px; /* Slightly more spacing on mobile */
+  }
+}
+
+/* Arrows */
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #00000088;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 20px;
+  border-radius: 50%;
+  z-index: 10;
+}
+.prev { left: 10px; }
+.next { right: 10px; }
+
+/* Dots */
+.dots {
+  text-align: center;
+  margin-top: 10px;
+}
+.dot {
+  height: 12px;
+  width: 12px;
+  margin: 0 5px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+}
+.dot.active {
+  background-color: #555;
+}
+
+/* Pricing */
+.price {
+  margin-top: 20px;
+  font-size: 1.3rem;
+}
+.price .old {
+  text-decoration: line-through;
+  color: #888;
+  margin-right: 10px;
+}
+.price .new {
+  color: #e91e63;
+  font-weight: bold;
+}
+.price .discount {
+  margin-left: 10px;
+  color: green;
+}
+
+/* Buttons */
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.add-to-cart-btn,
+.buy-now-btn,
+.call-btn,
+.whatsapp-btn {
+  padding: 12px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+  text-decoration: none;
+  transition: 0.3s;
+}
+.add-to-cart-btn { background: #222; color: white; }
+.buy-now-btn { background: #e91e63; color: white; }
+.call-btn { background: #4caf50; color: white; }
+.whatsapp-btn { background: #25d366; color: white; }
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f1f1f1;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+.quantity-controls button {
+  background: #333;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.qty {
+  font-size: 1.1rem;
+}
+
+/* Floating Cart Bar */
+.floating-cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  font-weight: bold;
+  z-index: 100;
+}
+.view-cart-btn {
+  background: #222;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+/* Section Heading */
+.section-heading {
+  margin: 40px auto 16px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Related Products */
+.related-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 0 16px 50px;
+}
+.product-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  transition: 0.3s;
+}
+.product-card:hover {
+  transform: translateY(-4px);
+}
+.product-card img.product-img {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+@media (max-width: 600px) {
+  .related-products {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row on mobile */
+  }
+}
+
+/* Watch Video Button (Mobile only) */
+.watch-video-btn {
+  display: inline-block;
+  margin-top: 20px;
+  background: #ff5252;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+/* Stock Badge */
+.stock-badge {
+  margin-top: 10px;
+  background: #f44336;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 0.9rem;
+}
+/* Floating Cart Bar Styling */
+#floatingCartBar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(to right, #007bff, #0056d2);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 50px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 500px;
+  z-index: 9999;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 16px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hide by default */
+#floatingCartBar.hidden {
+  display: none;
+}
+
+/* Cart Info section */
+#floatingCartBar .cart-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+#floatingCartBar .cart-info i {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px;
+  border-radius: 50%;
+}
+
+/* View Cart Button */
+#floatingCartBar .view-cart-btn {
+  background: white;
+  color: #0056d2;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-weight: bold;
+  text-decoration: none;
+  margin-left: auto;
+  transition: background 0.3s, color 0.3s;
+  white-space: nowrap;
+}
+
+#floatingCartBar .view-cart-btn:hover {
+  background: #f0f0f0;
+  color: #003fb3;
+}
+ .back-btn {
+   margin-top: 30px;
+   /* margin-bottom: 10px; */
+   display: inline-block;
+   padding: 8px 12px;
+   background: black;
+   color: white;
+   text-decoration: none;
+   border-radius: 6px;
+ }
+.wishlist-toggle {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+}
+.wishlist-icon.active {
+  color: red;
+}
+.dark-mode body,
+.dark-mode .product-detail-container {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+
+.dark-mode .back-btn {
+  background-color: #e0e0e0;
+  color: #121212;
+}
+
+.dark-mode .slide img.product-main-img {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+}
+
+.dark-mode .thumbnail {
+  background-color: #1e1e1e;
+  border-color: transparent;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .thumbnail.active,
+.dark-mode .thumbnail:hover {
+  border-color: #90caf9;
+  box-shadow: 0 3px 10px rgba(144, 202, 249, 0.4);
+}
+
+.dark-mode .price .old {
+  color: #757575;
+  text-decoration-color: #616161;
+}
+
+.dark-mode .price .new {
+  color: #ffb74d;
+}
+
+.dark-mode .price .discount {
+  color: #81c784;
+}
+
+.dark-mode .quantity-controls {
+  background: #1d1d1d;
+}
+
+.dark-mode .quantity-controls button {
+  background: #333;
+  color: #eee;
+}
+
+.dark-mode .add-to-cart-btn {
+  background: #424242;
+}
+
+.dark-mode .buy-now-btn {
+  background: #f06292;
+}
+
+.dark-mode .call-btn {
+  background: #66bb6a;
+}
+
+.dark-mode .whatsapp-btn {
+  background: #1ebea5;
+}
+
+.dark-mode .add-to-cart-btn:hover,
+.dark-mode .buy-now-btn:hover,
+.dark-mode .call-btn:hover,
+.dark-mode .whatsapp-btn:hover {
+  opacity: 0.9;
+}
+
+.dark-mode .stock-badge {
+  background: #ef5350;
+  color: white;
+}
+
+.dark-mode .related-products {
+  background: #1c1c1c;
+}
+
+.dark-mode .product-card {
+  background: #222;
+  color: #e0e0e0;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode .product-card img.product-img {
+  background: #2c2c2c;
+}
+
+.dark-mode .product-card .product-name {
+  color: #ffffff;
+}
+
+.dark-mode .product-card .add-to-cart-btn {
+  background-color: #1e88e5;
+  color: #ffffff;
+}
+
+.dark-mode .product-card .add-to-cart-btn:hover {
+  background-color: #1565c0;
+  box-shadow: 0 2px 6px rgba(30, 136, 229, 0.4);
+}
+
+.dark-mode .floating-cart-bar,
+.dark-mode #floatingCartBar {
+  background: #1e1e1e;
+  color: #f5f5f5;
+  box-shadow: 0 -2px 8px rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .floating-cart-bar .view-cart-btn,
+.dark-mode #floatingCartBar .view-cart-btn {
+  background: #f5f5f5;
+  color: #1a237e;
+}
+
+.dark-mode .floating-cart-bar .view-cart-btn:hover,
+.dark-mode #floatingCartBar .view-cart-btn:hover {
+  background: #dddddd;
+  color: #0d47a1;
+}
+
+.dark-mode .section-heading {
+  color: #f5f5f5;
+}
+
+.dark-mode .wishlist-icon.active {
+  color: #ff5252;
+}
+
+.dark-mode .top-banner {
+  background-color: #212121;
+  color: #f5f5f5;
+  border-bottom: 1px solid #333;
+}
+
+.dark-mode .banner-close {
+  background: none;
+  color: #ccc;
+}
+
+.dark-mode #scrollToTopBtn {
+  background-color: #424242;
+  color: white;
+}
+
+.dark-mode .watch-video-btn {
+  background: #ef5350;
+}
+
+.dark-mode .footer {
+  background: #111;
+  color: #ccc;
+} 
+.dark-mode .back-btn {
+  background-color: #e0e0e0;
+  color: #000000 !important; /* Ensure it's black text */
+} </style>
 <!-- Firebase App (the core Firebase SDK) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <!-- Firebase Realtime Database -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
+<script src="js/config.js"></script>
+<script src="js/init-firebase.js"></script>
+
+<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
 <script>
-  // Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
-  authDomain: "sublimestore-a0252.firebaseapp.com",
-  projectId: "sublimestore-a0252",
-  storageBucket: "sublimestore-a0252.firebasestorage.app",
-  messagingSenderId: "460519742193",
-  appId: "1:460519742193:web:92b91dc5ee963cc371e750"
-};
+(function(){
+  // alias for new code
+  window.db = window.database || null;
 
+  // expose window.database getter so other code can read window.database even if they read it later
+  try {
+    Object.defineProperty(window, 'database', {
+      get: function() { return window.db; },
+      configurable: true
+    });
+  } catch (e) {
+    // fallback if defineProperty blocked
+    if (!window.database) window.database = window.db;
+  }
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
+  // Monkey-patch firebase.database() so old code keeps working.
+  // Ensure firebase SDK is loaded and only patch once.
+  if (window.firebase && !firebase.__dbPatched) {
+    firebase.__dbPatched = true;
+    // Preserve original if present (for safety)
+    firebase.__originalDatabaseFn = firebase.database || null;
+    firebase.database = function() {
+      // return underlying db reference created by init-firebase.js
+      if (window.db) return window.db;
+      // fallback: if original exists, call it
+      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
+      // otherwise return null to avoid throwing in caller
+      return null;
+    };
+    // Helpful console info for debugging
+    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
+  } else {
+    // still log so you can diagnose missing init
+    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
+  }
+})();
 </script>
-<script defer data-domain="sublimestore.in" src="https://plausible.io/js/script.js"></script>
 </head>
-<body> <!-- 🔼 Top Banner -->
-      <div class="top-banner" id="topBanner">
-        <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
-        <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
-      </div>
+<body><!-- 🔼 Top Banner -->
+  <div class="top-banner" id="topBanner">
+    <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
+    <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
+  </div>
    <!-- ✅ Navbar loads here -->
   <div id="navbar"></div>
 
   <!-- ✅ Your script to load navbar -->
   <script>
-    fetch('navbar.html')
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById('navbar').innerHTML = data;
-      });
-  </script>
+  fetch('navbar.html')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('navbar').innerHTML = data;
+
+      if (typeof bindNavbarEvents === 'function') {
+        bindNavbarEvents();
+      }
+
+      // ✅ Ensure badge updates once navbar loads
+      if (typeof initMiniCartBadges === 'function') {
+        initMiniCartBadges();
+      }
+    });
+</script>
 <main>
   <button onclick="history.back()" class="back-btn">← Back</button>
-  <div class="product-detail" id="productDetail"></div>
-  
-  <h2 class="related-title">Related Products</h2>
-  <div class="product-list" id="relatedProducts"></div>
+ <div id="productDetail" class="product-detail-container"></div>
+
+<h2 class="section-heading">Related Products</h2>
+<div id="relatedProducts" class="related-products"></div>
+
+
 </main>
 <footer class="footer">
   <!-- Your full footer HTML content here -->
@@ -86,8 +638,9 @@ const firebaseConfig = {
 
   <script src="js/product.js"></script>
   <script src="js/navbar.js"defer></script>
+  <script src="js/mini-cart.js" defer></script>
   <!-- <script src="js/cart.js"></script> -->
   <script src="js/script-detail.js"></script>
-  <script src="js/script.js" defer></script>
+  <!-- <script src="js/script.js" defer></script> -->
 </body>
 </html>

@@ -7,6 +7,28 @@
 <meta name="keywords" content="Sublime Store, online shop, budget products, free delivery India">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="index, follow">
+<!-- match the progress bar color to your navbar in light & dark -->
+<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+<!-- Disable Chrome's new progress overlay -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="transparent">
+<meta name="browsermode" content="application">
+<meta name="display" content="standalone">
+
+<!-- Favicon for most browsers -->
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Android Chrome Icons -->
+<link rel="manifest" href="site.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="web-app-manifest-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="web-app-manifest-512x512.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <!-- <link rel="stylesheet" href="css/style.css" /> -->
   <style>
@@ -471,6 +493,17 @@ body.dark-mode #upiAppOptions img {
 label:hover {
   background-color: #f0f8ff;
 }
+/* Continue shopping button */
+.btn-continue{
+  display:inline-flex;align-items:center;gap:.6rem;margin-top:14px;
+  padding:.9rem 1.2rem;border-radius:999px;background:#111;color:#fff;
+  text-decoration:none;font-weight:600;letter-spacing:.2px;
+  box-shadow:0 8px 20px rgba(0,0,0,.18);transition:.2s;
+}
+.btn-continue::after{content:"→";font-size:1.1em}
+.btn-continue:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(0,0,0,.22)}
+body.dark-mode .btn-continue{background:#fff;color:#111}
+
   </style>
 
   <!-- Firebase -->
@@ -479,19 +512,67 @@ label:hover {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script> 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
-      authDomain: "sublimestore-a0252.firebaseapp.com",
-      projectId: "sublimestore-a0252",
-      storageBucket: "sublimestore-a0252.appspot.com",
-      messagingSenderId: "460519742193",
-      appId: "1:460519742193:web:92b91dc5ee963cc371e750"
+<script src="js/config.js"></script>
+<script src="js/init-firebase.js"></script>
+
+<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
+<script>
+(function(){
+  // alias for new code
+  window.db = window.database || null;
+
+  // expose window.database getter so other code can read window.database even if they read it later
+  try {
+    Object.defineProperty(window, 'database', {
+      get: function() { return window.db; },
+      configurable: true
+    });
+  } catch (e) {
+    // fallback if defineProperty blocked
+    if (!window.database) window.database = window.db;
+  }
+
+  // Monkey-patch firebase.database() so old code keeps working.
+  // Ensure firebase SDK is loaded and only patch once.
+  if (window.firebase && !firebase.__dbPatched) {
+    firebase.__dbPatched = true;
+    // Preserve original if present (for safety)
+    firebase.__originalDatabaseFn = firebase.database || null;
+    firebase.database = function() {
+      // return underlying db reference created by init-firebase.js
+      if (window.db) return window.db;
+      // fallback: if original exists, call it
+      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
+      // otherwise return null to avoid throwing in caller
+      return null;
     };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-  </script>
-  <script defer data-domain="sublimestore.in" src="https://plausible.io/js/script.js"></script>
+    // Helpful console info for debugging
+    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
+  } else {
+    // still log so you can diagnose missing init
+    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
+  }
+})();
+</script>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DBDC7X6FJR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DBDC7X6FJR');
+</script>
+<script>
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  function updateThemeColor() {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    metaTheme.setAttribute('content', dark ? '#000000' : '#ffffff');
+  }
+  updateThemeColor();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeColor);
+</script>
+
 </head>
 <body class="cart-page" id="cartBody">
    <!-- 🔼 Top Banner -->
@@ -499,6 +580,34 @@ label:hover {
     <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
     <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
   </div>
+  <!-- Spinner overlay -->
+<div id="spinnerOverlay" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.8);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+">
+  <div style="
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #4CAF50;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+  "></div>
+</div>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
  <div id="mainCartContainer">
   
   
@@ -580,8 +689,8 @@ label:hover {
     document.body.classList.remove('dark-mode');
   }
 
-  const TELEGRAM_BOT_TOKEN = "7658138886:AAGGfB0KOK3IVuJcQcG3Z7kG0xlJMkGTLaA";
-  const TELEGRAM_CHAT_IDS = [6020806530, 5056028508, 5310057351]; // You + your brother
+  
+ 
 
   function getCartFromLocalStorage() {
     const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
@@ -632,7 +741,9 @@ label:hover {
               <span>${item.qty}</span>
               <button onclick="updateQty('${item.id}', 1)">+</button>
             </div>
-            <a href="#" onclick="removeFromCart('${item.id}')" style="color: red; font-size: 14px;">Remove</a>
+            <button type="button" class="remove-btn" onclick="removeFromCart('${item.id}')" style="background:none;border:none;color:#d00;font-size:14px;text-decoration:underline;cursor:pointer;">
+  Remove
+</button>
           </div>
           <strong class="subtotal">Subtotal: ₹${item.price * item.qty}</strong>
         </div>
@@ -719,24 +830,30 @@ renderCart();
   }
 
   errorEl.style.display = "none";
+  // Show spinner immediately
+document.getElementById("spinnerOverlay").style.display = "flex";
+
  submitOrderFast(); // New function that handles Telegram + shows success // COD only
 }
 
   function updateQty(id, delta) {
-    const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
-    if (!rawCart[id]) return;
-    rawCart[id].qty += delta;
-    if (rawCart[id].qty < 1) rawCart[id].qty = 1;
-    localStorage.setItem("cart", JSON.stringify(rawCart));
-    renderCart();
-  }
+  const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
+  if (!rawCart[id]) return;
+  rawCart[id].qty += delta;
+  if (rawCart[id].qty < 1) rawCart[id].qty = 1;
+  localStorage.setItem("cart", JSON.stringify(rawCart));
+  try { sessionStorage.setItem('cartDirty', '1'); } catch(_){}
+  renderCart();
+}
 
-  function removeFromCart(id) {
-    const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
-    delete rawCart[id];
-    localStorage.setItem("cart", JSON.stringify(rawCart));
-    renderCart();
-  }
+function removeFromCart(id) {
+  const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
+  delete rawCart[id];
+  localStorage.setItem("cart", JSON.stringify(rawCart));
+  try { sessionStorage.setItem('cartDirty', '1'); } catch(_){}
+  renderCart();
+}
+
 function loadImageAsBase64(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -775,8 +892,8 @@ async function submitOrderFast() {
   const orderId = "ORD" + Date.now();
 
   // 🔔 Telegram message first
-  const TELEGRAM_BOT_TOKEN = "7658138886:AAGGfB0KOK3IVuJcQcG3Z7kG0xlJMkGTLaA";
-  const TELEGRAM_CHAT_IDS = [6020806530, 5056028508, 5310057351];
+
+ 
 
   const itemLines = cart.map(item =>
     `• ${item.title} (x${item.qty}) - Rs. ${item.price * item.qty}`
@@ -790,147 +907,176 @@ async function submitOrderFast() {
     `💰 *Total:* Rs. ${totalAmount}\n` +
     `📦 *Items:*\n${itemLines}`;
 
-  await Promise.all(
-    TELEGRAM_CHAT_IDS.map(chatId => {
-      return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: messageText,
-          parse_mode: "Markdown"
-        })
-      });
-    })
-  );
+  
 
   // ✅ Show user confirmation immediately
-  document.getElementById("orderForm").innerHTML = 
-    `<div style="padding: 20px; text-align: center; color: green;">
-      <h3>✓ Order Confirmed</h3>
-      <p><strong>Order ID:</strong> ${orderId}</p>
-      <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
-    </div>`;
-  localStorage.removeItem("cart");
-  document.getElementById("cartContainer").innerHTML = "";
-  document.getElementById("cartSummary").style.display = "none";
-  document.getElementById("cartTopBar").style.display = "none";
-  document.title = "Order Confirmed";
+// ✅ Show user confirmation + Continue shopping button
+// ✅ Success UI: HTML only (no inline <script>)
+const successHTML = `
+  <div style="padding: 20px; text-align: center; color: green;">
+    <h3>✓ Order Confirmed</h3>
+    <p><strong>Order ID:</strong> ${orderId}</p>
+    <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
+    <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
+  </div>
+`;
+function setSS(key, val) {
+  try { sessionStorage.setItem(key, val); } catch (_) {}
+}
+
+document.getElementById("orderForm").innerHTML = successHTML;
+// Make the top Back button behave like "Continue shopping" on success
+// Make the top "Back" button behave like Continue Shopping on success
+(function () {
+  const backBtn = document.getElementById('backBtn');
+  if (!backBtn) return;
+
+  backBtn.onclick = null;
+  backBtn.removeAttribute('onclick');
+
+  backBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    // we're leaving success screen; mark and navigate
+    window.__orderSuccessActive = false;
+    setSS('jumpToProducts','1');
+    setSS('clearCartOnHome','1');
+    try { localStorage.removeItem('cart'); } catch (_){}
+    location.replace(`index.html?ts=${Date.now()}#productList`);
+  });
+})();
+
+// Continue shopping button (same behavior)
+(function(){
+  const btn = document.getElementById('continueShopping');
+  if(!btn) return;
+  btn.addEventListener('click', function(e){
+    e.preventDefault();
+    window.__orderSuccessActive = false;
+    setSS('jumpToProducts','1');
+    setSS('clearCartOnHome','1');
+    location.replace(`index.html?ts=${Date.now()}#productList`);
+  });
+})();
+
+// Make device back (Android/iOS) behave like Continue Shopping on success
+// 🔒 Robust device-back trap for the success screen
+// 🔒 Robust + debounced device-back trap for the success screen
+(function setupHardwareBackTrap() {
+  if (window.__successTrapInstalled) return;
+  window.__successTrapInstalled = true;
+
+  window.__orderSuccessActive = true;
+  let redirecting = false;
+
+  try {
+    history.replaceState({ __success_base: true }, '', location.href);
+    history.pushState({ __success_trap: true }, '', location.href + (location.hash ? '' : '#_success_trap'));
+
+    const goHomeFresh = () => {
+      if (redirecting) return;
+      redirecting = true;
+      window.removeEventListener('popstate', onPop);
+      setSS('jumpToProducts', '1');
+      setSS('clearCartOnHome', '1');
+      try { localStorage.removeItem('cart'); } catch (_){}
+      location.replace(`index.html?ts=${Date.now()}#productList`);
+    };
+
+    const onPop = function () {
+      if (!window.__orderSuccessActive) return;
+      goHomeFresh();
+    };
+
+    window.addEventListener('popstate', onPop);
+
+    const cleanup = () => { window.__orderSuccessActive = false; window.removeEventListener('popstate', onPop); };
+    document.getElementById('continueShopping')?.addEventListener('click', cleanup);
+    document.getElementById('backBtn')?.addEventListener('click', cleanup);
+  } catch (_) {}
+})();
+
+// Clear local cart + UI
+localStorage.removeItem("cart");
+document.getElementById("cartContainer").innerHTML = "";
+document.getElementById("cartSummary").style.display = "none";
+document.getElementById("cartTopBar").style.display = "none";
+document.title = "Order Confirmed";
+
+// Hide spinner
+setTimeout(() => {
+  document.getElementById("spinnerOverlay").style.display = "none";
+}, 800); // spinner shows at least 0.8 seconds
+
 
   // ⚙️ Now generate + send PDF in background
   setTimeout(() => {
-    generateAndSendPDF({ name, phone, orderId, cart, totalAmount });
-  }, 300); // slight delay for UX smoothness
+  generateAndSendPDF({ name, phone, orderId, cart, totalAmount, messageText });
+}, 300);
+ // slight delay for UX smoothness
 }
-async function generateAndSendPDF({ name, phone, orderId, cart, totalAmount }) {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p", "pt", "a4");
-  const pageWidth = pdf.internal.pageSize.getWidth();
-
-  let y = 100;
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(18);
-  pdf.text("Sublime Store", pageWidth / 2, 40, { align: "center" });
-  pdf.setFontSize(10);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Near Variety Store, Link Road, Takana Road, Pithoragarh", pageWidth / 2, 55, { align: "center" });
-  pdf.text("Phone: +91 8868839446 | Website: sublimestore.in", pageWidth / 2, 70, { align: "center" });
-
-  pdf.setFontSize(12);
-  pdf.text(`Customer: ${name}`, 40, y);
-  pdf.text(`Phone: ${phone}`, 40, y + 18);
-  pdf.text(`Order ID: ${orderId}`, 40, y + 36);
-  pdf.text(`Date: ${new Date().toLocaleString()}`, 40, y + 54);
-  y += 80;
-
-  const rows = [];
-  for (let i = 0; i < cart.length; i++) {
-    const item = cart[i];
-    let imgBase64 = "";
-    try {
-      imgBase64 = await loadImageAsBase64(item.image);
-    } catch (err) {}
-    rows.push([
-      i + 1,
-      { content: "", image: imgBase64, imageWidth: 50, imageHeight: 50 },
-      item.title,
-      item.qty,
-      `Rs. ${item.price}`,
-      `Rs. ${item.price * item.qty}`
-    ]);
-  }
-  rows.push([
-    { content: 'Total', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } },
-    { content: `Rs. ${totalAmount}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } }
-  ]);
-
-  pdf.autoTable({
-    startY: y,
-    head: [["No.", "Image", "Product", "Qty", "Price", "Subtotal"]],
-    body: rows,
-    styles: {
-      fontSize: 10,
-      lineWidth: 0.1,
-      lineColor: [0, 0, 0],
-      valign: 'middle',
-    },
-    bodyStyles: {
-      minCellHeight: 60,
-    },
-    columnStyles: {
-      0: { cellWidth: 35 },
-      1: { cellWidth: 65 },
-      2: { cellWidth: 210 },
-      3: { cellWidth: 50 },
-      4: { cellWidth: 70 },
-      5: { cellWidth: 80 },
-    },
-    tableWidth: 'auto',
-    didDrawCell: function (data) {
-      if (data.column.index === 1 && data.cell.raw?.image) {
-        const imgSize = 50;
-        const xCenter = data.cell.x + (data.cell.width - imgSize) / 2;
-        const yCenter = data.cell.y + (data.cell.height - imgSize) / 2;
-        pdf.addImage(data.cell.raw.image, "JPEG", xCenter, yCenter, imgSize, imgSize);
-      }
-    }
-  });
-
-  const finalY = pdf.lastAutoTable.finalY + 20;
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(14);
-  pdf.text(`Total: Rs. ${totalAmount}`, pageWidth - 150, finalY);
-
-  pdf.setFont("times", "italic");
-  pdf.setFontSize(11);
-  pdf.setTextColor(60);
-  pdf.text("Thank you for shopping at Sublime Store.\nWe’ll call or WhatsApp you to confirm your order.", pageWidth / 2, finalY + 30, { align: "center" });
-
-  const pdfBlob = pdf.output("blob");
-  const TELEGRAM_BOT_TOKEN = "7658138886:AAGGfB0KOK3IVuJcQcG3Z7kG0xlJMkGTLaA";
-  const TELEGRAM_CHAT_IDS = [6020806530, 5056028508, 5310057351];
-  const cleanName = name.toLowerCase().replace(/\s+/g, "") + "order";
-
-  await Promise.all(
-    TELEGRAM_CHAT_IDS.map(chatId => {
-      const formData = new FormData();
-      formData.append("chat_id", chatId);
-      formData.append("document", pdfBlob, `${cleanName}.pdf`);
-      return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, {
-        method: "POST",
-        body: formData
-      });
-    })
+async function generateAndSendPDF(orderData) {
+  navigator.sendBeacon(
+    "/.netlify/functions/sendTelegramOrder",
+    new Blob([JSON.stringify(orderData)], { type: "application/json" })
   );
 }
-  
 
 
 
   // Initial render
   renderCart();
+
+
+// 👇 Mark cart as "clean" when you open the cart page
+try { sessionStorage.setItem('cartDirty', '0'); } catch(_) {}
+
+  // === Cart page Back button should always return to home (fresh) ===
+// === Cart page Back button: smart behavior ===
+(function wireCartPageBackButton() {
+  const backBtn = document.getElementById('backBtn');
+  if (!backBtn) return;
+
+  backBtn.onclick = null;
+  backBtn.removeAttribute('onclick');
+
+  backBtn.addEventListener('click', function (e) {
+    // 👇 add this guard so when success screen is active,
+    // the success-specific handler owns the Back behavior.
+    if (window.__orderSuccessActive) return;
+
+    e.preventDefault();
+    try { sessionStorage.setItem('jumpToProducts', '1'); } catch (_){}
+    location.replace(`index.html?ts=${Date.now()}#productList`);
+  });
+})();
+
+
+// === Hardware/gesture back on CART page → only redirect if cart changed ===
+(function trapCartHardwareBackSmart() {
+  if (window.__cartTrapInstalled) return;
+  window.__cartTrapInstalled = true;
+
+  try {
+    history.replaceState({ __cartBase: true }, '', location.href);
+    history.pushState({ __cartTrap: true }, '', location.href + (location.hash ? '' : '#_cart'));
+
+    const onPop = function () {
+      const dirty = (sessionStorage.getItem('cartDirty') === '1');
+      if (dirty) {
+        try { sessionStorage.setItem('jumpToProducts', '1'); } catch (_){}
+        location.replace(`index.html?ts=${Date.now()}#productList`);
+      } else {
+        window.removeEventListener('popstate', onPop);
+        history.back();
+      }
+    };
+
+    window.addEventListener('popstate', onPop);
+  } catch (_) {}
+})();
+
+
+
     const toggleBtn = document.getElementById('themeToggle');
 
   function applyTheme(mode) {

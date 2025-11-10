@@ -1,0 +1,195 @@
+<!-- wishlist.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wishlist - SublimeStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/product-card.css">
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #fafafa;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  margin-top: 2rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+.wishlist-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.wishlist-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.wishlist-card {
+  width: 280px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  text-decoration: none;
+}
+
+.wishlist-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.wishlist-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+}
+
+.wishlist-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.wishlist-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.wishlist-price {
+  color: #e53935;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.wishlist-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-view,
+.btn-remove {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  z-index: 2;
+}
+
+.btn-view {
+  background: #3f51b5;
+  color: white;
+}
+
+.btn-remove {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+#emptyWishlistMessage {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 3rem;
+  color: #888;
+}
+.wishlist-touchable {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.wishlist-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+}
+
+</style>
+</head>
+<body>
+<h1 class="wishlist-heading" style="text-align:center;">Your Wishlist</h1>
+ <div class="wishlist-container" style="max-width: 1200px; margin: 3rem auto; padding: 0 1rem;"></div>
+    <div id="wishlistItems" class="wishlist-grid"></div>
+    <p id="emptyWishlistMessage" style="text-align:center; display:none; font-size:1.8rem;">Your wishlist is empty 💔</p>
+  </div>
+
+  <script src="js/product.js"></script>
+  <script>
+  const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+
+  function renderWishlistItems() {
+    const container = document.getElementById("wishlistItems");
+    const emptyMessage = document.getElementById("emptyWishlistMessage");
+    container.innerHTML = '';
+
+    const wishlistProducts = products.filter(p => wishlist.includes(p.id.toString()));
+
+    if (wishlistProducts.length === 0) {
+      emptyMessage.style.display = "block";
+      return;
+    } else {
+      emptyMessage.style.display = "none";
+    }
+
+    wishlistProducts.forEach(product => {
+      const card = document.createElement('div');
+      card.className = 'wishlist-card';
+      card.innerHTML = `
+        <div class="wishlist-touchable" onclick="window.location.href='product-detail.html?id=${product.id}'">
+          <img src="${product.images[0]}" alt="${product.name}" />
+          <div class="wishlist-body">
+            <div>
+              <div class="wishlist-title">${product.name}</div>
+              <div class="wishlist-price">₹${product.newPrice}</div>
+            </div>
+          </div>
+        </div>
+        <div class="wishlist-actions">
+          <button class="btn btn-primary btn-view" onclick="event.stopPropagation(); window.location.href='product-detail.html?id=${product.id}'">View</button>
+          <button class="btn btn-remove" onclick="event.stopPropagation(); removeFromWishlist('${product.id}')">Remove</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function removeFromWishlist(productId) {
+    const index = wishlist.indexOf(productId);
+    if (index !== -1) {
+      wishlist.splice(index, 1);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      renderWishlistItems();
+    }
+  }
+
+  renderWishlistItems();
+</script>
+
+  <script src="js/script.js"></script>
+  
+
+</body>
+</html>

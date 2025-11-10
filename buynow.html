@@ -4,6 +4,28 @@
   <meta charset="UTF-8" />
   <title>Your Order – Sublime Store</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- match the progress bar color to your navbar in light & dark -->
+<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+<!-- Disable Chrome's new progress overlay -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="transparent">
+<meta name="browsermode" content="application">
+<meta name="display" content="standalone">
+
+  <!-- Favicon for most browsers -->
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Android Chrome Icons -->
+<link rel="manifest" href="site.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="web-app-manifest-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="web-app-manifest-512x512.png">
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -327,15 +349,90 @@ body.dark-mode .payment-method {
 label:hover {
   background-color: #f0f8ff;
 }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* Continue shopping button */
+.btn-continue{
+  display:inline-flex;align-items:center;gap:.6rem;margin-top:14px;
+  padding:.9rem 1.2rem;border-radius:999px;background:#111;color:#fff;
+  text-decoration:none;font-weight:600;letter-spacing:.2px;
+  box-shadow:0 8px 20px rgba(0,0,0,.18);transition:.2s;
+}
+.btn-continue::after{content:"→";font-size:1.1em}
+.btn-continue:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(0,0,0,.22)}
+body.dark-mode .btn-continue{background:#fff;color:#111}
+
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-  <script defer data-domain="sublimestore.in" src="https://plausible.io/js/script.js"></script>
+ <script src="js/config.js"></script>
+<script src="js/init-firebase.js"></script>
+
+<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
+<script>
+(function(){
+  // alias for new code
+  window.db = window.database || null;
+
+  // expose window.database getter so other code can read window.database even if they read it later
+  try {
+    Object.defineProperty(window, 'database', {
+      get: function() { return window.db; },
+      configurable: true
+    });
+  } catch (e) {
+    // fallback if defineProperty blocked
+    if (!window.database) window.database = window.db;
+  }
+
+  // Monkey-patch firebase.database() so old code keeps working.
+  // Ensure firebase SDK is loaded and only patch once.
+  if (window.firebase && !firebase.__dbPatched) {
+    firebase.__dbPatched = true;
+    // Preserve original if present (for safety)
+    firebase.__originalDatabaseFn = firebase.database || null;
+    firebase.database = function() {
+      // return underlying db reference created by init-firebase.js
+      if (window.db) return window.db;
+      // fallback: if original exists, call it
+      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
+      // otherwise return null to avoid throwing in caller
+      return null;
+    };
+    // Helpful console info for debugging
+    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
+  } else {
+    // still log so you can diagnose missing init
+    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
+  }
+})();
+</script>
+ <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DBDC7X6FJR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DBDC7X6FJR');
+</script>
+<script>
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  function updateThemeColor() {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    metaTheme.setAttribute('content', dark ? '#000000' : '#ffffff');
+  }
+  updateThemeColor();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeColor);
+</script>
+
 </head>
-<body>
+
     <body class="cart-page">
    <!-- 🔼 Top Banner -->
   <div class="top-banner" id="topBanner">
@@ -420,21 +517,10 @@ label:hover {
 </div>
   <script src="js/product.js"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
-      authDomain: "sublimestore-a0252.firebaseapp.com",
-      projectId: "sublimestore-a0252",
-      storageBucket: "sublimestore-a0252.appspot.com",
-      messagingSenderId: "460519742193",
-      appId: "1:460519742193:web:92b91dc5ee963cc371e750"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const TELEGRAM_BOT_TOKEN = "7658138886:AAGGfB0KOK3IVuJcQcG3Z7kG0xlJMkGTLaA";
-    const TELEGRAM_CHAT_IDS = [6020806530, 5056028508, 5310057351];
+    
 
     const urlParams = new URLSearchParams(window.location.search);
-const productId = urlParams.get("id") || sessionStorage.getItem("buyNowProduct");
+const productId = urlParams.get("id") || sessionStorage.getItem("buyNowProduct"); 
     const product = products.find(p => p.id == productId);
     let quantity = 1;
 
@@ -561,139 +647,97 @@ async function loadImageAsBase64(url) {
     img.src = url;
   });
 }
+firebase.database().ref("orders").push(order).then(() => {
+  // Show immediate success + spinner
+  document.querySelector(".container").innerHTML = `
+  <div class="confirmed-box">
+    <h3>✓ Order Confirmed</h3>
+    <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
+    <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
 
-     firebase.database().ref("orders").push(order).then(async () => {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p", "pt", "a4");
-  const pageWidth = pdf.internal.pageSize.getWidth();
+    <!-- Continue shopping button -->
+    <a href="index.html#productList" class="btn-continue" id="continueShopping">
+      Continue shopping
+    </a>
 
-  const loadImageAsBase64 = (url) =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        canvas.getContext("2d").drawImage(img, 0, 0);
-        resolve(canvas.toDataURL("image/jpeg"));
-      };
-      img.onerror = reject;
-      img.src = url;
-    });
+    <div id="backgroundStatus" style="
+        margin-top: 15px;
+        font-size: 14px;
+        color: #555;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    ">
+      <span class="spinner" style="
+          width: 16px;
+          height: 16px;
+          border: 3px solid #ccc;
+          border-top: 3px solid #4CAF50;
+          border-radius: 50%;
+          display: inline-block;
+          animation: spin 1s linear infinite;
+      "></span>
+      <span>Sending order details...</span>
+    </div>
+  </div>
 
-  // Header
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(18);
-  pdf.text("Sublime Store", pageWidth / 2, 40, { align: "center" });
-  pdf.setFontSize(10);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Near Variety Store, Link Road, Takana Road, Pithoragarh", pageWidth / 2, 55, { align: "center" });
-  pdf.text("Phone: +91 8868839446 | Website: sublimestore.in", pageWidth / 2, 70, { align: "center" });
+  <script>
+    (function(){
+      var btn = document.getElementById('continueShopping');
+      if(!btn) return;
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        // Tell index to clear floating cart UI and jump to product list
+        try { sessionStorage.setItem('jumpToProducts', '1'); } catch(_){}
+        // Force a fresh load (helps with PWA/service worker caches)
+        var ts = Date.now();
+        window.location.assign('index.html?ts=' + ts + '#productList');
+      });
+    })();
+  <\/script>
+`;
+;
+  sessionStorage.removeItem("buyNowProduct");
 
-  let y = 100;
-  pdf.setFontSize(12);
-  pdf.text(`Customer: ${name}`, 40, y);
-  pdf.text(`Phone: ${phone}`, 40, y + 18);
-  pdf.text(`Order ID: ${orderId}`, 40, y + 36);
-  pdf.text(`Date: ${new Date().toLocaleString()}`, 40, y + 54);
-  y += 100;
-
-  // Table
-  const item = order.items[0];
-  let imgBase64 = "";
-  try {
-    imgBase64 = await loadImageAsBase64(item.image);
-  } catch {}
-
-  const rows = [[
-    1,
-    { content: "", image: imgBase64, imageWidth: 50, imageHeight: 50 },
-    item.title,
-    item.qty,
-    `Rs. ${item.price}`,
-    `Rs. ${item.price * item.qty}`
-  ]];
-
-  rows.push([
-    { content: 'Total', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } },
-    { content: `Rs. ${order.totalAmount}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } }
-  ]);
-
-  pdf.autoTable({
-    startY: y,
-    head: [["No.", "Image", "Product", "Qty", "Price", "Subtotal"]],
-    body: rows,
-    styles: {
-    fontSize: 10,
-    valign: 'middle',
-    halign: 'center',
-    cellPadding: 6
-  },
-  bodyStyles: { minCellHeight: 60 },
-  tableWidth: 'auto',
-  theme: 'grid',
-  columnStyles: {
-    0: { cellWidth: 40 },           // No.
-    1: { cellWidth: 70 },           // Image
-    2: { cellWidth: 190 },          // Product Name
-    3: { cellWidth: 60 },           // Qty
-    4: { cellWidth: 80, halign: 'right' }, // Price
-    5: { cellWidth: 90, halign: 'right' }  // Subtotal
-  },
-    didDrawCell: function (data) {
-      if (data.column.index === 1 && data.cell.raw?.image) {
-        const x = data.cell.x + (data.cell.width - 50) / 2;
-        const y = data.cell.y + (data.cell.height - 50) / 2;
-        pdf.addImage(data.cell.raw.image, "JPEG", x, y, 50, 50);
-      }
-    }
-  });
-
-  let finalY = pdf.lastAutoTable.finalY + 20;
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(14);
-  pdf.text(`Total: Rs. ${order.totalAmount}`, pageWidth - 150, finalY);
-
-  pdf.setFont("times", "italic");
-  pdf.setFontSize(11);
-  pdf.setTextColor(60);
-  pdf.text("Thank you for shopping at Sublime Store.\nWe’ll call or WhatsApp you to confirm your order.", pageWidth / 2, finalY + 30, { align: "center" });
-
-  const pdfBlob = pdf.output("blob");
-  const pdfFile = new File([pdfBlob], `${name.trim().toLowerCase().replace(/\s+/g, '')}.pdf`, {
-  type: "application/pdf"
-});
-
-  const formData = new FormData();
-  formData.append("document", pdfFile);
-  formData.append("caption", `🛒 *Buy Now Order*
+  // Async background process
+  (async () => {
+    try {
+      const messageText = `🛒 *Buy Now Order*
 🧾 *Order ID:* ${orderId}
 👤 *Name:* ${name}
 📞 *Phone:* ${phone}
 🔗 *WhatsApp:* https://wa.me/91${phone}
 💰 *Total:* ₹${order.totalAmount}
-📦 *Product:* ${product.name} x${quantity}`);
+📦 *Product:* ${product.name} x${quantity}`;
 
-  await Promise.all(TELEGRAM_CHAT_IDS.map(chatId =>
-    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument?chat_id=${chatId}&parse_mode=Markdown`, {
-      method: "POST",
-      body: formData
-    })
-  ));
+      await fetch("/.netlify/functions/sendTelegramOrder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          phone,
+          orderId,
+          cart: order.items,
+          totalAmount: order.totalAmount,
+          messageText
+        })
+      });
 
-  document.querySelector(".container").innerHTML = `
-    <div class="confirmed-box">
-      <h3>✓ Order Confirmed</h3>
-      <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
-      <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
-    </div>`;
-  sessionStorage.removeItem("buyNowProduct");
+      // Update spinner text when done
+      const statusDiv = document.getElementById("backgroundStatus");
+      if (statusDiv) statusDiv.textContent = "Order details sent successfully!";
+    } catch (err) {
+      console.error("Background send failed:", err);
+      const statusDiv = document.getElementById("backgroundStatus");
+      if (statusDiv) statusDiv.textContent = "⚠️ Failed to send order details.";
+    }
+  })();
 }).catch(err => {
-  alert("Error: Please try again.");
+  alert("Error saving order. Please try again.");
   button.disabled = false;
   button.textContent = "Confirm Order";
-  console.error(err);
+  console.error("Firebase push failed:", err);
 });
 
     }
@@ -720,5 +764,6 @@ async function loadImageAsBase64(url) {
     });
   });
   </script>
+  
 </body>
 </html>

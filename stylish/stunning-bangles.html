@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Stunning Bangles - Sublime</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/product-card.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main>
+    <section class="stylish-page-header" id="stylishHeader"></section>
+    <div id="stylishProducts" class="product-grid"></div>
+  </main>
+  <div id="footer"></div>
+
+  <script src="/js/product.js"></script>
+  <script>
+    // slug is derived from filename
+    const slug = 'stunning-bangles';
+
+    async function initStylishPage() {
+      // try to read published file (it sets window.stylishPages)
+      // attempt fetch just in case
+      // prefer global window.stylishPages
+      if (!window.stylishPages) {
+        try {
+          await import('/js/stylishPages.js'); // if exported as module this won't work with CORS; but we set window.stylishPages in the file
+        } catch(e){
+          // ignore
+        }
+      }
+      const pages = window.stylishPages || [];
+      const page = pages.find(p => p.slug === slug);
+      if (!page) {
+        document.getElementById('stylishHeader').innerHTML = `<h1>Collection</h1><p>No items defined yet.</p>`;
+        return;
+      }
+
+      // set header and description (render description only here)
+      document.getElementById('stylishHeader').innerHTML = `
+        <h1>${page.title}</h1>
+        <div class="stylish-description">${page.descriptionHTML || ''}</div>
+      `;
+
+      // render products by id (use same renderProducts function from script.js)
+      const container = document.getElementById('stylishProducts');
+      container.innerHTML = '';
+      const ids = (page.productIds || []).map(String);
+      const list = products.filter(p => ids.includes(String(p.id)));
+      if (list.length === 0) {
+        container.innerHTML = '<p>No products added to this collection yet.</p>';
+      } else {
+        // reuse the same card generator used on home page or call renderProducts-like function
+        list.forEach(p => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'product-card';
+          wrapper.innerHTML = `
+            <div class="image-container"><img src="${p.images[0]||'images/default.jpg'}" class="product-img" loading="lazy" /></div>
+            <h3 class="product-name">${p.name}</h3>
+            <p class="price"><span class="new">₹${p.newPrice}</span> <span class="old">₹${p.oldPrice}</span></p>
+            <div class="button-group">
+              ${p.inStock ? `<button class="add-to-cart-btn">Add to cart</button>` : `<a class="call-btn" href="tel:+918868839446">Call Now</a>`}
+            </div>`;
+          // click to detail
+          wrapper.querySelector('.image-container').onclick = () => location.href = `../product-detail.html?id=${p.id}`;
+          wrapper.querySelector('h3').onclick = () => location.href = `../product-detail.html?id=${p.id}`;
+          container.appendChild(wrapper);
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initStylishPage);
+  </script>
+</body>
+</html>

@@ -18,7 +18,7 @@
       padding: 20px;
     }.container {
   max-width: 500px;
-  margin: auto;
+  margin: 120px auto;
   background: white;
   border-radius: 12px;
   padding: 24px;
@@ -224,10 +224,56 @@ body.dark-mode .order-info p {
 body.dark-mode .order-info h4 {
   color: #fff;
 }
-
+@media (max-width:768px){
+  body{
+    margin-top: 50px;
+  }
+}
 
 
   </style>  <!-- Firebase -->  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script></head>
+  <script src="js/config.js"></script>
+<script src="js/init-firebase.js"></script>
+
+<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
+<script>
+(function(){
+  // alias for new code
+  window.db = window.database || null;
+
+  // expose window.database getter so other code can read window.database even if they read it later
+  try {
+    Object.defineProperty(window, 'database', {
+      get: function() { return window.db; },
+      configurable: true
+    });
+  } catch (e) {
+    // fallback if defineProperty blocked
+    if (!window.database) window.database = window.db;
+  }
+
+  // Monkey-patch firebase.database() so old code keeps working.
+  // Ensure firebase SDK is loaded and only patch once.
+  if (window.firebase && !firebase.__dbPatched) {
+    firebase.__dbPatched = true;
+    // Preserve original if present (for safety)
+    firebase.__originalDatabaseFn = firebase.database || null;
+    firebase.database = function() {
+      // return underlying db reference created by init-firebase.js
+      if (window.db) return window.db;
+      // fallback: if original exists, call it
+      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
+      // otherwise return null to avoid throwing in caller
+      return null;
+    };
+    // Helpful console info for debugging
+    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
+  } else {
+    // still log so you can diagnose missing init
+    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
+  }
+})();
+</script>
 <body>
    <!-- 🔼 Top Banner -->
       <div class="top-banner" id="topBanner">
@@ -271,16 +317,6 @@ body.dark-mode .order-info h4 {
   </div>
   </main>
   <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
-  authDomain: "sublimestore-a0252.firebaseapp.com",
-  projectId: "sublimestore-a0252",
-  storageBucket: "sublimestore-a0252.appspot.com",
-  messagingSenderId: "460519742193",
-  appId: "1:460519742193:web:92b91dc5ee963cc371e750"
-};
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
 
 function searchOrders() {
   const phone = document.getElementById("phone").value.trim();

@@ -1,62 +1,58 @@
-
 async function loadNavbar() {
   const container = document.getElementById("navbar");
   const res = await fetch("navbar.html");
   const html = await res.text();
   container.innerHTML = html;
-
-  bindNavbarEvents(); // ✅ Call after injecting HTML
+  bindNavbarEvents();
   highlightActiveLink();
+
+  // Initialize mini-cart now that navbar DOM exists
+  if (typeof initMiniCart === 'function') {
+    try {
+      initMiniCart();
+      // console.log('mini cart initialized');
+    } catch (err) {
+      console.error('initMiniCart error:', err);
+    }
+  }
 }
 
 function bindNavbarEvents() {
   const $ = id => document.getElementById(id);
-
   const mobileMenu = $("mobileMenu");
 
-  $("openMenu")?.addEventListener("click", () => {
-    mobileMenu?.classList.add("active");
-  });
+  $("openMenu")?.addEventListener("click", () => mobileMenu?.classList.add("active"));
+  $("closeMenu")?.addEventListener("click", () => mobileMenu?.classList.remove("active"));
 
-  $("closeMenu")?.addEventListener("click", () => {
-    mobileMenu?.classList.remove("active");
-  });
-
-  // ✅ DARK MODE BUTTON WORKING
   const darkToggle = $("darkModeToggle");
-  const desktopToggle = $("desktopThemeToggle");
-function applySavedTheme() {
-  const saved = localStorage.getItem("theme");
-  const isDark = saved === "dark";
+  const desktopToggle = $("desktopDarkToggle");
 
-  document.body.classList.toggle("dark-mode", isDark);
+  // ✅ Dark Mode Theme Setup
+  function applySavedTheme() {
+    const isDark = localStorage.getItem("theme") === "dark";
+    document.body.classList.toggle("dark-mode", isDark);
 
-  if (darkToggle) darkToggle.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-  if (desktopToggle) desktopToggle.textContent = isDark ? "☀️" : "🌙";
-}
-
-// Run on initial load
-applySavedTheme();
-
-// Toggle dark mode on click
-darkToggle?.addEventListener("click", () => {
-  const isDark = document.body.classList.toggle("dark-mode");
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-  darkToggle.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-
-  // ✅ Close mobile menu if open
-  const menu = $("mobileMenu");
-  if (menu?.classList.contains("active")) {
-    menu.classList.remove("active");
+    // ✅ Set checkbox state based on theme
+    if (darkToggle) darkToggle.checked = isDark;
+    if (desktopToggle) desktopToggle.checked = isDark;
   }
-});
-desktopToggle?.addEventListener("click", () => {
-  const isDark = document.body.classList.toggle("dark-mode");
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-  if (darkToggle) darkToggle.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-  if (desktopToggle) desktopToggle.textContent = isDark ? "☀️" : "🌙";
-});
-  // Mobile search open/close
+
+  applySavedTheme();
+
+  // ✅ Toggle logic for both desktop & mobile
+  function toggleTheme(fromToggle) {
+    const isDark = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+
+    // Sync both toggles visually
+    if (darkToggle && fromToggle !== darkToggle) darkToggle.checked = isDark;
+    if (desktopToggle && fromToggle !== desktopToggle) desktopToggle.checked = isDark;
+  }
+
+  darkToggle?.addEventListener("change", () => toggleTheme(darkToggle));
+  desktopToggle?.addEventListener("change", () => toggleTheme(desktopToggle));
+
+  // Mobile search
   $("openSearch")?.addEventListener("click", () => {
     $("mobileSearch")?.classList.add("active");
     $("navbar")?.classList.add("hidden");
@@ -67,60 +63,34 @@ desktopToggle?.addEventListener("click", () => {
     $("mobileSearch")?.classList.remove("active");
     $("navbar")?.classList.remove("hidden");
     document.body.classList.remove("search-active");
-
     const input = $("mobileSearchInput");
     if (input) {
       input.value = "";
       document.dispatchEvent(new CustomEvent("liveSearch", { detail: "" }));
     }
   });
-// DESKTOP DROPDOWN LOGIC
-const openDesktopMenu = document.getElementById("openDesktopMenu");
-const desktopDropdown = document.getElementById("desktopDropdown");
 
-if (openDesktopMenu && desktopDropdown) {
-  openDesktopMenu.addEventListener("click", (e) => {
-    e.stopPropagation(); // Prevent bubbling to document
-    const isVisible = desktopDropdown.style.display === "block";
-    desktopDropdown.style.display = isVisible ? "none" : "block";
-  });
+  // Desktop dropdown
+  const openDesktopMenu = $("openDesktopMenu");
+  const desktopDropdown = $("desktopDropdown");
+  if (openDesktopMenu && desktopDropdown) {
+    openDesktopMenu.addEventListener("click", e => {
+      e.stopPropagation();
+      desktopDropdown.style.display = desktopDropdown.style.display === "block" ? "none" : "block";
+    });
+    document.addEventListener("click", e => {
+      if (!desktopDropdown.contains(e.target) && !openDesktopMenu.contains(e.target)) {
+        desktopDropdown.style.display = "none";
+      }
+    });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") desktopDropdown.style.display = "none";
+    });
+  }
 
-  // Close dropdown when clicking outside
-  document.addEventListener("click", (e) => {
-    if (
-      !desktopDropdown.contains(e.target) &&
-      !openDesktopMenu.contains(e.target)
-    ) {
-      desktopDropdown.style.display = "none";
-    }
-  });
-
-  // Optional: Close dropdown on ESC key
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      desktopDropdown.style.display = "none";
-    }
-  });
-}
-const desktopDarkToggle = document.getElementById("desktopDarkToggle");
-if (desktopDarkToggle) {
-  desktopDarkToggle.addEventListener("click", () => {
-  const isDark = document.body.classList.toggle("dark-mode");
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-  desktopDarkToggle.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-
-  // Sync mobile toggle
-  const mobileDark = document.getElementById("darkModeToggle");
-  if (mobileDark) mobileDark.textContent = desktopDarkToggle.textContent;
-
-  // ✅ Close the desktop dropdown after click
-  const desktopDropdown = document.getElementById("desktopDropdown");
-  if (desktopDropdown) desktopDropdown.style.display = "none";
-});
-}
-  // Search input
+  // Search input handling
   ["desktopSearchInput", "mobileSearchInput"].forEach(id => {
-    const input = document.getElementById(id);
+    const input = $(id);
     if (input) {
       const handler = e => {
         const query = e.target.value.trim();
@@ -128,36 +98,30 @@ if (desktopDarkToggle) {
           window.location.pathname.endsWith("index.html") ||
           window.location.pathname === "/" ||
           window.location.pathname === "/index";
-
         if (!isIndex) {
           window.location.href = `index.html?search=${encodeURIComponent(query)}`;
         } else {
           document.dispatchEvent(new CustomEvent("liveSearch", { detail: query }));
         }
       };
-
       input.addEventListener("input", handler);
       input.addEventListener("keyup", handler);
     }
   });
 
-  // Smooth scroll for All Products
+  // Scroll to Products
   ["allProductsLink", "allProductsLinkMobile"].forEach(id => {
-    const link = document.getElementById(id);
+    const link = $(id);
     if (link) {
       link.addEventListener("click", e => {
         const isOnHomePage =
           window.location.pathname.endsWith("index.html") ||
           window.location.pathname === "/";
-
         if (isOnHomePage) {
           e.preventDefault();
-          const target = document.getElementById("productList");
+          const target = $("productList");
           if (target) target.scrollIntoView({ behavior: "smooth" });
-
-          // Close mobile menu
           mobileMenu?.classList.remove("active");
-
           if (window.history.replaceState) {
             window.history.replaceState(null, null, "index.html");
           }
@@ -166,7 +130,35 @@ if (desktopDarkToggle) {
     }
   });
 
-  highlightActiveLink();
+  // ✅ Typing Animation
+  const searchInputs = ["desktopSearchInput", "mobileSearchInput"]
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+
+  const phrases = ["Sneakers", "Formal Shoes", "Wedding Shoes", "Premium Footwear", "Casual Styles"];
+  let phraseIndex = 0, charIndex = 0, isDeleting = false;
+
+  function animateTyping() {
+    const current = phrases[phraseIndex];
+    const text = isDeleting ? current.slice(0, --charIndex) : current.slice(0, ++charIndex);
+    searchInputs.forEach(input => {
+      if (!input.matches(":focus")) {
+        input.setAttribute("placeholder", `Search for ${text}`);
+      }
+    });
+    if (!isDeleting && charIndex === current.length) {
+      isDeleting = true;
+      setTimeout(animateTyping, 1000);
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      setTimeout(animateTyping, 500);
+    } else {
+      setTimeout(animateTyping, isDeleting ? 50 : 100);
+    }
+  }
+
+  animateTyping();
 }
 
 function highlightActiveLink() {
@@ -178,7 +170,6 @@ function highlightActiveLink() {
   if (!isIndexPage) {
     const currentPath = window.location.pathname;
     const links = document.querySelectorAll(".nav-center a, .mobile-menu a");
-
     links.forEach(link => {
       const linkPath = new URL(link.href, window.location.origin).pathname;
       link.classList.toggle("active", linkPath === currentPath);
@@ -186,18 +177,16 @@ function highlightActiveLink() {
     return;
   }
 
-const homeLink = document.getElementById("homeLink");
+  const homeLink = document.getElementById("homeLink");
   const homeLinkMobile = document.getElementById("homeLinkMobile");
   const allProductsLink = document.getElementById("allProductsLink");
   const allProductsLinkMobile = document.getElementById("allProductsLinkMobile");
-
   const productSection = document.getElementById("productList");
 
   const observer = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
         const inView = entry.isIntersecting;
-
         if (inView) {
           allProductsLink?.classList.add("active");
           allProductsLinkMobile?.classList.add("active");

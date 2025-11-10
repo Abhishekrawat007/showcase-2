@@ -1,11 +1,3 @@
-// ✅ Always apply saved theme early
-(function applyDarkModeEarly() {
-  const theme = localStorage.getItem("theme");
-  if (theme === "dark") {
-    document.documentElement.classList.add("dark-mode");
-  }
-})();
-
 const productList = document.getElementById("productList");
 const roundedRow1 = document.getElementById("roundedRow1");
 const roundedRow2 = document.getElementById("roundedRow2");
@@ -14,39 +6,46 @@ function generateProductCard(product) {
   let buttonsHTML = '';
 
   if (product.inStock) {
-    buttonsHTML = 
-      `<div class="button-group">
-        <button class="add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
+    buttonsHTML = `
+      <div class="button-group">
+        <button class="btn btn-primary add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
         <div class="quantity-controls" style="display:none;" data-id="${product.id}">
-          <button class="qty-btn minus" data-id="${product.id}">-</button>
+          <button class="btn qty-btn minus" data-id="${product.id}">−</button>
           <span class="qty-count" id="qty-${product.id}">1</span>
-          <button class="qty-btn plus" data-id="${product.id}">+</button>
+          <button class="btn qty-btn plus" data-id="${product.id}">+</button>
         </div>
-       <button class="buy-now-btn" onclick="buyNowFunction()" data-id="${product.id}">Buy Now</button>
+        <button class="btn btn-buy buy-now-btn" onclick="buyNowFunction()" data-id="${product.id}">Buy Now</button>
       </div>`;
   } else {
-    buttonsHTML = 
-      `<div class="button-group">
-        <a href="tel:+918868839446" class="call-btn">Call Now</a> 
-        <a href="https://wa.me/918868839446" class="whatsapp-btn">WhatsApp</a>
+    buttonsHTML = `
+      <div class="button-group">
+        <a href="tel:+918868839446" class="btn btn-call call-btn">Call Now</a>
+        <a href="https://wa.me/918868839446" class="btn btn-whatsapp whatsapp-btn">WhatsApp</a>
       </div>`;
   }
 
-  const cardContent = 
-    `<div class="image-container">
-      <img src="${product.images[0]}" class="product-img" alt="${product.name}"  loading="lazy"/>
+  const cardContent = `
+    <div class="image-container">
+      <img src="${product.images[0]}" class="product-img" alt="${product.name}" loading="lazy" />
       ${!product.inStock ? '<span class="stock-label">Out of Stock</span>' : ''}
-      <span class="media-info">${product.mediaCount}</span>
+      <span class="wishlist ${isInWishlist(product.id) ? 'active' : ''}" data-id="${product.id}">&#10084;</span>
     </div>
-    <h3 class="product-title">${product.name}</h3>
-    <div class="details">
-      <p class="price">
-        <span class="old">₹${product.oldPrice}</span>
-        <span class="new">₹${product.newPrice}</span>
+    <div class="card-body">
+      ${product.tags?.includes('bestseller') ? '<span class="tag">BESTSELLER</span>' : ''}
+      <h3 class="product-title">${product.name}</h3>
+      <div class="price-block">
+        <span class="new-price">₹${product.newPrice}</span>
+        <span class="old-price">₹${product.oldPrice}</span>
         <span class="discount">(${product.discount} off)</span>
-      </p>
+      </div>
+      ${product.offerPrice ? `<div class="offer-price">Get it for ₹${product.offerPrice}</div>` : ''}
+      ${product.colors?.length ? `
+        <div class="color-dots">
+          ${product.colors.map(color => `<span class="dot" style="background:${color}"></span>`).join('')}
+        </div>` : ''}
       ${buttonsHTML}
-    </div>`;
+    </div>
+  `;
 
   const wrapper = document.createElement("div");
   wrapper.className = "product-card";
@@ -61,16 +60,46 @@ function generateProductCard(product) {
   });
 
   if (productList) productList.appendChild(wrapper);
+
+  wrapper.querySelector('.wishlist')?.addEventListener('click', function (e) {
+    e.stopPropagation();
+   const productId = this.dataset.id;
+toggleWishlist(productId);
+this.classList.toggle('active');
+  });
+}
+function getWishlist() {
+  return JSON.parse(localStorage.getItem("wishlist") || "[]");
 }
 
-function generateRoundedCard(product) {
+function saveWishlist(wishlist) {
+  localStorage.setItem("wishlist", JSON.stringify(wishlist));
+}
+
+function isInWishlist(productId) {
+  return getWishlist().includes(productId);
+}
+
+function toggleWishlist(productId) {
+  let wishlist = getWishlist();
+  if (wishlist.includes(productId)) {
+    wishlist = wishlist.filter(id => id !== productId);
+    showToast("Removed from wishlist 💔");
+  } else {
+    wishlist.push(productId);
+    showToast("Added to wishlist 💖");
+  }
+  saveWishlist(wishlist);
+}
+function generateTrendingCard(product)  {
   const div = document.createElement("div");
-  div.className = "rounded-card";
+  div.className = "style-card trending";
   div.innerHTML = 
-    `<div class="rounded-img" onclick="window.location.href='product-detail.html?id=${product.id}'">
+    `<div class="rect-img-wrapper" onclick="window.location.href='product-detail.html?id=${product.id}'">
       <img src="${product.images[0]}" alt="${product.name}" loading="lazy">
+      <span class="flame-icon">🔥</span>
     </div>
-    <p class="rounded-title">${product.name2 || product.name}</p>`
+    <p>${product.name2 || product.name}</p>`
   ;
   return div;
 }
@@ -99,27 +128,22 @@ function cacheShuffle(key, data) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const roundedContainer1 = roundedRow1;
-  const roundedContainer2 = roundedRow2;
+  const stylesRow1 = document.getElementById("stylesRow1");
+  const stylesRow2 = document.getElementById("stylesRow2");
+  if (!stylesRow1 || !stylesRow2) return;
 
- // Get shuffled rounded cards from cache or shuffle now
-function renderRoundedCards() {
-  const roundedRow1 = document.getElementById("roundedRow1");
-  const roundedRow2 = document.getElementById("roundedRow2");
-  if (!roundedRow1 || !roundedRow2) return;
+  stylesRow1.innerHTML = "";
+  stylesRow2.innerHTML = "";
 
-  roundedRow1.innerHTML = "";
-  roundedRow2.innerHTML = "";
+  const shuffled = shuffleArray(products).slice(0, 14); // Always reshuffles
 
-  let rounded = shuffleArray(products).slice(0, 14);
+  const row1 = shuffled.slice(0, 7);
+  const row2 = shuffled.slice(7, 14);
 
-  const row1 = rounded.slice(0, 7);
-  const row2 = rounded.slice(7, 14);
-  row1.map(generateRoundedCard).forEach(card => roundedRow1.appendChild(card));
-  row2.map(generateRoundedCard).forEach(card => roundedRow2.appendChild(card));
-}
-renderRoundedCards();
+ row1.forEach(product => stylesRow1.appendChild(generateTrendingCard(product)));
+row2.forEach(product => stylesRow2.appendChild(generateTrendingCard(product)));
 
+});
   /*const cachedProductOrder = getCachedShuffle("productShuffle", 24);
 const productOrder = cachedProductOrder || shuffleArray(products);
 if (!cachedProductOrder) cacheShuffle("productShuffle", productOrder);
@@ -153,14 +177,35 @@ const $ = id => document.getElementById(id);
   };
 
   function searchHandler(query) {
-    const q = query.trim().toLowerCase();
-    const filtered = q
-      ? products.filter(p => p.name.toLowerCase().includes(q))
-      : [...products];
-    toggleUI(!!q);
-    if (productList) renderProducts(filtered);
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? products.filter(p => p.name.toLowerCase().includes(q))
+    : [...products];
+
+  toggleUI(!!q);
+  // ✅ Also hide banners and stylish sections
+const bannerSlider = document.querySelector(".banner-slider");
+const stylesSection = document.getElementById("stylesSection");
+const stylishCollage = document.getElementById("stylishCollage");
+const trustBadges = document.querySelector(".trust-badges");
+if (trustBadges) trustBadges.style.display = q ? "none" : "flex";
+
+if (bannerSlider) bannerSlider.style.display = q ? "none" : "block";
+if (stylesSection) stylesSection.style.display = q ? "none" : "block";
+if (stylishCollage) stylishCollage.style.display = q ? "none" : "grid"; // or "flex" if needed
+
+  // ✅ Hide or show stylish cards depending on search
+  const stylesRow1 = document.getElementById("stylesRow1");
+  const stylesRow2 = document.getElementById("stylesRow2");
+
+  if (stylesRow1 && stylesRow2) {
+    const shouldHideStylish = q.length > 0;
+    stylesRow1.style.display = shouldHideStylish ? "none" : "flex";
+    stylesRow2.style.display = shouldHideStylish ? "none" : "flex";
   }
 
+  if (productList) renderProducts(filtered);
+}
   const sessionTerm = sessionStorage.getItem("liveSearch");
   if (sessionTerm) {
     if (desktopInput) desktopInput.value = sessionTerm;
@@ -199,6 +244,186 @@ const $ = id => document.getElementById(id);
     });
   });
 
+  // Optional: also adjust on window resize
+  window.addEventListener('resize', adjustDropdownHeight);
+
+// load stylishPages (fall back to small default if missing)
+// 🖼️ Generate Stylish Collage Cards (for stylish-collage section)
+function generateStylishCard(page) {
+  const div = document.createElement("div");
+  div.className = "stylish-card";
+  const imgSrc =
+    page.previewImage ||
+    (page.productIds?.length
+      ? (products.find(p => String(p.id) === String(page.productIds[0]))?.images?.[0])
+      : "images/default.jpg");
+
+  div.innerHTML = `
+    <img src="${imgSrc}" alt="${page.title}" loading="lazy">
+    <div class="overlay">
+      <h3>${page.title}</h3>
+      <p>${page.desc || page.shortDesc || ""}</p>
+    </div>
+  `;
+  
+  // Clicking navigates to its stylish page
+  const slug = page.slug || page.title.toLowerCase().replace(/\s+/g, "-");
+  div.addEventListener("click", () => {
+    window.location.href = "/stylish/" + slug + ".html";
+  });
+  
+  return div;
+}
+
+// 🧠 Load & Render Stylish Collage
+// ---- Robust renderStylishCollage (replace existing) ----
+async function renderStylishCollage() {
+  const collage = document.getElementById("stylishCollage");
+  if (!collage) {
+    console.warn('stylishCollage container not found.');
+    return;
+  }
+
+  // 1) Try window.stylishPages
+  let pages = window.stylishPages;
+  if (!pages) {
+    // 2) Try localStorage preview saved by editor
+    try {
+      const raw = localStorage.getItem('stylishPages');
+      if (raw) {
+        pages = JSON.parse(raw);
+        console.info('Loaded stylishPages from localStorage (preview).');
+      }
+    } catch (e) {
+      console.warn('Failed to parse localStorage stylishPages:', e);
+    }
+  }
+
+  // 3) Try fetching the file directly (helps during local testing)
+  if (!pages) {
+    try {
+      const res = await fetch('/js/stylishPages.js', { cache: 'no-store' });
+      if (res.ok) {
+        const text = await res.text();
+        // Attempt to locate an assignment to stylishPages inside file
+        // We'll create a sandboxed function so "const stylishPages = ..." still works.
+        try {
+          const wrapper = `(function(){ ${text}; return (typeof window !== 'undefined' && window.stylishPages) ? window.stylishPages : (typeof stylishPages !== 'undefined' ? stylishPages : null); })()`;
+          pages = (0, eval)(wrapper); // eslint-disable-line no-eval
+          if (pages) {
+            window.stylishPages = pages;
+            console.info('Loaded stylishPages from /js/stylishPages.js via fetch+eval.');
+          }
+        } catch (e) {
+          console.warn('eval failed for stylishPages.js:', e);
+        }
+      } else {
+        console.info('/js/stylishPages.js not found (status ' + res.status + ').');
+      }
+    } catch (err) {
+      console.warn('Fetch of /js/stylishPages.js failed:', err);
+    }
+  }
+
+  // 4) Give up gracefully if still missing
+  if (!pages || !Array.isArray(pages) || pages.length === 0) {
+    console.warn('stylishPages data not found — collage will remain empty.');
+    collage.innerHTML = ''; // clear it
+    return;
+  }
+
+  // 5) Render up to 6 cards
+  collage.innerHTML = '';
+  pages.slice(0, 6).forEach(p => {
+    try {
+      collage.appendChild(generateStylishCard(p));
+    } catch (err) {
+      console.error('Error rendering stylish card', p, err);
+    }
+  });
+}
+// Run once DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderStylishCollage);
+} else {
+  renderStylishCollage();
+}
+
+
+
+// Only run on page load, not during search
+document.addEventListener("DOMContentLoaded", () => {
+  renderStylishCollage(); // loads from stylishPages.js dynamically
+});
+
+function updateCartIconBadge() {
+  const cartBadge = document.getElementById("cartCountBadge");
+  if (!cartBadge) return;
+
+  const itemCount = Object.values(cart || {}).reduce((sum, item) => {
+    return sum + (item?.qty || 0);
+  }, 0);
+
+  if (itemCount > 0) {
+    cartBadge.textContent = itemCount;
+    cartBadge.style.display = "inline-block";
+  } else {
+    cartBadge.style.display = "none";
+  }
+}
+
+function showToast(message) {
+  let toast = document.createElement("div");
+  toast.className = "cart-toast";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("show");
+  }, 100); // let it render first
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    toast.addEventListener("transitionend", () => toast.remove());
+  }, 3000);
+}
+// sliding banner starts here
+document.addEventListener("DOMContentLoaded", () => {
+  const track = document.querySelector(".banner-track");
+  const slides = document.querySelectorAll(".banner-slide");
+  const prev = document.querySelector(".prev-btn");
+  const next = document.querySelector(".next-btn");
+
+  // Defensive check in case slides are not found
+  if (!track || slides.length === 0) {
+    console.warn("No slides found for the banner!");
+    return;
+  }
+
+  let index = 0;
+
+  function updateSlider() {
+    track.style.transform = `translateX(-${index * 100}%)`;
+  }
+
+  next?.addEventListener("click", () => {
+    index = (index + 1) % slides.length;
+    updateSlider();
+  });
+
+  prev?.addEventListener("click", () => {
+    index = (index - 1 + slides.length) % slides.length;
+    updateSlider();
+  });
+
+  setInterval(() => {
+    index = (index + 1) % slides.length;
+    updateSlider();
+  }, 4000);
+  updateCartIconBadge();
+});
+
+  // filter button starts here
   const allFilterBtns = document.querySelectorAll('.filter-btn');
   allFilterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -298,7 +523,7 @@ const $ = id => document.getElementById(id);
     renderFilteredProducts();
   });
 });
-});
+
 
 
 function toggleBadge() {
@@ -321,18 +546,24 @@ function scrollToTop() {
     behavior: "smooth"
   });
 }
-document.getElementById("categoryToggle")?.addEventListener("click", () => {
-  document.getElementById("categoryMenu")?.classList.toggle("hidden");
-});
+// ✅ Open/close category menu
+const categoryToggle = document.getElementById("categoryToggle");
+const categoryMenu = document.getElementById("categoryMenu");
 
-// Optional: Close dropdown when clicking outside
-document.addEventListener("click", (e) => {
-  const toggle = document.getElementById("categoryToggle");
-  const menu = document.getElementById("categoryMenu");
-  if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-    menu.classList.add("hidden");
-  }
-});
+if (categoryToggle && categoryMenu) {
+  categoryToggle.addEventListener("click", (e) => {
+    e.stopPropagation(); // prevent global click listener from firing
+    categoryMenu.classList.toggle("hidden");
+    adjustDropdownHeight();
+  });
+
+  // Close only if clicking outside BOTH menu and toggle
+  document.addEventListener("click", (e) => {
+    if (!categoryMenu.contains(e.target) && !categoryToggle.contains(e.target)) {
+      categoryMenu.classList.add("hidden");
+    }
+  });
+}
 
   function adjustDropdownHeight() {
     const button = document.getElementById('categoryToggle');
@@ -352,8 +583,14 @@ document.addEventListener("click", (e) => {
   document.getElementById('categoryToggle').addEventListener('click', () => {
     adjustDropdownHeight();
   });
-
-  // Optional: also adjust on window resize
-  window.addEventListener('resize', adjustDropdownHeight);
-
-
+function showToast(message) {
+  let toast = document.createElement("div");
+  toast.className = "toast-message";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add("visible"), 10);
+  setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
