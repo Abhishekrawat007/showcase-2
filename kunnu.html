@@ -125,7 +125,7 @@ async function login() {
 
     // store token and redirect
     sessionStorage.setItem("adminToken", data.token);
-    window.location.href = "ravi.html";
+    window.location.href = "editor.html";
   } catch (err) {
     console.error(err);
     errorText.textContent = "❌ Network error";
