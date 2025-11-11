@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "��#\u0000 \u0000m\u0000y\u0000-\u0000e\u0000c\u0000o\u0000m\u0000m\u0000e\u0000r\u0000c\u0000e\u0000-\u0000s\u0000i\u0000t\u0000e\u0000\r\u0000 \u0000",
   "main": "index.js",
-  "scripts": { 
+  "scripts": {
     "generate-config": "node scripts/generate-config.js",
     "build": "npm run generate-config && echo 'No build step needed'",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,7 +14,11 @@
   "dependencies": {
     "@octokit/core": "^7.0.3",
     "@octokit/rest": "^22.0.0",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "form-data": "^4.0.4",
+    "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2",
+    "node-fetch": "^2.7.0"
   },
   "repository": {
     "type": "git",
