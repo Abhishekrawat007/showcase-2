@@ -1,56 +1,58 @@
+// netlify/functions/sendTelegramOrder.js
 import fetch from "node-fetch";
 import FormData from "form-data";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-// sharp may be optional on your platform — we try to import it and fallback
-let sharp;
-try { sharp = await import("sharp"); sharp = sharp.default || sharp; } catch (e) { sharp = null; }
+import sharp from "sharp";
 
-function escapeMarkdownV2(text = "") {
-  return text.replace(/([_*[\]()~`>#+\-=|{}.!])/g, "\\$1");
+// --- Helper: Escape Markdown special chars ---
+function escapeMarkdown(text) {
+  return text.replace(/([_*[\]()~`>#+-=|{}.!])/g, "\\$1");
 }
 
+// --- Helper: Optimize Cloudinary URL or fetch & compress ---
 async function fetchImageAsBase64(imgPath) {
   try {
     let finalUrl = imgPath;
+
+    // If relative path, build full URL
     if (!/^https?:\/\//i.test(imgPath)) {
       const siteUrl = process.env.URL || process.env.DEPLOY_URL || "";
       finalUrl = siteUrl.replace(/\/$/, "") + "/" + imgPath.replace(/^\/?/, "");
     }
 
+    // Optimize Cloudinary URL if detected
     if (/res\.cloudinary\.com/.test(finalUrl)) {
-      // optimize via Cloudinary simple transform
-      finalUrl = finalUrl.replace(/(\/upload\/)(?!.*w_)/, "$1w_80,q_50,f_auto/");
-      const res = await fetch(finalUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const arrayBuffer = await res.arrayBuffer();
+      finalUrl = finalUrl.replace(/(\/upload\/)(?!w_\d+)/, "$1w_80,q_50,f_auto/");
+      const arrayBuffer = await (await fetch(finalUrl)).arrayBuffer();
       return `data:image/jpeg;base64,${Buffer.from(arrayBuffer).toString("base64")}`;
     }
 
-    // otherwise fetch and try to compress with sharp if available
+    // Otherwise, fetch original and compress with Sharp
     const res = await fetch(finalUrl);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
     const buffer = Buffer.from(await res.arrayBuffer());
-    if (sharp) {
-      const compressed = await sharp(buffer).resize({ width: 80 }).jpeg({ quality: 50 }).toBuffer();
-      return `data:image/jpeg;base64,${compressed.toString("base64")}`;
-    } else {
-      // fallback: return original as base64 (might be large)
-      return `data:image/jpeg;base64,${buffer.toString("base64")}`;
-    }
+    const compressedBuffer = await sharp(buffer)
+      .resize({ width: 80 })
+      .jpeg({ quality: 50 })
+      .toBuffer();
+
+    return `data:image/jpeg;base64,${compressedBuffer.toString("base64")}`;
   } catch (err) {
-    console.error("fetchImageAsBase64 error:", imgPath, err.message);
+    console.error("Image fetch error:", imgPath, err.message);
     return "";
   }
 }
 
+// --- Helper: Send Telegram text messages safely ---
 async function sendTelegramMessage(botToken, chatId, text) {
   const MAX_LENGTH = 4096;
   if (text.length <= MAX_LENGTH) {
     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: escapeMarkdownV2(text), parse_mode: "MarkdownV2" })
+      body: JSON.stringify({ chat_id: chatId, text: escapeMarkdown(text), parse_mode: "MarkdownV2" })
     });
     return;
   }
@@ -69,7 +71,7 @@ async function sendTelegramMessage(botToken, chatId, text) {
     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: escapeMarkdownV2(chunk), parse_mode: "MarkdownV2" })
+      body: JSON.stringify({ chat_id: chatId, text: escapeMarkdown(chunk), parse_mode: "MarkdownV2" })
     });
     start = end;
     part++;
@@ -86,10 +88,11 @@ export async function handler(event) {
       return { statusCode: 400, body: "Missing order details" };
     }
 
-    // PDF creation (your existing logic)
+    // --- Create PDF ---
     const pdf = new jsPDF("p", "pt", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
 
+    // Header
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(18);
     pdf.text("Sublime Store", pageWidth / 2, 40, { align: "center" });
@@ -143,7 +146,7 @@ export async function handler(event) {
       }
     });
 
-    const finalY = pdf.lastAutoTable?.finalY || (y + 200);
+    const finalY = pdf.lastAutoTable.finalY + 20;
     pdf.setFont("times", "italic");
     pdf.setFontSize(11);
     pdf.setTextColor(60);
@@ -157,33 +160,22 @@ export async function handler(event) {
     const pdfBuffer = Buffer.from(pdf.output("arraybuffer"));
 
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    const TELEGRAM_CHAT_IDS = (process.env.TELEGRAM_CHAT_ID || "")
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean);
+    const TELEGRAM_CHAT_IDS = process.env.TELEGRAM_CHAT_ID;
 
-    if (!TELEGRAM_BOT_TOKEN) {
-      return { statusCode: 500, body: "Missing TELEGRAM_BOT_TOKEN" };
-    }
-    if (TELEGRAM_CHAT_IDS.length === 0) {
-      return { statusCode: 500, body: "No TELEGRAM_CHAT_ID configured" };
-    }
-
-    // Send text messages (sequential or parallel)
+    // Send text messages
     for (const chatId of TELEGRAM_CHAT_IDS) {
       await sendTelegramMessage(TELEGRAM_BOT_TOKEN, chatId, messageText);
     }
 
     // Send PDF
-    await Promise.all(
-      TELEGRAM_CHAT_IDS.map(async (chatId) => {
-        const formData = new FormData();
-        formData.append("document", pdfBuffer, "order.pdf");
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument?chat_id=${chatId}`, { method: "POST", body: formData });
-      })
-    );
+    for (const chatId of TELEGRAM_CHAT_IDS) {
+      const formData = new FormData();
+      formData.append("document", pdfBuffer, "order.pdf");
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument?chat_id=${chatId}`, { method: "POST", body: formData });
+    }
 
     return { statusCode: 200, body: JSON.stringify({ success: true }) };
+
   } catch (err) {
     console.error("Error generating order PDF:", err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };

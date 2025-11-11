@@ -1,5 +1,5 @@
 {
-  "name": "sublime",
+  "name": "showcase-2",
   "version": "1.0.0",
   "description": "��#\u0000 \u0000m\u0000y\u0000-\u0000e\u0000c\u0000o\u0000m\u0000m\u0000e\u0000r\u0000c\u0000e\u0000-\u0000s\u0000i\u0000t\u0000e\u0000\r\u0000 \u0000",
   "main": "index.js",
@@ -14,18 +14,24 @@
   "dependencies": {
     "@octokit/core": "^7.0.3",
     "@octokit/rest": "^22.0.0",
-    "dotenv": "^17.2.3",
+    "firebase": "^12.5.0",
+    "firebase-admin": "^13.5.0",
     "form-data": "^4.0.4",
-    "jspdf": "^3.0.3",
+    "jsonwebtoken": "^9.0.0",
+    "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^3.3.2",
+    "sharp": "^0.34.3"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Abhishekrawat007/my-ecommerce-site.git"
+    "url": "git+https://github.com/Abhishekrawat007/showcase-2.git"
   },
   "bugs": {
-    "url": "https://github.com/Abhishekrawat007/my-ecommerce-site/issues"
+    "url": "https://github.com/Abhishekrawat007/showcase-2/issues"
   },
-  "homepage": "https://github.com/Abhishekrawat007/my-ecommerce-site#readme"
+  "homepage": "https://github.com/Abhishekrawat007/showcase-2#readme",
+  "devDependencies": {
+    "dotenv": "^17.2.3"
+  }
 }
