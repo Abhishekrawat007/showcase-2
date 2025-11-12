@@ -3,7 +3,8 @@ const functions = require("firebase-functions"); const admin = require("firebase
 
 initializeApp();
 
-const TELEGRAM_BOT_TOKEN = "7658138886:AAGGfB0KOK3IVuJcQcG3Z7kG0xlJMkGTLaA"; const TELEGRAM_CHAT_IDS = [6020806530, 5056028508, 5310057351];
+const TELEGRAM_BOT_TOKEN = "8549572473:AAF_dCIp0Hn1IMS_BMEu1DZAXhEYTtm7jAE"; 
+const TELEGRAM_CHAT_IDS = 6020806530;
 
 exports.sendOrderPDF = onRequest(async (req, res) => { try { const { name, phone, cartItems, totalPrice } = req.body; const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", });
 
