@@ -1,11 +1,19 @@
 import fetch from "node-fetch";
 import FormData from "form-data";
 
+// common helper (put near top of file)
+function getChatIdsFromEnv() {
+  const raw = process.env.TELEGRAM_CHAT_ID || "";
+  if (!raw) return [];
+  return raw.split(",").map(s => s.trim()).filter(Boolean);
+}
+
 export async function handler(event) {
   try {
     const { pdfBase64 } = JSON.parse(event.body);
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    const TELEGRAM_CHAT_IDS = process.env.TELEGRAM_CHAT_ID;
+    const TELEGRAM_CHAT_IDS = getChatIdsFromEnv();
+
 
     // Convert base64 string to Buffer
     const pdfBuffer = Buffer.from(pdfBase64, "base64");

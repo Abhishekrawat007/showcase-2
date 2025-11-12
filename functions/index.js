@@ -2,9 +2,16 @@
 const functions = require("firebase-functions"); const admin = require("firebase-admin"); const PDFDocument = require("pdfkit"); const { onRequest } = require("firebase-functions/v2/https"); const { initializeApp } = require("firebase-admin/app"); const { getStorage } = require("firebase-admin/storage"); const { tmpdir } = require("os"); const { join } = require("path"); const { writeFileSync, readFileSync } = require("fs"); const fetch = require("node-fetch");
 
 initializeApp();
+// common helper (put near top of file)
+function getChatIdsFromEnv() {
+  const raw = process.env.TELEGRAM_CHAT_ID || "";
+  if (!raw) return [];
+  return raw.split(",").map(s => s.trim()).filter(Boolean);
+}
 
-const TELEGRAM_BOT_TOKEN = "8549572473:AAF_dCIp0Hn1IMS_BMEu1DZAXhEYTtm7jAE"; 
-const TELEGRAM_CHAT_IDS = 6020806530;
+  const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+    const TELEGRAM_CHAT_IDS = getChatIdsFromEnv();
+
 
 exports.sendOrderPDF = onRequest(async (req, res) => { try { const { name, phone, cartItems, totalPrice } = req.body; const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", });
 

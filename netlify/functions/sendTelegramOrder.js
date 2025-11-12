@@ -5,6 +5,14 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import sharp from "sharp";
 
+// common helper (put near top of file)
+function getChatIdsFromEnv() {
+  const raw = process.env.TELEGRAM_CHAT_ID || "";
+  if (!raw) return [];
+  return raw.split(",").map(s => s.trim()).filter(Boolean);
+}
+
+
 // --- Helper: Escape Markdown special chars ---
 function escapeMarkdown(text) {
   return text.replace(/([_*[\]()~`>#+-=|{}.!])/g, "\\$1");
@@ -160,7 +168,8 @@ export async function handler(event) {
     const pdfBuffer = Buffer.from(pdf.output("arraybuffer"));
 
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    const TELEGRAM_CHAT_IDS = process.env.TELEGRAM_CHAT_ID;
+    const TELEGRAM_CHAT_IDS = getChatIdsFromEnv();
+
 
     // Send text messages
     for (const chatId of TELEGRAM_CHAT_IDS) {

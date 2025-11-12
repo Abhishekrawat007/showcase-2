@@ -1,6 +1,13 @@
 import fetch from "node-fetch";
 import FormData from "form-data";
 
+// common helper (put near top of file)
+function getChatIdsFromEnv() {
+  const raw = process.env.TELEGRAM_CHAT_ID || "";
+  if (!raw) return [];
+  return raw.split(",").map(s => s.trim()).filter(Boolean);
+}
+
 export const handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -14,7 +21,8 @@ export const handler = async (event) => {
     }
 
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    const TELEGRAM_CHAT_IDS = process.env.TELEGRAM_CHAT_ID;
+    const TELEGRAM_CHAT_IDS = getChatIdsFromEnv();
+
 
     // 1️⃣ Send the message to all chats
     await Promise.all(
