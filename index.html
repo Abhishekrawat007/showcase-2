@@ -383,43 +383,47 @@
   // Safety: if either event never fires, remove after 8s
   setTimeout(removeLoader, 8000);
 </script>
-<!-- Notification modal (replace old notif-popup) -->
-<div id="notif-modal" class="notif-modal hidden" role="dialog" aria-modal="true" aria-labelledby="notif-title" aria-describedby="notif-desc">
-  <div class="notif-backdrop" id="notif-backdrop" tabindex="-1"></div>
+<!-- Notification modal — namespaced for safety -->
+<div id="sublime-notif-modal" class="sublime-notif-modal sublime-hidden" role="dialog" aria-modal="true" aria-labelledby="sublime-notif-title" aria-describedby="sublime-notif-desc">
+  <div class="sublime-notif-backdrop" id="sublime-notif-backdrop" tabindex="-1"></div>
 
-  <div class="notif-wrap"> 
+  <div class="sublime-notif-wrap"> 
     <!-- floating badge / header above the card -->
-    <div class="notif-badge" aria-hidden="true">
-      <div class="badge-inner">
-        <svg class="badge-bell" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <div class="sublime-notif-badge" aria-hidden="true">
+      <div class="sublime-badge-inner">
+        <svg class="sublime-badge-bell" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M12 22c1.1046 0 2-.8954 2-2h-4c0 1.1046.8954 2 2 2z" fill="currentColor"/>
           <path d="M18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 10-3 0v.68C7.64 5.36 6 7.92 6 11v5l-1.7 1.7A1 1 0 005 19h14a1 1 0 00.7-1.6L18 16z" fill="currentColor"/>
         </svg>
-        <span class="badge-text">Stay Updated</span>
+        <span class="sublime-badge-text">Stay Updated</span>
       </div>
     </div>
 
-    <div class="notif-dialog" role="document" aria-labelledby="notif-title">
-      <header class="notif-header">
-        <h3 id="notif-title">🔔 Stay Updated!</h3>
+    <div class="sublime-notif-dialog" role="document" aria-labelledby="sublime-notif-title">
+      <header class="sublime-notif-header">
+        <h3 id="sublime-notif-title">🔔 Stay Updated!</h3>
       </header>
 
-      <div class="notif-body" id="notif-desc">
+      <div class="sublime-notif-body" id="sublime-notif-desc">
         Enable notifications to get new product updates & exclusive offers — we'll only send important stuff.
       </div>
 
-      <footer class="notif-footer">
-        <button id="notif-enable" class="btn primary">Enable</button>
-        <button id="notif-close"  class="btn ghost">Maybe Later</button>
+      <footer class="sublime-notif-footer">
+        <button id="sublime-notif-enable" class="sublime-btn sublime-primary">Enable</button>
+        <button id="sublime-notif-close"  class="sublime-btn sublime-ghost">Maybe Later</button>
       </footer>
     </div>
   </div>
 </div>
 
-
 <style>
- /* Modal wrapper - full viewport */
-.notif-modal {
+/* ---- Namespaced modal CSS (visuals preserved) ---- */
+
+/* Hide helper (namespaced) */
+.sublime-hidden { display: none !important; }
+
+/* Modal wrapper - full viewport */
+.sublime-notif-modal {
   position: fixed;
   inset: 0;
   display: flex;
@@ -427,10 +431,8 @@
   justify-content: center;
   z-index: 120000;
 }
-.notif-modal.hidden { display: none; }
-
 /* Backdrop */
-.notif-backdrop {
+.sublime-notif-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(0,0,0,0.45);
@@ -440,25 +442,25 @@
 }
 
 /* Outer wrapper holds badge + dialog so we can position badge visually above */
-.notif-wrap {
+.sublime-notif-wrap {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 14px;
-  pointer-events: none; /* allow dialog children handle pointer events only */
+  pointer-events: none; /* dialog children handle pointer events */
 }
 
 /* floating badge above dialog */
-.notif-badge {
+.sublime-notif-badge {
   position: absolute;
   top: -28px; /* lifts badge above dialog */
   left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
 }
-.badge-inner {
+.sublime-badge-inner {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -471,11 +473,11 @@
   font-size: 14px;
   pointer-events: none;
 }
-.badge-bell { color: #f59e0b; } /* amber bell in light mode */
-.badge-text { letter-spacing: .2px; }
+.sublime-badge-bell { color: #f59e0b; } /* amber bell in light mode */
+.sublime-badge-text { letter-spacing: .2px; }
 
 /* dialog card itself */
-.notif-dialog {
+.sublime-notif-dialog {
   pointer-events: auto;
   width: 92%;
   max-width: 440px;
@@ -490,52 +492,41 @@
 }
 
 /* header / body / footer */
-.notif-header h3 { margin: 0 0 6px 0; font-size: 18px; font-weight: 800; }
-.notif-body { color: #374151; font-size: 15px; margin-bottom: 14px; line-height: 1.35; }
+.sublime-notif-header h3 { margin: 0 0 6px 0; font-size: 18px; font-weight: 800; }
+.sublime-notif-body { color: #374151; font-size: 15px; margin-bottom: 14px; line-height: 1.35; }
 
 /* footer buttons */
-.notif-footer { display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.btn { min-width: 120px; padding: 10px 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; }
-.btn.primary { background: linear-gradient(180deg,#0A84FF,#0068E8); color: #fff; box-shadow: 0 8px 20px rgba(10,132,255,0.16); }
-.btn.ghost { background: #f3f4f6; color: #0b1220; border: 1px solid rgba(0,0,0,0.06); }
+.sublime-notif-footer { display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.sublime-btn { min-width: 120px; padding: 10px 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; }
+.sublime-primary { background: linear-gradient(180deg,#0A84FF,#0068E8); color: #fff; box-shadow: 0 8px 20px rgba(10,132,255,0.16); }
+.sublime-ghost { background: #f3f4f6; color: #0b1220; border: 1px solid rgba(0,0,0,0.06); }
 
 /* small screens: make dialog stretch nearly full width and badge scale */
 @media (max-width: 520px) {
-  .notif-dialog { width: calc(100% - 28px); max-width: none; padding: 16px; border-radius: 12px; }
-  .badge-inner { padding: 8px 12px; font-size: 13px; }
-  .notif-badge { top: -30px; }
+  .sublime-notif-dialog { width: calc(100% - 28px); max-width: none; padding: 16px; border-radius: 12px; }
+  .sublime-badge-inner { padding: 8px 12px; font-size: 13px; }
+  .sublime-notif-badge { top: -30px; }
 }
 
-/* ---------------- Dark mode overrides ---------------- */
-.dark-mode .notif-backdrop { background: rgba(0,0,0,0.65); }
-.dark-mode .notif-dialog {
-  background: #081026;            /* deep background */
-  color: #e6eef8;                 /* near white text */
+/* Dark mode overrides (same look but namespaced) */
+.dark-mode .sublime-notif-backdrop { background: rgba(0,0,0,0.65); }
+.dark-mode .sublime-notif-dialog {
+  background: #081026;
+  color: #e6eef8;
   box-shadow: 0 18px 40px rgba(2,6,23,0.6);
   border: 1px solid rgba(255,255,255,0.04);
 }
-.dark-mode .notif-body { color: #c7d2e2; }
-.dark-mode .badge-inner {
+.dark-mode .sublime-notif-body { color: #c7d2e2; }
+.dark-mode .sublime-badge-inner {
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
   color: #e6eef8;
   box-shadow: 0 8px 22px rgba(2,6,23,0.6);
 }
-.dark-mode .badge-bell { color: #ffd166; } /* softer amber for dark */
-.dark-mode .btn.ghost { background: rgba(255,255,255,0.03); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.04); }
-.dark-mode .btn.primary { box-shadow: 0 8px 20px rgba(10,132,255,0.12); }
-/* Fix: Make badge readable in dark mode */
-.dark-mode .badge-inner {
-  background: #1e293b; /* Dark navy background for contrast */
-  color: #f8fafc;      /* Light text */
-  box-shadow: 0 4px 14px rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-.dark-mode .badge-bell {
-  color: #facc15; /* Golden yellow bell for dark mode */
-}
- 
-
+.dark-mode .sublime-badge-bell { color: #ffd166; }
+.dark-mode .sublime-ghost { background: rgba(255,255,255,0.03); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.04); }
+.dark-mode .sublime-primary { box-shadow: 0 8px 20px rgba(10,132,255,0.12); }
 </style>
+
 
   <script src="js/product.js" defer></script>
   <script src="js/navbar.js" defer></script>

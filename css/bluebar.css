@@ -8,11 +8,13 @@
   .top-progress,
   .app-progress,
   .progress-bar,
-  .top-banner,
+  
   /* generic tiny horizontal elements */
   header + div[style*="height: 4px"],
   div[style*="height: 4px"][style*="background"],
   div[style*="height: 3px"][style*="background"],
+   div[style*="height: 2px"][style*="background"],
+    div[style*="height: 1px"][style*="background"],
   div[style*="border-top"],
   progress,
   .thin-bar,

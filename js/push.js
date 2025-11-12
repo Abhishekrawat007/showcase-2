@@ -1,268 +1,299 @@
-// js/push.js — refined for better UX & reliability
-// ------------------------------------------------
-console.log("Checking popup condition", {
-  permission: Notification.permission,
-  shown: localStorage.getItem('notifPromptShown'),
-  last: localStorage.getItem('notifPromptLastShown')
-});
+// js/push.js - safer, namespaced, backwards-compatible version
+// ----------------------------------------------------------
+(function () {
+  const PREFIX = 'sublime'; // namespacing for keys & classes
+  const LS_SHOWN_KEYS = [PREFIX + 'NotifPromptShown', 'notifPromptShown']; // honor old key too
+  const LS_LAST_KEYS = [PREFIX + 'NotifPromptLastShown', 'notifPromptLastShown'];
+  const HIDDEN_CLASS = PREFIX + '-hidden';
 
-// ---------------- Register service worker ----------------
-let swRegistrationPromise = null;
-if ('serviceWorker' in navigator) {
-  swRegistrationPromise = navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then(reg => {
-      console.log('Push Service Worker registered ✅', reg);
-      return reg;
-    })
-    .catch(err => {
-      console.error('Service Worker registration failed ❌', err);
-      return null;
-    });
-} else {
-  swRegistrationPromise = Promise.resolve(null);
-}
+  const REPEAT_INTERVAL = 60 * 60 * 1000; // 1 hour
+  const SHOW_DELAY_MS = 15 * 1000;
 
-// ---------------- Config (tweakable) ----------------
-const REPEAT_INTERVAL = 60 * 60 * 1000; // 1 hour in ms
-const SHOW_DELAY_MS = 15 * 1000;        // show modal after 15s for better prompt reliability
-const TOKEN_FETCH_TIMEOUT = 9000;       // timeout for messaging.getToken (ms)
+  let localToastTimer = null;
 
-// ---------------- Modal theme helper ----------------
-function applyModalTheme() {
-  const saved = localStorage.getItem('theme');
-  if (saved === 'dark') { document.documentElement.classList.add('dark-mode'); return; }
-  if (saved === 'light') { document.documentElement.classList.remove('dark-mode'); return; }
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (prefersDark) document.documentElement.classList.add('dark-mode');
-  else document.documentElement.classList.remove('dark-mode');
-}
-window.addEventListener('storage', (e) => { if (e.key === 'theme') applyModalTheme(); });
+  function log(...args) { console.log('sublime-push:', ...args); }
+  function warn(...args) { console.warn('sublime-push:', ...args); }
+  function err(...args) { console.error('sublime-push:', ...args); }
 
-// ---------------- Modal show/hide helpers ----------------
-function showNotifModal() {
-  applyModalTheme();
-  const modal = document.getElementById('notif-modal') || document.getElementById('notif-popup');
-  const backdrop = document.getElementById('notif-backdrop');
-  if (!modal) return;
+  // helper to read/write namespaced LS but keep backwards compatibility
+  function lsGet(keys) {
+    for (const k of keys) {
+      try {
+        const v = localStorage.getItem(k);
+        if (v !== null) return v;
+      } catch (_) {}
+    }
+    return null;
+  }
+  function lsSet(key, value) {
+    try { localStorage.setItem(key, value); } catch (_) {}
+  }
 
-  modal.classList.remove('hidden');
-  if (backdrop) backdrop.classList.remove('hidden');
+  // Always try to restore scroll lock
+  function restoreScroll() {
+    try {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    } catch (_) {}
+  }
 
-  // prevent background scroll
-  document.documentElement.style.overflow = 'hidden';
-  document.body.style.overflow = 'hidden';
-
-  // accessibility
-  document.getElementById('notif-enable')?.focus();
-
-  // record last shown
-  try { localStorage.setItem('notifPromptLastShown', Date.now().toString()); } catch (_) {}
-}
-
-function hideNotifModal() {
-  const modal = document.getElementById('notif-modal') || document.getElementById('notif-popup');
-  const backdrop = document.getElementById('notif-backdrop');
-  if (!modal) return;
-  modal.classList.add('hidden');
-  if (backdrop) backdrop.classList.add('hidden');
-
-  // restore scroll
-  document.documentElement.style.overflow = '';
-  document.body.style.overflow = '';
-}
-
-// ---------------- Decide whether to show popup ----------------
-function shouldShowPopup() {
+  // Service worker registration safe wrapper
+  let swRegistrationPromise = null;
   try {
-    // already accepted before — never show
-    if (localStorage.getItem('notifPromptShown') === '1') return false;
-  } catch (_) {}
-
-  // granted → skip
-  if (Notification && Notification.permission === 'granted') {
-    try { localStorage.setItem('notifPromptShown', '1'); } catch (_) {}
-    return false;
+    if ('serviceWorker' in navigator) {
+      swRegistrationPromise = navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then(reg => {
+          log('Service Worker registered', reg.scope);
+          return reg;
+        })
+        .catch(e => {
+          warn('Service Worker registration failed', e);
+          return null;
+        });
+    } else {
+      swRegistrationPromise = Promise.resolve(null);
+    }
+  } catch (e) {
+    swRegistrationPromise = Promise.resolve(null);
+    warn('SW registration thrown', e);
   }
 
-  // denied → skip (browser will not re-ask)
-  if (Notification && Notification.permission === 'denied') {
-    console.log("Permission previously denied — skipping popup.");
-    return false;
+  // theme helper (keeps your existing logic)
+  function applyModalTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') { document.documentElement.classList.add('dark-mode'); return; }
+    if (saved === 'light') { document.documentElement.classList.remove('dark-mode'); return; }
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) document.documentElement.classList.add('dark-mode');
+    else document.documentElement.classList.remove('dark-mode');
+  }
+  window.addEventListener('storage', (e) => { if (e.key === 'theme') applyModalTheme(); });
+
+  // Namespaced show/hide that also supports old 'hidden' class
+  function showElement(el) {
+    if (!el) return;
+    el.classList.remove(HIDDEN_CLASS);
+    el.classList.remove('hidden');
+    el.style.display = ''; // let CSS control it
+  }
+  function hideElement(el) {
+    if (!el) return;
+    el.classList.add(HIDDEN_CLASS);
+    el.classList.add('hidden');
+    // do not forcibly set display:none in case other logic relies on it
   }
 
-  // 🚀 If it's the first time (permission === 'default'), always show immediately
-  if (Notification && Notification.permission === 'default') {
-    console.log("First-time user — showing enable modal.");
-    return true;
+  function shouldShowPopup() {
+    try {
+      // if either namespaced or legacy stored '1', skip
+      if (lsGet(LS_SHOWN_KEYS) === '1') return false;
+    } catch (_) {}
+
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch (_) {}
+      return false;
+    }
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+      log('Permission previously denied — skipping prompt.');
+      return false;
+    }
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      log('First-time user (permission default) — show prompt.');
+      return true;
+    }
+
+    const lastShown = lsGet(LS_LAST_KEYS);
+    if (!lastShown) return true;
+    const elapsed = Date.now() - parseInt(lastShown || '0', 10);
+    return elapsed > REPEAT_INTERVAL;
   }
 
-  // fallback to interval re-show
-  const lastShown = localStorage.getItem('notifPromptLastShown');
-  if (!lastShown) return true;
-  const elapsed = Date.now() - parseInt(lastShown || '0', 10);
-  return elapsed > REPEAT_INTERVAL;
-}
-
-// ---------------- Save token ----------------
-function savePushToken(token) {
-  try {
-    firebase.database().ref("pushSubscribers/" + token).set({
-      token,
-      time: Date.now()
-    }).then(() => {
-      console.log("Push token saved to DB ✅");
-      // subscribe to topic via Netlify function
+  async function savePushToken(token) {
+    try {
+      if (!window.firebase || !firebase.database) {
+        warn('Firebase DB not available; token not saved.');
+        return;
+      }
+      await firebase.database().ref("pushSubscribers/" + token).set({ token, time: Date.now() });
+      log('Push token saved to DB ✅');
+      // non-blocking subscribe call (best-effort)
       fetch("/.netlify/functions/subscribe-topic", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, topic: "all" })
-      }).then((res) => res.json())
-        .then((data) => { console.log("subscribe-topic response:", data); })
-        .catch((err) => { console.warn("subscribe-topic error:", err); });
-    }).catch((err) => {
-      console.error("Token save failed", err);
+      }).then(r => r.json()).then(d => log('subscribe-topic response', d)).catch(e => warn('subscribe-topic error', e));
+    } catch (e) {
+      warn('savePushToken failed', e);
+    }
+  }
+
+  // Display modal safely (supports both new and old IDs)
+  function showNotifModal() {
+    applyModalTheme();
+    const modal = document.getElementById('sublime-notif-modal') || document.getElementById('notif-modal') || document.getElementById('notif-popup');
+    const backdrop = document.getElementById('sublime-notif-backdrop') || document.getElementById('notif-backdrop');
+    if (!modal) return;
+    showElement(modal);
+    if (backdrop) showElement(backdrop);
+    try { document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden'; } catch (_) {}
+    try { lsSet(LS_LAST_KEYS[0], Date.now().toString()); } catch (_) {}
+    // focus enable button if available
+    const enableBtn = document.getElementById('sublime-notif-enable') || document.getElementById('notif-enable');
+    if (enableBtn) try { enableBtn.focus(); } catch (_) {}
+  }
+
+  function hideNotifModal() {
+    const modal = document.getElementById('sublime-notif-modal') || document.getElementById('notif-modal') || document.getElementById('notif-popup');
+    const backdrop = document.getElementById('sublime-notif-backdrop') || document.getElementById('notif-backdrop');
+    if (!modal) return;
+    hideElement(modal);
+    if (backdrop) hideElement(backdrop);
+    restoreScroll();
+  }
+
+  // DOM wiring after load
+  document.addEventListener('DOMContentLoaded', () => {
+    log('popup condition', {
+      permission: (typeof Notification !== 'undefined' ? Notification.permission : 'unavailable'),
+      shown: lsGet(LS_SHOWN_KEYS),
+      last: lsGet(LS_LAST_KEYS)
     });
-  } catch (err) {
-    console.error("Token save failed", err);
-  }
-}
 
-// ---------------- DOM wiring ----------------
-document.addEventListener('DOMContentLoaded', () => {
-  // if already granted, mark as such
-  if (Notification && Notification.permission === 'granted') {
-    try { localStorage.setItem('notifPromptShown', '1'); } catch (_) {}
-  }
-
-  // show modal if conditions say so (with configurable delay)
-  if (shouldShowPopup()) {
-    setTimeout(() => {
-      // final guard: only show if not already granted and modal exists
-      if (!(Notification && Notification.permission === 'granted')) showNotifModal();
-    }, SHOW_DELAY_MS);
-  }
-
-  const enableBtn = document.getElementById('notif-enable');
-  const closeBtn = document.getElementById('notif-close');
-  const backdrop = document.getElementById('notif-backdrop');
-
-  if (backdrop) backdrop.addEventListener('click', (e) => { e.stopPropagation(); });
-
- // FAST-UX enable handler — PRESERVE user gesture for mobile
-enableBtn?.addEventListener('click', (ev) => {
-  // don't call ev.preventDefault() here — leave default behavior unless required
-  // (preventDefault can sometimes change gesture handling on some browsers)
-  try { /* nothing */ } catch(_) {}
-
-  // 1) CALL requestPermission() IMMEDIATELY as part of the click handler
-  //    Do not await anything before this call.
-  const permissionPromise = Notification.requestPermission();
-
-  // 2) Update UI quickly (hide modal) AFTER calling requestPermission()
-  //    This ensures the permission call is still in the original gesture.
-  hideNotifModal();
-
-  // optional: show toast feedback
-  const toast = document.getElementById('subscribeToast');
-  const toastText = document.getElementById('subscribeToastText');
-  const toastSpinner = document.getElementById('subscribeToastSpinner');
-  if (toast && toastText && toastSpinner) {
-    toastText.textContent = 'Requesting browser permission...';
-    toastSpinner.style.display = 'inline-block';
-    toast.style.display = 'block';
-  }
-
-  // 3) Now handle the result asynchronously
-  permissionPromise.then((permission) => {
-    console.log('Permission result:', permission);
-
-    if (permission !== 'granted') {
-      // gracefully inform user
-      if (toast && toastText && toastSpinner) {
-        toastSpinner.style.display = 'none';
-        toastText.textContent = 'Notifications blocked or ignored ❌';
-        clearTimeout(window._subscribeToastTimer);
-        window._subscribeToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 4000);
-      }
-      try { localStorage.setItem('notifPromptLastShown', Date.now().toString()); } catch (_) {}
-      return;
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch (_) {}
     }
 
-    // Permission granted — now get SW and FCM token
-    (async () => {
-      if (!window.firebase || !window.firebase.messaging) {
-        console.error('firebase.messaging() missing!');
-        return;
-      }
-      try {
-        const reg = await swRegistrationPromise;
-        const messaging = window.firebase.messaging();
+    if (shouldShowPopup()) {
+      setTimeout(() => {
+        if (!(typeof Notification !== 'undefined' && Notification.permission === 'granted')) showNotifModal();
+      }, SHOW_DELAY_MS);
+    }
 
-        const token = await messaging.getToken({
-          vapidKey: "BGqOSVUBJJiN8RroZyQ5kmiAzIfdLR-Y85JNYx4vsWxefv-8guZyZJlIWYBOYuFJ16i1DmH_bQlWvwPJpZM7ndM",
-          serviceWorkerRegistration: reg || undefined
-        });
+    // elements (try namespaced first, then fall back)
+    const enableBtn = document.getElementById('sublime-notif-enable') || document.getElementById('notif-enable');
+    const closeBtn = document.getElementById('sublime-notif-close') || document.getElementById('notif-close');
+    const backdrop = document.getElementById('sublime-notif-backdrop') || document.getElementById('notif-backdrop');
 
-        if (token) {
-          console.log("✅ Got FCM token:", token);
-          try { localStorage.setItem('notifPromptShown', '1'); } catch (_) {}
-          savePushToken(token);
+    if (backdrop) backdrop.addEventListener('click', (e) => { e.stopPropagation(); });
 
-          if (toast && toastText && toastSpinner) {
-            toastSpinner.style.display = 'none';
-            toastText.textContent = 'Notifications enabled ✅';
-            clearTimeout(window._subscribeToastTimer);
-            window._subscribeToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 2000);
-          }
-        } else {
-          console.warn('No token received from messaging.getToken()');
-          if (toast && toastText && toastSpinner) {
-            toastSpinner.style.display = 'none';
-            toastText.textContent = 'Error generating token ❌';
-            clearTimeout(window._subscribeToastTimer);
-            window._subscribeToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 2500);
-          }
-        }
-      } catch (err) {
-        console.error('FCM token error:', err);
-      }
-    })();
-  }).catch(err => {
-    console.error('requestPermission() failed:', err);
-  });
-});
+    // Using local timer so we don't overwrite window._subscribeToastTimer
+    let localTimer = null;
+    const toast = document.getElementById('sublimeSubscribeToast') || document.getElementById('subscribeToast');
+    const toastText = document.getElementById('sublimeSubscribeToastText') || document.getElementById('subscribeToastText');
+    const toastSpinner = document.getElementById('sublimeSubscribeToastSpinner') || document.getElementById('subscribeToastSpinner');
 
+    enableBtn && enableBtn.addEventListener('click', (ev) => {
+      // call requestPermission immediately as part of user gesture
+      let permissionPromise;
+      try { permissionPromise = Notification.requestPermission(); } catch (e) { err('requestPermission() failed sync', e); return; }
 
-  // extra protection for some laptop browsers where click might be blocked by focus/overlay
-  enableBtn?.addEventListener('mousedown', (e) => { e.preventDefault(); enableBtn.click(); });
-
-  // MAYBE LATER: hide and record lastShown (so reappears later)
-  closeBtn?.addEventListener('click', () => {
-    try { localStorage.setItem('notifPromptLastShown', Date.now().toString()); } catch (_) {}
-    hideNotifModal();
-  });
-
-  // ESC key closes modal
-  document.addEventListener('keydown', (e) => {
-    const modal = document.getElementById('notif-modal') || document.getElementById('notif-popup');
-    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-      try { localStorage.setItem('notifPromptLastShown', Date.now().toString()); } catch (_) {}
       hideNotifModal();
-    }
-  });
 
-  // Bonus: listen to global permission changes (some browsers expose it)
-  try {
-    if (navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: 'notifications' }).then(p => {
-        p.onchange = () => {
-          console.log('Notification permission changed to', Notification.permission);
-          if (Notification.permission === 'granted') {
-            try { localStorage.setItem('notifPromptShown', '1'); } catch (_) {}
-            hideNotifModal();
+      if (toast && toastText && toastSpinner) {
+        toastText.textContent = 'Requesting browser permission...';
+        toastSpinner.style.display = 'inline-block';
+        toast.style.display = 'block';
+      }
+
+      permissionPromise.then((permission) => {
+        log('Permission result:', permission);
+        if (permission !== 'granted') {
+          if (toast && toastText && toastSpinner) {
+            toastSpinner.style.display = 'none';
+            toastText.textContent = 'Notifications blocked or ignored ❌';
+            clearTimeout(localTimer);
+            localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 4000);
           }
-        };
-      }).catch(()=>{/*ignore*/});
-    }
-  } catch(_) {}
-});
+          try { lsSet(LS_LAST_KEYS[0], Date.now().toString()); } catch (_) {}
+          return;
+        }
+
+        // get FCM token
+        (async () => {
+          try {
+            if (!window.firebase || !firebase.messaging) {
+              err('firebase.messaging() missing!');
+              if (toast && toastText) { toastText.textContent = 'FCM unavailable'; }
+              return;
+            }
+            const reg = await swRegistrationPromise;
+            const messaging = window.firebase.messaging();
+            const token = await messaging.getToken({
+              vapidKey: "BGqOSVUBJJiN8RroZyQ5kmiAzIfdLR-Y85JNYx4vsWxefv-8guZyZJlIWYBOYuFJ16i1DmH_bQlWvwPJpZM7ndM",
+              serviceWorkerRegistration: reg || undefined
+            });
+
+            if (token) {
+              log('Got FCM token', token);
+              try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch (_) {}
+              await savePushToken(token);
+              if (toast && toastText && toastSpinner) {
+                toastSpinner.style.display = 'none';
+                toastText.textContent = 'Notifications enabled ✅';
+                clearTimeout(localTimer);
+                localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2000);
+              }
+            } else {
+              warn('No token received from messaging.getToken()');
+              if (toast && toastText && toastSpinner) {
+                toastSpinner.style.display = 'none';
+                toastText.textContent = 'Error generating token ❌';
+                clearTimeout(localTimer);
+                localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2500);
+              }
+            }
+          } catch (e) {
+            err('FCM token error:', e);
+            if (toast && toastText) {
+              toastText.textContent = 'Error enabling notifications';
+              clearTimeout(localTimer);
+              localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2500);
+            }
+            restoreScroll();
+          }
+        })();
+      }).catch(e => {
+        err('requestPermission() failed:', e);
+        restoreScroll();
+      });
+    });
+
+    // Prevent double-block on mousedown for laptop gestures (retain behaviour)
+    enableBtn?.addEventListener('mousedown', (e) => { try { e.preventDefault(); enableBtn.click(); } catch(_){} });
+
+    closeBtn && closeBtn.addEventListener('click', () => {
+      try { lsSet(LS_LAST_KEYS[0], Date.now().toString()); } catch (_) {}
+      hideNotifModal();
+    });
+
+    // restore scroll on escape if open
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('sublime-notif-modal') || document.getElementById('notif-modal') || document.getElementById('notif-popup');
+      if (e.key === 'Escape' && modal && !(modal.classList.contains(HIDDEN_CLASS) || modal.classList.contains('hidden'))) {
+        try { lsSet(LS_LAST_KEYS[0], Date.now().toString()); } catch (_) {}
+        hideNotifModal();
+      }
+    });
+
+    // restore scroll on page events (safety)
+    window.addEventListener('pagehide', restoreScroll);
+    window.addEventListener('beforeunload', restoreScroll);
+
+    // watch permission changes if supported
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'notifications' }).then(p => {
+          p.onchange = () => {
+            log('Notification permission changed to', Notification.permission);
+            if (Notification.permission === 'granted') {
+              try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch (_) {}
+              hideNotifModal();
+            }
+          };
+        }).catch(()=>{/*ignore*/});
+      }
+    } catch(_) {}
+
+  }); // DOMContentLoaded
+
+})(); // IIFE end
