@@ -3,12 +3,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAGt7uPfeLVinT31xQkbs2y-LR7K4ZfZ7k",
-  authDomain: "sublimestore-a0252.firebaseapp.com",
-  projectId: "sublimestore-a0252",
-  storageBucket: "sublimestore-a0252.appspot.com",
-  messagingSenderId: "460519742193",
-  appId: "1:460519742193:web:92b91dc5ee963cc371e750"
+  apiKey: "AIzaSyBBfvlFpfG21SpMpyjmjM-EP_Dt54kYfAI",
+  authDomain: "showcase-2-24f0a.firebaseapp.com",
+  projectId: "showcase-2-24f0a",
+  storageBucket: "showcase-2-24f0a.firebasestorage.app",
+  messagingSenderId: "894978656187",
+  appId: "1:894978656187:web:2c17a99781591a91c6a69e"
 };
 
 const app = initializeApp(firebaseConfig);
