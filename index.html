@@ -289,6 +289,29 @@
   <a href="cart.html" class="view-cart-btn">View Cart →</a>
 </div>
 
+<!-- PWA INSTALL BAR -->
+<div id="pwa-install-bar" role="dialog" aria-live="polite" aria-label="Install app bar" hidden>
+  <button class="pwa-close" id="pwa-close-btn" aria-label="Close install bar">×</button>
+
+  <div class="pwa-row">
+    <div class="pwa-icon" aria-hidden="true">
+      <img src="/web-app-manifest-192x192.png" alt="SublimeStore App Icon" width="52" height="52" style="border-radius:14px;">
+    </div>
+
+    <div class="pwa-text">
+      <div class="pwa-title">SublimeStore</div>
+      <div class="pwa-sub">Install for 1-tap shopping ⚡</div>
+    </div>
+
+    <div class="pwa-cta">
+      <button id="pwa-install-btn" class="pwa-btn pwa-install">Install</button>
+      <button id="pwa-later-btn" class="pwa-btn pwa-later">Later</button>
+    </div>
+  </div>
+
+  <div class="pwa-progress"><i></i></div>
+</div>
+
 <!-- Page Loader -->
 <div id="pageLoader" aria-busy="true" style="
   position: fixed;
@@ -346,6 +369,160 @@
   // Safety: if either event never fires, remove after 8s
   setTimeout(removeLoader, 8000);
 </script>
+<!-- Notification modal (replace old notif-popup) -->
+<div id="notif-modal" class="notif-modal hidden" role="dialog" aria-modal="true" aria-labelledby="notif-title" aria-describedby="notif-desc">
+  <div class="notif-backdrop" id="notif-backdrop" tabindex="-1"></div>
+
+  <div class="notif-wrap"> 
+    <!-- floating badge / header above the card -->
+    <div class="notif-badge" aria-hidden="true">
+      <div class="badge-inner">
+        <svg class="badge-bell" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 22c1.1046 0 2-.8954 2-2h-4c0 1.1046.8954 2 2 2z" fill="currentColor"/>
+          <path d="M18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 10-3 0v.68C7.64 5.36 6 7.92 6 11v5l-1.7 1.7A1 1 0 005 19h14a1 1 0 00.7-1.6L18 16z" fill="currentColor"/>
+        </svg>
+        <span class="badge-text">Stay Updated</span>
+      </div>
+    </div>
+
+    <div class="notif-dialog" role="document" aria-labelledby="notif-title">
+      <header class="notif-header">
+        <h3 id="notif-title">🔔 Stay Updated!</h3>
+      </header>
+
+      <div class="notif-body" id="notif-desc">
+        Enable notifications to get new product updates & exclusive offers — we'll only send important stuff.
+      </div>
+
+      <footer class="notif-footer">
+        <button id="notif-enable" class="btn primary">Enable</button>
+        <button id="notif-close"  class="btn ghost">Maybe Later</button>
+      </footer>
+    </div>
+  </div>
+</div>
+
+
+<style>
+ /* Modal wrapper - full viewport */
+.notif-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 120000;
+}
+.notif-modal.hidden { display: none; }
+
+/* Backdrop */
+.notif-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  z-index: 1;
+}
+
+/* Outer wrapper holds badge + dialog so we can position badge visually above */
+.notif-wrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  pointer-events: none; /* allow dialog children handle pointer events only */
+}
+
+/* floating badge above dialog */
+.notif-badge {
+  position: absolute;
+  top: -28px; /* lifts badge above dialog */
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.badge-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b1220;
+  box-shadow: 0 8px 20px rgba(3,7,18,0.12);
+  font-weight: 700;
+  font-size: 14px;
+  pointer-events: none;
+}
+.badge-bell { color: #f59e0b; } /* amber bell in light mode */
+.badge-text { letter-spacing: .2px; }
+
+/* dialog card itself */
+.notif-dialog {
+  pointer-events: auto;
+  width: 92%;
+  max-width: 440px;
+  border-radius: 14px;
+  padding: 18px;
+  background: #ffffff;
+  color: #0b1220;
+  box-shadow: 0 18px 40px rgba(2,6,23,0.12);
+  border: 1px solid rgba(0,0,0,0.04);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* header / body / footer */
+.notif-header h3 { margin: 0 0 6px 0; font-size: 18px; font-weight: 800; }
+.notif-body { color: #374151; font-size: 15px; margin-bottom: 14px; line-height: 1.35; }
+
+/* footer buttons */
+.notif-footer { display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn { min-width: 120px; padding: 10px 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; }
+.btn.primary { background: linear-gradient(180deg,#0A84FF,#0068E8); color: #fff; box-shadow: 0 8px 20px rgba(10,132,255,0.16); }
+.btn.ghost { background: #f3f4f6; color: #0b1220; border: 1px solid rgba(0,0,0,0.06); }
+
+/* small screens: make dialog stretch nearly full width and badge scale */
+@media (max-width: 520px) {
+  .notif-dialog { width: calc(100% - 28px); max-width: none; padding: 16px; border-radius: 12px; }
+  .badge-inner { padding: 8px 12px; font-size: 13px; }
+  .notif-badge { top: -30px; }
+}
+
+/* ---------------- Dark mode overrides ---------------- */
+.dark-mode .notif-backdrop { background: rgba(0,0,0,0.65); }
+.dark-mode .notif-dialog {
+  background: #081026;            /* deep background */
+  color: #e6eef8;                 /* near white text */
+  box-shadow: 0 18px 40px rgba(2,6,23,0.6);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.dark-mode .notif-body { color: #c7d2e2; }
+.dark-mode .badge-inner {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  color: #e6eef8;
+  box-shadow: 0 8px 22px rgba(2,6,23,0.6);
+}
+.dark-mode .badge-bell { color: #ffd166; } /* softer amber for dark */
+.dark-mode .btn.ghost { background: rgba(255,255,255,0.03); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.04); }
+.dark-mode .btn.primary { box-shadow: 0 8px 20px rgba(10,132,255,0.12); }
+/* Fix: Make badge readable in dark mode */
+.dark-mode .badge-inner {
+  background: #1e293b; /* Dark navy background for contrast */
+  color: #f8fafc;      /* Light text */
+  box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.dark-mode .badge-bell {
+  color: #facc15; /* Golden yellow bell for dark mode */
+}
+ 
+
+</style>
+
   <script src="js/product.js" defer></script>
   <script src="js/navbar.js" defer></script>
    <script src="js/mini-cart.js" defer></script>
