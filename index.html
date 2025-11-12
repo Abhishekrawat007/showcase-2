@@ -303,27 +303,29 @@
 </div>
 
 <!-- PWA INSTALL BAR -->
-<div id="pwa-install-bar" role="dialog" aria-live="polite" aria-label="Install app bar" hidden>
-  <button class="pwa-close" id="pwa-close-btn" aria-label="Close install bar">×</button>
+<!-- PWA INSTALL BAR v2 -->
+<div id="pwa2-install-bar" role="dialog" aria-live="polite" aria-label="Install app bar" hidden>
+  <button class="pwa2-close" id="pwa2-close-btn" aria-label="Close install bar">×</button>
 
-  <div class="pwa-row">
-    <div class="pwa-icon" aria-hidden="true">
+  <div class="pwa2-row">
+    <div class="pwa2-icon" aria-hidden="true">
       <img src="/web-app-manifest-192x192.png" alt="SublimeStore App Icon" width="52" height="52" style="border-radius:14px;">
     </div>
 
-    <div class="pwa-text">
-      <div class="pwa-title">SublimeStore</div>
-      <div class="pwa-sub">Install for 1-tap shopping ⚡</div>
+    <div class="pwa2-text">
+      <div class="pwa2-title">SublimeStore</div>
+      <div class="pwa2-sub">Install for 1-tap shopping ⚡</div>
     </div>
 
-    <div class="pwa-cta">
-      <button id="pwa-install-btn" class="pwa-btn pwa-install">Install</button>
-      <button id="pwa-later-btn" class="pwa-btn pwa-later">Later</button>
+    <div class="pwa2-cta">
+      <button id="pwa2-install-btn" class="pwa2-btn pwa2-install">Install</button>
+      <button id="pwa2-later-btn" class="pwa2-btn pwa2-later">Later</button>
     </div>
   </div>
 
-  <div class="pwa-progress"><i></i></div>
+  <div class="pwa2-progress" aria-hidden="true"><i></i></div>
 </div>
+
 
 <!-- Page Loader -->
 <div id="pageLoader" aria-busy="true" style="
@@ -383,42 +385,40 @@
   setTimeout(removeLoader, 8000);
 </script>
 <!-- Notification modal (replace old notif-popup) -->
-<div id="notif-modal" class="notif-modal hidden" role="dialog" aria-modal="true" aria-labelledby="notif-title" aria-describedby="notif-desc">
-  <div class="notif-backdrop" id="notif-backdrop" tabindex="-1"></div>
+<!-- Notification modal v2 -->
+<div id="notif2-modal" class="notif2-modal hidden" role="dialog" aria-modal="true" aria-labelledby="notif2-title" aria-describedby="notif2-desc">
+  <div class="notif2-backdrop" id="notif2-backdrop" tabindex="-1"></div>
 
-  <div class="notif-wrap"> 
-    <!-- floating badge / header above the card -->
-    <div class="notif-badge" aria-hidden="true">
-      <div class="badge-inner">
-        <svg class="badge-bell" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 22c1.1046 0 2-.8954 2-2h-4c0 1.1046.8954 2 2 2z" fill="currentColor"/>
-          <path d="M18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 10-3 0v.68C7.64 5.36 6 7.92 6 11v5l-1.7 1.7A1 1 0 005 19h14a1 1 0 00.7-1.6L18 16z" fill="currentColor"/>
-        </svg>
-        <span class="badge-text">Stay Updated</span>
+  <div class="notif2-wrap"> 
+    <div class="notif2-badge" aria-hidden="true">
+      <div class="notif2-badge-inner">
+        <svg class="notif2-bell" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">...</svg>
+        <span class="notif2-badge-text">Stay Updated</span>
       </div>
     </div>
 
-    <div class="notif-dialog" role="document" aria-labelledby="notif-title">
-      <header class="notif-header">
-        <h3 id="notif-title">🔔 Stay Updated!</h3>
+    <div class="notif2-dialog" role="document" aria-labelledby="notif2-title">
+      <header class="notif2-header">
+        <h3 id="notif2-title">🔔 Stay Updated!</h3>
       </header>
 
-      <div class="notif-body" id="notif-desc">
+      <div class="notif2-body" id="notif2-desc">
         Enable notifications to get new product updates & exclusive offers — we'll only send important stuff.
       </div>
 
-      <footer class="notif-footer">
-        <button id="notif-enable" class="btn primary">Enable</button>
-        <button id="notif-close"  class="btn ghost">Maybe Later</button>
+      <footer class="notif2-footer">
+        <button id="notif2-enable" class="btn primary">Enable</button>
+        <button id="notif2-close"  class="btn ghost">Maybe Later</button>
       </footer>
     </div>
   </div>
 </div>
 
 
+
 <style>
  /* Modal wrapper - full viewport */
-.notif-modal {
+.notif2-modal {
   position: fixed;
   inset: 0;
   display: flex;
@@ -426,10 +426,10 @@
   justify-content: center;
   z-index: 120000;
 }
-.notif-modal.hidden { display: none; }
+.notif2-modal.hidden { display: none; }
 
 /* Backdrop */
-.notif-backdrop {
+.notif2-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(0,0,0,0.45);
@@ -439,7 +439,7 @@
 }
 
 /* Outer wrapper holds badge + dialog so we can position badge visually above */
-.notif-wrap {
+.notif2-wrap {
   position: relative;
   z-index: 2;
   display: flex;
@@ -450,7 +450,7 @@
 }
 
 /* floating badge above dialog */
-.notif-badge {
+.notif2-badge {
   position: absolute;
   top: -28px; /* lifts badge above dialog */
   left: 50%;
@@ -474,7 +474,7 @@
 .badge-text { letter-spacing: .2px; }
 
 /* dialog card itself */
-.notif-dialog {
+.notif2-dialog {
   pointer-events: auto;
   width: 92%;
   max-width: 440px;
@@ -489,31 +489,31 @@
 }
 
 /* header / body / footer */
-.notif-header h3 { margin: 0 0 6px 0; font-size: 18px; font-weight: 800; }
-.notif-body { color: #374151; font-size: 15px; margin-bottom: 14px; line-height: 1.35; }
+.notif2-header h3 { margin: 0 0 6px 0; font-size: 18px; font-weight: 800; }
+.notif2-body { color: #374151; font-size: 15px; margin-bottom: 14px; line-height: 1.35; }
 
 /* footer buttons */
-.notif-footer { display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.notif2-footer { display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .btn { min-width: 120px; padding: 10px 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; }
 .btn.primary { background: linear-gradient(180deg,#0A84FF,#0068E8); color: #fff; box-shadow: 0 8px 20px rgba(10,132,255,0.16); }
 .btn.ghost { background: #f3f4f6; color: #0b1220; border: 1px solid rgba(0,0,0,0.06); }
 
 /* small screens: make dialog stretch nearly full width and badge scale */
 @media (max-width: 520px) {
-  .notif-dialog { width: calc(100% - 28px); max-width: none; padding: 16px; border-radius: 12px; }
+  .notif2-dialog { width: calc(100% - 28px); max-width: none; padding: 16px; border-radius: 12px; }
   .badge-inner { padding: 8px 12px; font-size: 13px; }
-  .notif-badge { top: -30px; }
+  .notif2-badge { top: -30px; }
 }
 
 /* ---------------- Dark mode overrides ---------------- */
-.dark-mode .notif-backdrop { background: rgba(0,0,0,0.65); }
-.dark-mode .notif-dialog {
+.dark-mode .notif2-backdrop { background: rgba(0,0,0,0.65); }
+.dark-mode .notif2-dialog {
   background: #081026;            /* deep background */
   color: #e6eef8;                 /* near white text */
   box-shadow: 0 18px 40px rgba(2,6,23,0.6);
   border: 1px solid rgba(255,255,255,0.04);
 }
-.dark-mode .notif-body { color: #c7d2e2; }
+.dark-mode .notif2-body { color: #c7d2e2; }
 .dark-mode .badge-inner {
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
   color: #e6eef8;
