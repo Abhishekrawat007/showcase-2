@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="css/autoslideshow.css">
   <link rel="stylesheet" href="css/roundedproductcard.css">
   <link rel="stylesheet" href="css/product-card.css">
-  
+  <link rel="stylesheet" href="css/pwa-install.css">
   <style>
     html {
       scroll-behavior: smooth;
@@ -302,6 +302,28 @@
   <a href="cart.html" class="view-cart-btn">View Cart →</a>
 </div>
 
+<!-- PWA INSTALL BAR -->
+<div id="pwa-install-bar" role="dialog" aria-live="polite" aria-label="Install app bar" hidden>
+  <button class="pwa-close" id="pwa-close-btn" aria-label="Close install bar">×</button>
+
+  <div class="pwa-row">
+    <div class="pwa-icon" aria-hidden="true">
+      <img src="/web-app-manifest-192x192.png" alt="SublimeStore App Icon" width="52" height="52" style="border-radius:14px;">
+    </div>
+
+    <div class="pwa-text">
+      <div class="pwa-title">SublimeStore</div>
+      <div class="pwa-sub">Install for 1-tap shopping ⚡</div>
+    </div>
+
+    <div class="pwa-cta">
+      <button id="pwa-install-btn" class="pwa-btn pwa-install">Install</button>
+      <button id="pwa-later-btn" class="pwa-btn pwa-later">Later</button>
+    </div>
+  </div>
+
+  <div class="pwa-progress"><i></i></div>
+</div>
 
 <!-- Page Loader -->
 <div id="pageLoader" aria-busy="true" style="
@@ -361,6 +383,149 @@
   setTimeout(removeLoader, 8000);
 </script>
 
+<!-- Notification modal — namespaced for safety -->
+<div id="sublime-notif-modal" class="sublime-notif-modal sublime-hidden" role="dialog" aria-modal="true" aria-labelledby="sublime-notif-title" aria-describedby="sublime-notif-desc">
+  <div class="sublime-notif-backdrop" id="sublime-notif-backdrop" tabindex="-1"></div>
+
+  <div class="sublime-notif-wrap"> 
+    <!-- floating badge / header above the card -->
+    <div class="sublime-notif-badge" aria-hidden="true">
+      <div class="sublime-badge-inner">
+        <svg class="sublime-badge-bell" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 22c1.1046 0 2-.8954 2-2h-4c0 1.1046.8954 2 2 2z" fill="currentColor"/>
+          <path d="M18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 10-3 0v.68C7.64 5.36 6 7.92 6 11v5l-1.7 1.7A1 1 0 005 19h14a1 1 0 00.7-1.6L18 16z" fill="currentColor"/>
+        </svg>
+        <span class="sublime-badge-text">Stay Updated</span>
+      </div>
+    </div>
+
+    <div class="sublime-notif-dialog" role="document" aria-labelledby="sublime-notif-title">
+      <header class="sublime-notif-header">
+        <h3 id="sublime-notif-title">🔔 Stay Updated!</h3>
+      </header>
+
+      <div class="sublime-notif-body" id="sublime-notif-desc">
+        Enable notifications to get new product updates & exclusive offers — we'll only send important stuff.
+      </div>
+
+      <footer class="sublime-notif-footer">
+        <button id="sublime-notif-enable" class="sublime-btn sublime-primary">Enable</button>
+        <button id="sublime-notif-close"  class="sublime-btn sublime-ghost">Maybe Later</button>
+      </footer>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ---- Namespaced modal CSS (visuals preserved) ---- */
+
+/* Hide helper (namespaced) */
+.sublime-hidden { display: none !important; }
+
+/* Modal wrapper - full viewport */
+.sublime-notif-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 120000;
+}
+/* Backdrop */
+.sublime-notif-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  z-index: 1;
+}
+
+/* Outer wrapper holds badge + dialog so we can position badge visually above */
+.sublime-notif-wrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  pointer-events: none; /* dialog children handle pointer events */
+}
+
+/* floating badge above dialog */
+.sublime-notif-badge {
+  position: absolute;
+  top: -28px; /* lifts badge above dialog */
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.sublime-badge-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b1220;
+  box-shadow: 0 8px 20px rgba(3,7,18,0.12);
+  font-weight: 700;
+  font-size: 14px;
+  pointer-events: none;
+}
+.sublime-badge-bell { color: #f59e0b; } /* amber bell in light mode */
+.sublime-badge-text { letter-spacing: .2px; }
+
+/* dialog card itself */
+.sublime-notif-dialog {
+  pointer-events: auto;
+  width: 92%;
+  max-width: 440px;
+  border-radius: 14px;
+  padding: 18px;
+  background: #ffffff;
+  color: #0b1220;
+  box-shadow: 0 18px 40px rgba(2,6,23,0.12);
+  border: 1px solid rgba(0,0,0,0.04);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* header / body / footer */
+.sublime-notif-header h3 { margin: 0 0 6px 0; font-size: 18px; font-weight: 800; }
+.sublime-notif-body { color: #374151; font-size: 15px; margin-bottom: 14px; line-height: 1.35; }
+
+/* footer buttons */
+.sublime-notif-footer { display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.sublime-btn { min-width: 120px; padding: 10px 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; }
+.sublime-primary { background: linear-gradient(180deg,#0A84FF,#0068E8); color: #fff; box-shadow: 0 8px 20px rgba(10,132,255,0.16); }
+.sublime-ghost { background: #f3f4f6; color: #0b1220; border: 1px solid rgba(0,0,0,0.06); }
+
+/* small screens: make dialog stretch nearly full width and badge scale */
+@media (max-width: 520px) {
+  .sublime-notif-dialog { width: calc(100% - 28px); max-width: none; padding: 16px; border-radius: 12px; }
+  .sublime-badge-inner { padding: 8px 12px; font-size: 13px; }
+  .sublime-notif-badge { top: -30px; }
+}
+
+/* Dark mode overrides (same look but namespaced) */
+.dark-mode .sublime-notif-backdrop { background: rgba(0,0,0,0.65); }
+.dark-mode .sublime-notif-dialog {
+  background: #081026;
+  color: #e6eef8;
+  box-shadow: 0 18px 40px rgba(2,6,23,0.6);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.dark-mode .sublime-notif-body { color: #c7d2e2; }
+.dark-mode .sublime-badge-inner {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  color: #e6eef8;
+  box-shadow: 0 8px 22px rgba(2,6,23,0.6);
+}
+.dark-mode .sublime-badge-bell { color: #ffd166; }
+.dark-mode .sublime-ghost { background: rgba(255,255,255,0.03); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.04); }
+.dark-mode .sublime-primary { box-shadow: 0 8px 20px rgba(10,132,255,0.12); }
+</style>
 
   <script src="js/product.js" defer></script>
   <script src="js/navbar.js" defer></script>
@@ -371,7 +536,60 @@
   <script src="js/script.js" defer></script>
   <script src="js/autoslideshow.js"></script>
   <script src="js/typinganimation.js" defer></script>
-  
+   <script src="js/pwa-install.js"></script>
+  <script src="js/push.js" defer></script>
+  <script src="js/pwa-standalone.js"></script>
+  <script>
+(function () {
+  let jump = false, clear = false;
+  try {
+    jump  = sessionStorage.getItem('jumpToProducts') === '1';
+    clear = sessionStorage.getItem('clearCartOnHome') === '1';
+  } catch (_){}
+
+  // Nothing to do
+  if (!jump && !clear) return;
+
+  // Clear only when explicitly asked (after success screen)
+  if (clear) {
+    try { localStorage.removeItem('cart'); } catch(_){}
+    try { sessionStorage.removeItem('clearCartOnHome'); } catch(_){}
+    // mark for any code that reads a flag instead of events
+    window.__cartJustCleared = true;
+  }
+
+  // Consume jump flag (regardless of clear)
+  try { sessionStorage.removeItem('jumpToProducts'); } catch(_){}
+
+  function notifyAndScroll() {
+    // Let your cart UI know to recompute (read localStorage)
+    document.dispatchEvent(new CustomEvent('cart:maybeUpdated'));
+    if (clear) document.dispatchEvent(new CustomEvent('cart:cleared'));
+
+    // Scroll to product list if present
+    const target = document.getElementById('productList');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      // Fallback: set hash so if the section mounts later, browser will jump
+      try { location.hash = '#productList'; } catch(_){}
+    }
+
+    // Re-emit once on next tick for late-mounted listeners (hydration, etc.)
+    setTimeout(() => {
+      document.dispatchEvent(new CustomEvent('cart:maybeUpdated'));
+      if (clear) document.dispatchEvent(new CustomEvent('cart:cleared'));
+    }, 0);
+  }
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', notifyAndScroll, { once: true });
+  } else {
+    // DOM is ready already
+    notifyAndScroll();
+  }
+})();
+</script>
   
 
 </body>

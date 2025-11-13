@@ -2247,3 +2247,82 @@ body.dark-mode .why-choose .feature {
   .styles-section { margin-top: 0; padding-top: 0.4rem; }
 }
 
+.body.pwa-standalone { 
+  --pwa-banner-height: 56px;   /* keep banner at 56 */
+  --pwa-navbar-height: 60px;   /* new navbar height you asked (60px) */
+}
+
+/* Banner top (blue) */
+body.pwa-standalone .top-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--pwa-banner-height) !important;
+  line-height: var(--pwa-banner-height) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  font-weight: 700;
+  font-size: 15px;
+  background: linear-gradient(90deg,#1e40af,#2563eb);
+  color: #fff;
+  overflow: hidden;
+}
+
+/* Place header immediately below banner and remove extra header padding that could add height */
+body.pwa-standalone header {
+  position: fixed;
+  top: calc(var(--pwa-banner-height));
+  left: 0;
+  right: 0;
+  background: var(--header-bg, #fff);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  padding-top: 0 !important; /* cancel header's earlier padding */
+  padding-bottom: 0 !important;
+}
+
+/* Make navbar a compact 60px and cancel any earlier top offset on .navbar */
+body.pwa-standalone .navbar,
+body.pwa-standalone .navbar-mobile,
+body.pwa-standalone .navbar-desktop,
+body.pwa-standalone .desktop-navbar {
+  height: var(--pwa-navbar-height) !important;
+  min-height: var(--pwa-navbar-height) !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+
+  /* cancel global .navbar top:40px or similar */
+  position: relative !important;
+  top: 0 !important;
+}
+
+/* Ensure mobile-only navbar displays in PWA (small screens) */
+@media (max-width: 962px) {
+  body.pwa-standalone .navbar-desktop,
+  body.pwa-standalone .desktop-navbar {
+    display: none !important;
+  }
+  body.pwa-standalone .navbar-mobile {
+    display: flex !important;
+  }
+}
+
+/* Mobile menu / mobile search should open directly below header (banner + navbar) */
+body.pwa-standalone .mobile-menu,
+body.pwa-standalone #mobileSearch,
+body.pwa-standalone #mobileSearch.active {
+  /* start below the banner + navbar so they don't overlap */
+  top: calc(var(--pwa-banner-height) + var(--pwa-navbar-height)) !important;
+}
+
+/* Push main content down exactly banner + navbar (small extra gap = 4px) */
+body.pwa-standalone main {
+  margin-top: calc(var(--pwa-banner-height) + var(--pwa-navbar-height) + 0px) !important;
+  /* cancel other body padding-top that might add more space */
+  padding-top: 0 !important;
+}
+
