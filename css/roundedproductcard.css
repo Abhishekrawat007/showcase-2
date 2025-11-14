@@ -202,6 +202,11 @@
     margin-left: 0;
     margin-right: 0;
   }
+  .styles-scroll-row {
+  overflow-x: auto;
+  white-space: nowrap;
+  margin-bottom: 0px!important;
+}
 }
 /* === Force two horizontal scroll rows between 1100px and 1340px ===
    Keeps each row horizontally scrollable (nowrap) and adds a subtle
