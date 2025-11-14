@@ -119,7 +119,7 @@
 @media screen and (max-width: 768px) {
   #slideshow-container {
     height: 390px; /* Fixed height for mobile */
-    margin-top: 10px;
+    margin-top: 15px;
     padding-top: 0px;
   }
   /* .slideshow-wrapper .aut0-slide img{
