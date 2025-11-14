@@ -2247,9 +2247,9 @@ body.dark-mode .why-choose .feature {
   .styles-section { margin-top: 0; padding-top: 0.4rem; }
 }
 
-.body.pwa-standalone { 
+body.pwa-standalone {
   --pwa-banner-height: 56px;   /* keep banner at 56 */
-  --pwa-navbar-height: 60px;   /* new navbar height you asked (60px) */
+  --pwa-navbar-height: 72px;   /* new navbar height you asked (60px) */
 }
 
 /* Banner top (blue) */
@@ -2315,14 +2315,68 @@ body.pwa-standalone .desktop-navbar {
 body.pwa-standalone .mobile-menu,
 body.pwa-standalone #mobileSearch,
 body.pwa-standalone #mobileSearch.active {
-  /* start below the banner + navbar so they don't overlap */
-  top: calc(var(--pwa-banner-height) + var(--pwa-navbar-height)) !important;
+  position: fixed !important;
+  top: var(--pwa-banner-height) !important;   /* starts right under banner (56px) */
+  left: 0 !important;
+  right: 0 !important;
+  /* mobile-menu can be a side drawer; use bottom:0 to fill remaining viewport */
+  bottom: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-shadow: none !important;
+  transition: transform .22s ease, opacity .18s ease !important;
 }
 
-/* Push main content down exactly banner + navbar (small extra gap = 4px) */
+/* If your mobile side-drawer uses width < 100%, keep that, but it still starts under the banner */
+body.pwa-standalone .mobile-menu {
+  width: 85% !important; /* if using a drawer; adjust if needed */
+  max-width: 360px !important;
+}
+
+/* Push page content down exactly by banner + navbar so slideshow sits flush under navbar */
 body.pwa-standalone main {
-  margin-top: calc(var(--pwa-banner-height) + var(--pwa-navbar-height) + 0px) !important;
-  /* cancel other body padding-top that might add more space */
+  margin-top: calc(var(--pwa-banner-height) + var(--pwa-navbar-height)) !important;
   padding-top: 0 !important;
 }
 
+/* tiny safety for sticky filter: keep it below whole header area */
+body.pwa-standalone #filterContainer {
+  top: calc(var(--pwa-banner-height) + var(--pwa-navbar-height)) !important;
+}
+
+
+/* Remove margins/padding from first content so slideshow is attached to navbar */
+
+body.pwa-standalone #slideshow-container,
+body.pwa-standalone .auto-slideshow,
+body.pwa-standalone .slideshow-wrapper,
+body.pwa-standalone .mobile-slideshow,
+body.pwa-standalone .auto-slide {
+  margin-top: -15px !important;
+  padding-top: 0 !important;
+  
+}
+
+/* Explicit mobile-slideshow targeting so there's no mismatch */
+body.pwa-standalone #slideshow-container .mobile-slideshow,
+body.pwa-standalone #slideshow-container .mobile-slideshow .auto-slide img {
+  margin-top: -15px !important;
+  padding-top: 0 !important;
+}
+
+body.pwa-standalone .dots-container {
+  text-align: center;
+  position: absolute;
+  width: 100%;
+  bottom: 40px;
+}
+
+body.pwa-standaoone .welcome-container{
+  margin-top: -10px !important;;
+}
+body.pwa-standalone #price-filter-panel{
+  top: 57px !important;
+}
+body.pwa-standalone .back-btn{
+  margin-bottom: 5px !important;
+}

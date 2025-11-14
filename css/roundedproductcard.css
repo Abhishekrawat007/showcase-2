@@ -106,10 +106,6 @@
   z-index: 2;
 }
 
-.style-card.trending .rect-img-wrapper {
-  border: 2px solid #ff9800;
-  box-shadow: 0 0 12px rgba(255, 102, 0, 0.3);
-}
 
 /* Flame Animation */
 @keyframes pulseFlame {
@@ -129,7 +125,7 @@
     justify-content: center;
     flex-wrap: wrap;
     overflow-x: hidden;
-    gap: 2rem;
+    gap: 1.5rem;
   }
 
   .style-card {
