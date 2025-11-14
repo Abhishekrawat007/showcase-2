@@ -2249,7 +2249,7 @@ body.dark-mode .why-choose .feature {
 
 body.pwa-standalone {
   --pwa-banner-height: 56px;   /* keep banner at 56 */
-  --pwa-navbar-height: 72px;   /* new navbar height you asked (60px) */
+  --pwa-navbar-height: 85px;   /* new navbar height you asked (60px) */
 }
 
 /* Banner top (blue) */
@@ -2313,7 +2313,6 @@ body.pwa-standalone .desktop-navbar {
 
 /* Mobile menu / mobile search should open directly below header (banner + navbar) */
 body.pwa-standalone .mobile-menu,
-body.pwa-standalone #mobileSearch,
 body.pwa-standalone #mobileSearch.active {
   position: fixed !important;
   top: var(--pwa-banner-height) !important;   /* starts right under banner (56px) */
@@ -2352,7 +2351,7 @@ body.pwa-standalone .auto-slideshow,
 body.pwa-standalone .slideshow-wrapper,
 body.pwa-standalone .mobile-slideshow,
 body.pwa-standalone .auto-slide {
-  margin-top: -15px !important;
+  margin-top: 0px !important;
   padding-top: 0 !important;
   
 }
@@ -2360,7 +2359,7 @@ body.pwa-standalone .auto-slide {
 /* Explicit mobile-slideshow targeting so there's no mismatch */
 body.pwa-standalone #slideshow-container .mobile-slideshow,
 body.pwa-standalone #slideshow-container .mobile-slideshow .auto-slide img {
-  margin-top: -15px !important;
+  margin-top: 0px !important;
   padding-top: 0 !important;
 }
 
