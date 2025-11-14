@@ -2247,6 +2247,61 @@ body.dark-mode .why-choose .feature {
   .styles-section { margin-top: 0; padding-top: 0.4rem; }
 }
 
+/* css for changed behaviour on laptop and mobile */
+/* -------------------------
+  Responsive: swap slideshow vs style rows
+  Paste at the END of css/style.css
+   - Desktop (>=962px): HIDE slideshow, SHOW styles rows & trust badges
+   - Mobile (<962px): HIDE style rows & trust badges, SHOW mobile slideshow
+--------------------------*/
+
+/* Base defaults (safe): ensure components are visible unless overridden */
+#slideshow-container { display: block !important; }
+.styles-scroll-row,
+.styles-section,
+.trust-badges { display: block !important; }
+
+/* ---------- Desktop: hide slideshow, show style rows ---------- */
+@media (min-width: 962px) {
+  /* hide whole slideshow container on desktop */
+  #slideshow-container { display: none !important; }
+
+  /* Ensure desktop slideshow (if present) hidden too */
+  #slideshow-container .mobile-slideshow,
+  #slideshow-container .auto-slide.mobile-only,
+  .mobile-slideshow { display: none !important; }
+
+  /* Show the style rows + nice spacing */
+  .styles-scroll-row,
+  .styles-section,
+  .trust-badges {
+    display: block !important;
+    margin-top: 12px !important;
+  }
+}
+
+/* ---------- Mobile: show slideshow, hide style rows & trust badges ---------- */
+@media (max-width: 961px) {
+  /* hide the style rows and trust badges on small screens */
+  .styles-scroll-row,
+  .styles-section,
+  .trust-badges {
+    display: none !important;
+  }
+
+  /* ensure mobile slideshow is visible */
+  #slideshow-container { display: block !important; }
+  #slideshow-container .mobile-slideshow,
+  .mobile-slideshow { display: block !important; }
+
+  /* hide desktop slideshow if it exists */
+  #slideshow-container .desktop-slideshow,
+  .desktop-slideshow { display: none !important; }
+
+ 
+}
+
+/* pwa standalone */
 body.pwa-standalone {
   --pwa-banner-height: 56px;   /* keep banner at 56 */
   --pwa-navbar-height: 85px;   /* new navbar height you asked (60px) */
@@ -2359,7 +2414,7 @@ body.pwa-standalone .auto-slide {
 /* Explicit mobile-slideshow targeting so there's no mismatch */
 body.pwa-standalone #slideshow-container .mobile-slideshow,
 body.pwa-standalone #slideshow-container .mobile-slideshow .auto-slide img {
-  margin-top: 0px !important;
+  margin-top: -10px !important;
   padding-top: 0 !important;
 }
 
@@ -2367,7 +2422,7 @@ body.pwa-standalone .dots-container {
   text-align: center;
   position: absolute;
   width: 100%;
-  bottom: 40px;
+  bottom: 50px;
 }
 
 body.pwa-standaoone .welcome-container{

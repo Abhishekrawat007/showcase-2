@@ -118,8 +118,8 @@
 /* Responsive: Mobile */
 @media screen and (max-width: 768px) {
   #slideshow-container {
-    height: 450px; /* Fixed height for mobile */
-    margin-top: 23px;
+    height: 390px; /* Fixed height for mobile */
+    margin-top: 36px;
     padding-top: 0px;
   }
   /* .slideshow-wrapper .aut0-slide img{
