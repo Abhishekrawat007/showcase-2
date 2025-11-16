@@ -2350,7 +2350,7 @@ body.pwa-standalone .desktop-navbar {
   align-items: center !important;
   box-sizing: border-box !important;
 
-  /* cancel global .navbar top:40px or similar */
+/* cancel global .navbar top:40px or similar */
   position: relative !important;
   top: 0 !important;
 }

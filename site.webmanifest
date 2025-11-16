@@ -19,5 +19,9 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],"serviceworker": {
+    "src": "/firebase-messaging-sw.js",
+    "scope": "/",
+    "type": "classic"
+  }
 }
