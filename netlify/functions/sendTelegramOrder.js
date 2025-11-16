@@ -7,7 +7,7 @@ import sharp from "sharp";
 
 // common helper (put near top of file)
 function getChatIdsFromEnv() {
-  const raw = process.env.TELEGRAM_CHAT_ID || "";
+  const raw = process.env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_CHAT_IDS || "";
   if (!raw) return [];
   return raw.split(",").map(s => s.trim()).filter(Boolean);
 }
@@ -90,10 +90,64 @@ export async function handler(event) {
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
 
   try {
-    const { name, phone, orderId, cart, totalAmount, messageText } = JSON.parse(event.body || "{}");
+    // keep original destructuring but also capture whole body for payment fields
+    const body = JSON.parse(event.body || "{}");
+    const { name, phone, orderId, cart, totalAmount } = body;
+    let messageText = body.messageText || body.message || "";
 
-    if (!name || !phone || !orderId || !cart || !totalAmount || !messageText) {
+    // allow alternate amount fields
+    const computedTotal = totalAmount ?? body.amount ?? body.amountPaid ?? body.amount_paid ?? 0;
+
+    if (!name || !phone || !orderId || !cart || !computedTotal) {
       return { statusCode: 400, body: "Missing order details" };
+    }
+
+    // Build items list for message if needed
+    const itemLines = Array.isArray(cart) ? cart.map((it) => {
+      const title = it.title || it.name || it.product || "Item";
+      const qty = it.qty ?? it.quantity ?? 1;
+      const price = it.price ?? it.newPrice ?? 0;
+      return `• ${title} (x${qty}) - Rs. ${price * qty}`;
+    }).join("\n") : "";
+
+    // Determine paid / cod badge (server-enforced)
+    let statusBadge = '🔴 *COD / UNPAID*';
+    try {
+      const payment = body.payment || {};
+      const status = (payment.status || '').toString().toLowerCase();
+      const amountPaidNum = Number(body.amountPaid ?? body.amount ?? body.amount_paid ?? 0);
+
+      if (status === 'paid' || status === 'success' || (!isNaN(amountPaidNum) && amountPaidNum > 0)) {
+        statusBadge = '🟢 *PAID*';
+      } else {
+        statusBadge = '🔴 *COD / UNPAID*';
+      }
+    } catch (e) {
+      statusBadge = '🔴 *COD / UNPAID*';
+    }
+
+    // WhatsApp link
+    const waLink = phone ? `https://wa.me/91${String(phone).replace(/\D/g, "")}` : "";
+
+    // Ensure messageText contains badge/title
+    if (messageText && typeof messageText === "string" && messageText.trim().length > 0) {
+      if (!/^(🟢|🔴)/.test(messageText.trim()) && !/New Order Received/i.test(messageText)) {
+        messageText = `🧾 *New Order Received* ${statusBadge}\n` + messageText;
+      } else if (!/New Order Received/i.test(messageText)) {
+        messageText = `🧾 *New Order Received* ${statusBadge}\n` + messageText;
+      } else {
+        if (!/^(🟢|🔴)/.test(messageText.trim())) {
+          messageText = messageText.replace(/^(🧾\s*\*New Order Received\*\s*)/i, `$1${statusBadge}\n`);
+        }
+      }
+    } else {
+      messageText = `🧾 *New Order Received* ${statusBadge}\n` +
+        `*Order ID:* ${orderId}\n` +
+        `${name ? `👤 *Name:* ${name}\n` : ""}` +
+        `${phone ? `📞 *Phone:* ${phone}\n` : ""}` +
+        `${waLink ? `💬 *WhatsApp:* [Chat](${waLink})\n` : ""}` +
+        `💰 *Total:* Rs. ${computedTotal}\n` +
+        `📦 *Items:*\n${itemLines}`;
     }
 
     // --- Create PDF ---
@@ -133,7 +187,7 @@ export async function handler(event) {
 
     rows.push([
       { content: "Total", colSpan: 5, styles: { halign: "right", fontStyle: "bold" } },
-      { content: `Rs. ${totalAmount}`, styles: { halign: "right", fontStyle: "bold" } }
+      { content: `Rs. ${computedTotal}`, styles: { halign: "right", fontStyle: "bold" } }
     ]);
 
     autoTable(pdf, {
@@ -170,17 +224,29 @@ export async function handler(event) {
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const TELEGRAM_CHAT_IDS = getChatIdsFromEnv();
 
+    if (!TELEGRAM_BOT_TOKEN || TELEGRAM_CHAT_IDS.length === 0) {
+      console.error("Telegram env missing", { hasToken: !!TELEGRAM_BOT_TOKEN, chatCount: TELEGRAM_CHAT_IDS.length });
+      return { statusCode: 500, body: "Telegram bot token or chat ids not configured" };
+    }
 
     // Send text messages
     for (const chatId of TELEGRAM_CHAT_IDS) {
-      await sendTelegramMessage(TELEGRAM_BOT_TOKEN, chatId, messageText);
+      try {
+        await sendTelegramMessage(TELEGRAM_BOT_TOKEN, chatId, messageText);
+      } catch (err) {
+        console.error("sendTelegramMessage error for chat", chatId, err && err.message);
+      }
     }
 
     // Send PDF
     for (const chatId of TELEGRAM_CHAT_IDS) {
-      const formData = new FormData();
-      formData.append("document", pdfBuffer, "order.pdf");
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument?chat_id=${chatId}`, { method: "POST", body: formData });
+      try {
+        const formData = new FormData();
+        formData.append("document", pdfBuffer, "order.pdf");
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument?chat_id=${chatId}`, { method: "POST", body: formData });
+      } catch (err) {
+        console.error("sendDocument error for chat", chatId, err && err.message);
+      }
     }
 
     return { statusCode: 200, body: JSON.stringify({ success: true }) };

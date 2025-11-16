@@ -30,8 +30,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="web-app-manifest-192x192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="web-app-manifest-512x512.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- <link rel="stylesheet" href="css/style.css" /> -->
-  
+
  <style>
  body.cart-page {
   font-family: Arial, sans-serif;
@@ -188,10 +187,10 @@ h1 {
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
-  box-sizing: border-box; /* ✅ Ensures borders/padding don't overflow */
+  box-sizing: border-box;
 }
 #orderForm input:not(:last-child) {
-  margin-bottom: 12px; /* or 10px */
+  margin-bottom: 12px;
 }
 
 #orderForm button {
@@ -208,6 +207,7 @@ h1 {
 #orderForm button:hover {
   background-color: #1669c1;
 }
+
 #orderForm {
   box-sizing: border-box;
   width: 100%;
@@ -250,7 +250,7 @@ h1 {
   color: #0a8f08;
   font-size: 20px;
 }
-/* Top banner */
+ /* Top banner */
  .top-banner {
    position: fixed;
    top: 0;
@@ -275,7 +275,6 @@ h1 {
    font-size: 18px;
    cursor: pointer;
    font-weight: bold;
-
  }
 
  .top-banner span {
@@ -296,8 +295,6 @@ h1 {
      transform: translateX(-100%);
    }
  }
-
-
 
   /* Desktop-only cart item layout override */
 @media (min-width: 768px) {
@@ -376,11 +373,11 @@ body.dark-mode input {
   background-color: #2a2a2a;
   color: #fff;
   border: 1px solid #555;
-  box-shadow: none !important; /* 🔧 Remove weird glow */
+  box-shadow: none !important;
 }
 
 body.dark-mode input::placeholder {
-  color: #bbb; /* Softer placeholder text */
+  color: #bbb;
 }
 
 body.dark-mode .quantity-controls {
@@ -393,7 +390,7 @@ body.dark-mode .remove-btn {
   color: #ff8080;
 }
 body.dark-mode .cart-total-label {
-  color: #fff; /* or use red: #ff4d4d */
+  color: #fff;
 }
 body.dark-mode .cart-total-value{
   color:#fff
@@ -403,7 +400,7 @@ body.dark-mode .cart-total-value{
 }
 .theme-toggle-btn {
   position: absolute;
-  right: 50px; /* default for mobile */
+  right: 50px;
   top: 80px;
   background: none;
   border: none;
@@ -416,7 +413,7 @@ body.dark-mode .cart-total-value{
 /* Adjust for larger screens only */
 @media (min-width: 768px) {
   .theme-toggle-btn {
-    right: 430px; /* less exaggerated */
+    right: 430px;
     top: 80px;
   }
 }
@@ -464,19 +461,17 @@ body.dark-mode label[style*="padding: 14px"] div {
 }
 
 body.dark-mode label[style*="padding: 14px"] div > div:first-child {
-  color: #fff; /* Title */
+  color: #fff;
 }
 
 body.dark-mode label[style*="padding: 14px"] a {
-  color: #90caf9 !important; /* light blue link */
+  color: #90caf9 !important;
 }
 body.dark-mode .payment-method {
   background-color: #1e1e1e !important;
   color: #eee !important;
   border-color: #333 !important;
 }
-
-
 
 body.dark-mode #upiAppOptions label {
   background-color: #2c2c2c !important;
@@ -485,16 +480,15 @@ body.dark-mode #upiAppOptions label {
 }
 
 body.dark-mode #upiAppOptions label input {
-  filter: brightness(1.2); /* makes radio buttons visible */
+  filter: brightness(1.2);
 }
 
 body.dark-mode #upiAppOptions img {
-  filter: brightness(1.1); /* make logo icons look fine */
+  filter: brightness(1.1);
 }
 label:hover {
   background-color: #f0f8ff;
 }
-/* Continue shopping button */
 .btn-continue{
   display:inline-flex;align-items:center;gap:.6rem;margin-top:14px;
   padding:.9rem 1.2rem;border-radius:999px;background:#111;color:#fff;
@@ -504,7 +498,6 @@ label:hover {
 .btn-continue::after{content:"→";font-size:1.1em}
 .btn-continue:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(0,0,0,.22)}
 body.dark-mode .btn-continue{background:#fff;color:#111}
-
   </style>
 
   <!-- Firebase -->
@@ -529,28 +522,19 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
       configurable: true
     });
   } catch (e) {
-    // fallback if defineProperty blocked
     if (!window.database) window.database = window.db;
   }
 
-  // Monkey-patch firebase.database() so old code keeps working.
-  // Ensure firebase SDK is loaded and only patch once.
   if (window.firebase && !firebase.__dbPatched) {
     firebase.__dbPatched = true;
-    // Preserve original if present (for safety)
     firebase.__originalDatabaseFn = firebase.database || null;
     firebase.database = function() {
-      // return underlying db reference created by init-firebase.js
       if (window.db) return window.db;
-      // fallback: if original exists, call it
       if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
-      // otherwise return null to avoid throwing in caller
       return null;
     };
-    // Helpful console info for debugging
     console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
   } else {
-    // still log so you can diagnose missing init
     console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
   }
 })();
@@ -610,8 +594,6 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
 </style>
 
  <div id="mainCartContainer">
-  
-  
   <button id="backBtn" onclick="history.back()" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 999px; color: #333; font-size: 14px; font-weight: 500; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s ease;">
     <span style="font-size: 16px;">←</span> 
     <span>Back</span>
@@ -640,7 +622,6 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
 <!-- Hidden PDF Template -->
 <div id="pdfInvoice" style="display:none; padding: 20px; font-family: Arial;">
   <div style="text-align: center; margin-bottom: 10px;">
-    
     <h2 style="margin: 5px 0;">Sublime Store</h2>
     <p style="font-size: 13px;">Near Variety Store Link Road, Takana Road, Pithoragarh</p>
     <p style="font-size: 13px;">📞 +91 8868839446 | ✉️ s4sublimestore@gmail.com</p>
@@ -667,7 +648,6 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
     <tbody id="pdfProductRows"></tbody>
   </table>
 
-  <!-- Increased font-size for total -->
   <div style="text-align: right; font-weight: bold; margin-top: 15px; font-size: 24px;">
     Total: ₹<span id="pdfTotal"></span>
   </div>
@@ -679,9 +659,11 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
 </div>
 
   <script src="js/product.js"></script>
-  
+
 <script>
-  
+  // Small public key placeholder; replace with your public key variable or set window.RAZORPAY_KEY_ID_PUBLIC before calling
+  window.RAZORPAY_KEY_ID_PUBLIC = window.RAZORPAY_KEY_ID_PUBLIC || 'rzp_test_RfzszE7iee0S3d';
+
   const savedMode = localStorage.getItem('darkMode') || 'light';
   if (savedMode === 'dark') {
     document.documentElement.classList.remove('light-mode');
@@ -690,9 +672,7 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
     document.body.classList.remove('dark-mode');
   }
 
-  
- 
-
+  // --- Cart helpers (unchanged) ---
   function getCartFromLocalStorage() {
     const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
     return Object.values(rawCart).map(cartItem => {
@@ -711,6 +691,279 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
     return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   }
 
+  // --- sendOrderOnce dedupe + fetch helper (copied from Sublime) ---
+  function sendOrderOnce(payload) {
+    const id = String(payload.orderId || payload.order_id || ('o' + (payload.ts || Date.now())));
+    const key = 'sentOrder:' + id;
+    if (sessionStorage.getItem(key)) {
+      console.warn('sendOrderOnce: already sent, skipping:', id);
+      return Promise.resolve({ ok: true, skipped: true, reason: 'already-sent' });
+    }
+    try { sessionStorage.setItem(key, '1'); } catch (e) {}
+    setTimeout(() => { try { sessionStorage.removeItem(key); } catch (_) {} }, 2 * 60 * 1000);
+
+    return fetch('/.netlify/functions/sendTelegramOrder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true
+    }).then(async (res) => {
+      const text = await res.text().catch(()=>null);
+      console.log('sendOrderOnce ->', res.status, text);
+      if (!res.ok) try { sessionStorage.removeItem(key); } catch(_) {}
+      return { ok: res.ok, status: res.status, text };
+    }).catch(err => {
+      try { sessionStorage.removeItem(key); } catch(_) {}
+      console.error('sendOrderOnce network error', err);
+      throw err;
+    });
+  }
+
+  // --- Replace payment form HTML (idempotent) ---
+  function replacePaymentFormHTML() {
+    const form = document.getElementById('orderForm');
+    if (!form) return;
+
+    const total = Number(document.getElementById('cartTotal')?.textContent || 0);
+    const belowThreshold = total < 199;
+    const warningMsg = belowThreshold ? `<div style="background:#fff3cd;color:#856404;border:1px solid #ffeeba;padding:10px;border-radius:8px;margin-bottom:14px;font-size:14px;font-weight:500">⚠️ Delivery charges may apply on orders below ₹199.</div>` : '';
+
+    form.innerHTML = `
+      ${warningMsg}
+      <input type="text" id="customerName" placeholder="Your Name" required autocomplete="off" />
+      <input type="tel" id="customerPhone" placeholder="Mobile Number" required autocomplete="off" />
+      <div id="phoneError" style="color:red;font-size:13px;margin-top:-8px;margin-bottom:10px;display:none;"></div>
+
+      <h3 style="font-weight:600;font-size:18px;margin-bottom:12px;">Payment method</h3>
+
+      <label class="payment-method" style="display:flex;align-items:center;border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:12px;background:#fff;cursor:pointer;">
+        <input id="pm_cod" type="radio" name="paymentMethod" value="cod" checked style="margin-right:12px;width:18px;height:18px;" />
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:15px;">Cash on Delivery</div>
+          <div style="font-size:13px;color:#555;">Pay when you receive the order.</div>
+        </div>
+        <i class="fas fa-truck" style="color:#4CAF50;margin-left:8px;"></i>
+      </label>
+
+      <label class="payment-method" style="display:flex;align-items:center;border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:12px;background:#fff;cursor:pointer;">
+        <input id="pm_online" type="radio" name="paymentMethod" value="online" style="margin-right:12px;width:18px;height:18px;" />
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:15px;">Pay Online (Card / UPI / Wallets)</div>
+          <div style="font-size:13px;color:#555;">Secure payments via Razorpay — instant confirmation.</div>
+        </div>
+        <i class="fas fa-credit-card" style="color:#1e88e5;margin-left:8px;"></i>
+      </label>
+
+      <div id="actionButtons" style="margin-top:12px;">
+        <button id="confirmOrderBtn" style="width:100%;padding:12px;border-radius:8px;font-size:16px;background:#1e88e5;color:#fff;border:none;cursor:pointer;">
+          Confirm Order
+        </button>
+      </div>
+    `;
+
+    // delegate wiring for the confirm button (keeps code tolerant)
+    const btn = document.getElementById('confirmOrderBtn');
+    if (btn) {
+      btn.onclick = function(e){ e.preventDefault(); handlePayment(); };
+    }
+  }
+
+  // --- Unified payment handler (COD + Razorpay) ---
+  async function handlePayment() {
+    const name = (document.getElementById("customerName")?.value || '').trim();
+    const phone = (document.getElementById("customerPhone")?.value || '').trim();
+    const errorEl = document.getElementById("phoneError");
+    if (!name || !phone) { if (errorEl) { errorEl.textContent = "Please enter your name and phone number"; errorEl.style.display = "block"; } return; }
+    if (!/^[6-9]\d{9}$/.test(phone)) { if (errorEl) { errorEl.textContent = "Enter a valid 10-digit Indian mobile number."; errorEl.style.display = "block"; } return; }
+    if (errorEl) errorEl.style.display = "none";
+
+    const spinner = document.getElementById('spinnerOverlay'); if (spinner) spinner.style.display = 'flex';
+    const method = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
+
+    // COD path
+    if (method === 'cod') {
+      if (typeof submitOrderFast === 'function') {
+        try { submitOrderFast(); } catch(err) { console.error('submitOrderFast error', err); if (spinner) spinner.style.display='none'; alert('COD failed.'); }
+        return;
+      } else {
+        document.getElementById('orderForm').innerHTML = `<div style="padding:20px;text-align:center;color:green"><h3>✓ Order Confirmed</h3><p>Order ID: ORD${Date.now()}</p></div>`;
+        try { localStorage.removeItem('cart'); } catch(_) {}
+        if (spinner) spinner.style.display = 'none';
+        return;
+      }
+    }
+
+    // ONLINE path (Razorpay)
+    try {
+      const cart = getCartFromLocalStorage();
+      if (!cart || cart.length === 0) throw new Error('Cart is empty');
+      const totalAmount = calculateTotal(cart);
+      const amountPaise = Math.round(totalAmount * 100);
+
+      const createRes = await fetch('/.netlify/functions/create-order', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ amount: amountPaise })
+      });
+      if (!createRes.ok) { const txt = await createRes.text(); throw new Error('create-order error: ' + txt); }
+      const order = await createRes.json();
+
+      if (!window.Razorpay) {
+        await new Promise((resolve, reject) => {
+          let waited = 0;
+          const iv = setInterval(() => { if (window.Razorpay) { clearInterval(iv); resolve(); } waited += 150; if (waited > 3000) { clearInterval(iv); reject(new Error('Razorpay script timeout')); } }, 150);
+        }).catch(err => { throw err; });
+      }
+
+      const options = {
+        key: (window.RAZORPAY_KEY_ID_PUBLIC || 'rzp_test_RfzszE7iee0S3d'),
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Sublime Store',
+        description: 'Order from Sublime Store',
+        order_id: order.id,
+        prefill: { name: document.getElementById('customerName')?.value || '', contact: document.getElementById('customerPhone')?.value || '' },
+        notes: { order_receipt: order.receipt || order.id },
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch('/.netlify/functions/verify-payment', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(response)
+            });
+            const verifyJson = await verifyRes.json();
+            if (!verifyRes.ok || !verifyJson.ok) throw new Error(verifyJson.error || 'Payment verification failed');
+
+            const cart = getCartFromLocalStorage();
+            const totalAmount = calculateTotal(cart);
+            const amountPaid = (order && order.amount) ? Number(order.amount) / 100 : totalAmount;
+            const orderId = (order && order.id) ? order.id : ('ORD' + Date.now());
+            const name = (document.getElementById('customerName')?.value || '').trim();
+            const phone = (document.getElementById('customerPhone')?.value || '').trim();
+            const itemLines = (cart || []).map(item => `• ${item.title} (x${item.qty}) - Rs. ${item.price * item.qty}`).join('\n');
+            const waLink = phone ? `https://wa.me/91${phone}` : '';
+
+            const messageText = `🧾 *New Order Received*\n` +
+              `*Order ID:* ${orderId}\n` +
+              `👤 *Name:* ${name}\n` +
+              `📞 *Phone:* ${phone}\n` +
+              `💬 *WhatsApp:* ${waLink ? `[Chat](${waLink})` : 'N/A'}\n` +
+              `💰 *Total:* Rs. ${amountPaid}\n` +
+              `📦 *Items:*\n${itemLines}`;
+
+            const payload = {
+              orderId,
+              name,
+              phone,
+              totalAmount,
+              amountPaid,
+              currency: order?.currency || 'INR',
+              items: (cart || []).map(i => ({ id: i.id, title: i.title, price: i.price, qty: i.qty, image: i.image || "" })),
+              payment: { provider: 'Razorpay', razorpay_payment_id: response.razorpay_payment_id, razorpay_order_id: response.razorpay_order_id, razorpay_signature: response.razorpay_signature, method: 'online', status: 'paid' },
+              messageText,
+              ts: Date.now()
+            };
+
+            sendOrderOnce(payload).catch(err => {
+              console.error('sendOrderOnce (online) failed', err);
+              try { if (navigator.sendBeacon) navigator.sendBeacon('/.netlify/functions/sendTelegramOrder', JSON.stringify(payload)); } catch(e){}
+            });
+
+            const successHTML = `<div style="padding:20px;text-align:center;color:green;"><h3>✓ Payment & Order Confirmed</h3><p><strong>Order ID:</strong> ${orderId}</p><p>Thank you for buying from <strong>Sublime Store</strong>.</p><a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a></div>`;
+            document.getElementById("orderForm").innerHTML = successHTML;
+            try { localStorage.removeItem('cart'); } catch(_) {}
+            document.getElementById("cartContainer").innerHTML = "";
+            document.getElementById("cartSummary").style.display = "none";
+            document.getElementById("cartTopBar").style.display = "none";
+            if (spinner) spinner.style.display = 'none';
+
+            setTimeout(() => { try { generateAndSendPDF(Object.assign({}, payload, { __noNotify: true })); } catch(_) {} }, 300);
+
+          } catch (err) {
+            console.error('verify/after-payment error', err);
+            alert('Payment succeeded but verification/notification failed. Contact support with payment id: ' + (response.razorpay_payment_id || 'N/A'));
+            if (spinner) spinner.style.display = 'none';
+          }
+        },
+        modal: { ondismiss: function(){ if (spinner) spinner.style.display = 'none'; } }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+
+    } catch (err) {
+      console.error('online payment error', err);
+      alert('Checkout error: ' + (err.message || err));
+      if (spinner) spinner.style.display = 'none';
+    }
+  }
+
+  // --- submitOrderFast (COD) ---
+  async function submitOrderFast() {
+    const name = document.getElementById("customerName").value.trim();
+    const phone = document.getElementById("customerPhone").value.trim();
+    const errorEl = document.getElementById("phoneError");
+    if (!name || !phone) { errorEl.textContent = "Please enter your name and phone number"; errorEl.style.display = "block"; return; }
+    if (!/^[6-9]\d{9}$/.test(phone)) { errorEl.textContent = "Enter a valid 10-digit Indian mobile number."; errorEl.style.display = "block"; return; }
+    errorEl.style.display = "none";
+
+    const cart = getCartFromLocalStorage();
+    const totalAmount = calculateTotal(cart);
+    const orderId = "ORD" + Date.now();
+
+    const itemLines = (cart || []).map(item => `• ${item.title} (x${item.qty}) - Rs. ${item.price * item.qty}`).join('\n');
+    const messageText = `🧾 *New Order Received*\n` +
+      `*Order ID:* ${orderId}\n` +
+      `👤 *Name:* ${name}\n` +
+      `📞 *Phone:* ${phone}\n` +
+      `💬 *WhatsApp:* [Chat](https://wa.me/91${phone})\n` +
+      `💰 *Total:* Rs. ${totalAmount}\n` +
+      `📦 *Items:*\n${itemLines}`;
+
+    const payload = {
+      orderId,
+      name,
+      phone,
+      totalAmount,
+      amountPaid: 0,
+      currency: 'INR',
+      items: (cart || []).map(i => ({ id: i.id, title: i.title, price: i.price, qty: i.qty, image: i.image || "" })),
+      payment: { provider: 'COD', method: 'cod', status: 'pending' },
+      messageText,
+      ts: Date.now()
+    };
+
+    const successHTML = `<div style="padding:20px;text-align:center;color:green;"><h3>✓ Order Confirmed</h3><p><strong>Order ID:</strong> ${orderId}</p><p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p><a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a></div>`;
+    document.getElementById("orderForm").innerHTML = successHTML;
+
+    try { localStorage.removeItem('cart'); } catch(_) {}
+    document.getElementById("cartContainer").innerHTML = "";
+    document.getElementById("cartSummary").style.display = "none";
+    document.getElementById("cartTopBar").style.display = "none";
+    document.title = "Order Confirmed";
+    setTimeout(() => { document.getElementById("spinnerOverlay").style.display = "none"; }, 800);
+
+    setTimeout(() => { sendOrderOnce(payload).catch(err => { console.error('sendOrderOnce (cod) failed', err); try { if (navigator.sendBeacon) navigator.sendBeacon('/.netlify/functions/sendTelegramOrder', JSON.stringify(payload)); } catch(e){} }); }, 300);
+
+    setTimeout(() => { generateAndSendPDF(payload); }, 300);
+  }
+
+  // --- generateAndSendPDF (delegates to sendOrderOnce / beacon fallback) ---
+  async function generateAndSendPDF(orderData) {
+    try {
+      if (orderData && orderData.__noNotify) {
+        console.log('generateAndSendPDF: __noNotify true - skipping notify for', orderData.orderId);
+        return;
+      }
+      const r = await sendOrderOnce(orderData);
+      if (r && r.ok) console.log('generateAndSendPDF -> sendTelegramOrder OK', r.status);
+      else {
+        console.warn('generateAndSendPDF -> sendTelegramOrder result', r);
+        try { if (navigator.sendBeacon) navigator.sendBeacon('/.netlify/functions/sendTelegramOrder', JSON.stringify(orderData)); } catch(e){ console.warn('beacon fallback failed', e); }
+      }
+    } catch (err) {
+      console.error('generateAndSendPDF: sendTelegramOrder fetch failed', err);
+      try { if (navigator.sendBeacon) navigator.sendBeacon('/.netlify/functions/sendTelegramOrder', JSON.stringify(orderData)); } catch (e) { console.warn('beacon fallback failed', e); }
+    }
+  }
+
+  // --- UI rendering (uses replacePaymentFormHTML) ---
   function renderCart() {
     const cart = getCartFromLocalStorage();
     const container = document.getElementById("cartContainer");
@@ -759,327 +1012,89 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
     totalPrice.textContent = `₹${total}`;
     document.title = `(${cart.reduce((a, b) => a + b.qty, 0)}) Your Cart`;
 
-   form.style.display = "block";
+    form.style.display = "block";
 
-const belowThreshold = total < 199;
-const warningMsg = belowThreshold ? 
-  `<div style="
-    background: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-bottom: 14px;
-    font-size: 14px;
-    font-weight: 500;
-  ">
-    ⚠️ Delivery charges may apply on orders below ₹199.
-  </div>`
- : '';
-
-form.innerHTML = `
-  ${warningMsg}
- 
-  <input type="text" id="customerName" placeholder="Your Name" required autocomplete="off" />
-  <input type="tel" id="customerPhone" placeholder="Mobile Number" required autocomplete="off" />
-  <div id="phoneError" style="color: red; font-size: 13px; margin-top: -8px; margin-bottom: 10px; display: none;"></div>
-  <div style="margin-bottom: 10px;">
-   
-    <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 16px;">Payment method</h3>
-
-<!-- Cash on Delivery -->
-<label class="payment-method" data-method="cod" style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 14px 12px; margin-bottom: 16px; background: #fff; cursor: pointer;">
-  <input type="radio" name="paymentMethod" value="cod" checked style="margin-right: 12px; width: 18px; height: 18px;" />
-  <div style="flex: 1;">
-    <div style="font-weight: 600; font-size: 15px;">Cash on Delivery / Pay on Delivery</div>
-    <div style="font-size: 13px; color: #555;">Cash, UPI and Cards accepted.</div>
-  </div>
-  <i class="fas fa-wallet" style="margin-right: 8px; color: #4CAF50;"></i>
-</label>
-
-
-<!-- Final Action Button -->
-<div id="actionButtons" style="margin-top: 10px;">
-  <button id="confirmOrderBtn" onclick="handlePayment()">Confirm Order</button>
-</div>`;
-
+    replacePaymentFormHTML();
   }
 
-renderCart();
-
-
-  const upiRadio = document.querySelector('input[value="upi"]');
-  const codRadio = document.querySelector('input[value="cod"]');
-  const upiAppSection = document.getElementById("upiAppOptions");
-  const confirmBtn = document.getElementById("confirmOrderBtn");
-
- function handlePayment() {
-  const name = document.getElementById("customerName").value.trim();
-  const phone = document.getElementById("customerPhone").value.trim();
-  const errorEl = document.getElementById("phoneError");
-
-  if (!name || !phone) {
-    errorEl.textContent = "Please enter your name and phone number";
-    errorEl.style.display = "block";
-    return;
-  }
-
-  if (!/^[6-9]\d{9}$/.test(phone)) {
-    errorEl.textContent = "Enter a valid 10-digit Indian mobile number.";
-    errorEl.style.display = "block";
-    return;
-  }
-
-  errorEl.style.display = "none";
-  // Show spinner immediately
-document.getElementById("spinnerOverlay").style.display = "flex";
-
- submitOrderFast(); // New function that handles Telegram + shows success // COD only
-}
-
+  // --- small utilities and event wiring ---
   function updateQty(id, delta) {
-  const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
-  if (!rawCart[id]) return;
-  rawCart[id].qty += delta;
-  if (rawCart[id].qty < 1) rawCart[id].qty = 1;
-  localStorage.setItem("cart", JSON.stringify(rawCart));
-  try { sessionStorage.setItem('cartDirty', '1'); } catch(_){}
-  renderCart();
-}
-
-function removeFromCart(id) {
-  const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
-  delete rawCart[id];
-  localStorage.setItem("cart", JSON.stringify(rawCart));
-  try { sessionStorage.setItem('cartDirty', '1'); } catch(_){}
-  renderCart();
-}
-
-function loadImageAsBase64(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.setAttribute("crossOrigin", "anonymous");
-    img.onload = function () {
-      const canvas = document.createElement("canvas");
-      canvas.width = this.naturalWidth;
-      canvas.height = this.naturalHeight;
-      canvas.getContext("2d").drawImage(this, 0, 0);
-      resolve(canvas.toDataURL("image/jpeg"));
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-async function submitOrderFast() {
-  const name = document.getElementById("customerName").value.trim();
-  const phone = document.getElementById("customerPhone").value.trim();
-  const errorEl = document.getElementById("phoneError");
-
-  if (!name || !phone) {
-    errorEl.textContent = "Please enter your name and phone number";
-    errorEl.style.display = "block";
-    return;
+    const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
+    if (!rawCart[id]) return;
+    rawCart[id].qty += delta;
+    if (rawCart[id].qty < 1) rawCart[id].qty = 1;
+    localStorage.setItem("cart", JSON.stringify(rawCart));
+    try { sessionStorage.setItem('cartDirty', '1'); } catch(_){}
+    renderCart();
   }
 
-  if (!/^[6-9]\d{9}$/.test(phone)) {
-    errorEl.textContent = "Enter a valid 10-digit Indian mobile number.";
-    errorEl.style.display = "block";
-    return;
+  function removeFromCart(id) {
+    const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
+    delete rawCart[id];
+    localStorage.setItem("cart", JSON.stringify(rawCart));
+    try { sessionStorage.setItem('cartDirty', '1'); } catch(_){}
+    renderCart();
   }
 
-  errorEl.style.display = "none";
-  const cart = getCartFromLocalStorage();
-  const totalAmount = calculateTotal(cart);
-  const orderId = "ORD" + Date.now();
+  function loadImageAsBase64(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous");
+      img.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = this.naturalWidth;
+        canvas.height = this.naturalHeight;
+        canvas.getContext("2d").drawImage(this, 0, 0);
+        resolve(canvas.toDataURL("image/jpeg"));
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
 
-  // 🔔 Telegram message first
+  // initial render & idempotent replacement
+  renderCart();
 
- 
+  // mark cart clean
+  try { sessionStorage.setItem('cartDirty', '0'); } catch(_){}
 
-  const itemLines = cart.map(item =>
-    `• ${item.title} (x${item.qty}) - Rs. ${item.price * item.qty}`
-  ).join('\n');
-
-  const messageText = `🧾 *New Order Received*\n` +
-    `*Order ID:* ${orderId}\n` +
-    `👤 *Name:* ${name}\n` +
-    `📞 *Phone:* ${phone}\n` +
-    `💬 *WhatsApp:* [Chat](https://wa.me/91${phone})\n` +
-    `💰 *Total:* Rs. ${totalAmount}\n` +
-    `📦 *Items:*\n${itemLines}`;
-
-  
-
-  // ✅ Show user confirmation immediately
-// ✅ Show user confirmation + Continue shopping button
-// ✅ Success UI: HTML only (no inline <script>)
-const successHTML = `
-  <div style="padding: 20px; text-align: center; color: green;">
-    <h3>✓ Order Confirmed</h3>
-    <p><strong>Order ID:</strong> ${orderId}</p>
-    <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
-    <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
-  </div>
-`;
-function setSS(key, val) {
-  try { sessionStorage.setItem(key, val); } catch (_) {}
-}
-
-document.getElementById("orderForm").innerHTML = successHTML;
-// Make the top Back button behave like "Continue shopping" on success
-// Make the top "Back" button behave like Continue Shopping on success
-(function () {
-  const backBtn = document.getElementById('backBtn');
-  if (!backBtn) return;
-
-  backBtn.onclick = null;
-  backBtn.removeAttribute('onclick');
-
-  backBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    // we're leaving success screen; mark and navigate
-    window.__orderSuccessActive = false;
-    setSS('jumpToProducts','1');
-    setSS('clearCartOnHome','1');
-    try { localStorage.removeItem('cart'); } catch (_){}
-    location.replace(`index.html?ts=${Date.now()}#productList`);
-  });
-})();
-
-// Continue shopping button (same behavior)
-(function(){
-  const btn = document.getElementById('continueShopping');
-  if(!btn) return;
-  btn.addEventListener('click', function(e){
-    e.preventDefault();
-    window.__orderSuccessActive = false;
-    setSS('jumpToProducts','1');
-    setSS('clearCartOnHome','1');
-    location.replace(`index.html?ts=${Date.now()}#productList`);
-  });
-})();
-
-// Make device back (Android/iOS) behave like Continue Shopping on success
-// 🔒 Robust device-back trap for the success screen
-// 🔒 Robust + debounced device-back trap for the success screen
-(function setupHardwareBackTrap() {
-  if (window.__successTrapInstalled) return;
-  window.__successTrapInstalled = true;
-
-  window.__orderSuccessActive = true;
-  let redirecting = false;
-
-  try {
-    history.replaceState({ __success_base: true }, '', location.href);
-    history.pushState({ __success_trap: true }, '', location.href + (location.hash ? '' : '#_success_trap'));
-
-    const goHomeFresh = () => {
-      if (redirecting) return;
-      redirecting = true;
-      window.removeEventListener('popstate', onPop);
-      setSS('jumpToProducts', '1');
-      setSS('clearCartOnHome', '1');
-      try { localStorage.removeItem('cart'); } catch (_){}
+  // back button wiring
+  (function wireCartPageBackButton() {
+    const backBtn = document.getElementById('backBtn');
+    if (!backBtn) return;
+    backBtn.onclick = null;
+    backBtn.removeAttribute('onclick');
+    backBtn.addEventListener('click', function (e) {
+      if (window.__orderSuccessActive) return;
+      e.preventDefault();
+      try { sessionStorage.setItem('jumpToProducts', '1'); } catch (_){}
       location.replace(`index.html?ts=${Date.now()}#productList`);
-    };
+    });
+  })();
 
-    const onPop = function () {
-      if (!window.__orderSuccessActive) return;
-      goHomeFresh();
-    };
+  // hardware back trap
+  (function trapCartHardwareBackSmart() {
+    if (window.__cartTrapInstalled) return;
+    window.__cartTrapInstalled = true;
+    try {
+      history.replaceState({ __cartBase: true }, '', location.href);
+      history.pushState({ __cartTrap: true }, '', location.href + (location.hash ? '' : '#_cart'));
+      const onPop = function () {
+        const dirty = (sessionStorage.getItem('cartDirty') === '1');
+        if (dirty) {
+          try { sessionStorage.setItem('jumpToProducts', '1'); } catch (_){}
+          location.replace(`index.html?ts=${Date.now()}#productList`);
+        } else {
+          window.removeEventListener('popstate', onPop);
+          history.back();
+        }
+      };
+      window.addEventListener('popstate', onPop);
+    } catch (_) {}
+  })();
 
-    window.addEventListener('popstate', onPop);
-
-    const cleanup = () => { window.__orderSuccessActive = false; window.removeEventListener('popstate', onPop); };
-    document.getElementById('continueShopping')?.addEventListener('click', cleanup);
-    document.getElementById('backBtn')?.addEventListener('click', cleanup);
-  } catch (_) {}
-})();
-
-// Clear local cart + UI
-localStorage.removeItem("cart");
-document.getElementById("cartContainer").innerHTML = "";
-document.getElementById("cartSummary").style.display = "none";
-document.getElementById("cartTopBar").style.display = "none";
-document.title = "Order Confirmed";
-
-// Hide spinner
-setTimeout(() => {
-  document.getElementById("spinnerOverlay").style.display = "none";
-}, 800); // spinner shows at least 0.8 seconds
-
-
-  // ⚙️ Now generate + send PDF in background
-  setTimeout(() => {
-  generateAndSendPDF({ name, phone, orderId, cart, totalAmount, messageText });
-}, 300);
- // slight delay for UX smoothness
-}
-async function generateAndSendPDF(orderData) {
-  navigator.sendBeacon(
-    "/.netlify/functions/sendTelegramOrder",
-    new Blob([JSON.stringify(orderData)], { type: "application/json" })
-  );
-}
-
-
-
-  // Initial render
-  renderCart();
-
-
-// 👇 Mark cart as "clean" when you open the cart page
-try { sessionStorage.setItem('cartDirty', '0'); } catch(_) {}
-
-  // === Cart page Back button should always return to home (fresh) ===
-// === Cart page Back button: smart behavior ===
-(function wireCartPageBackButton() {
-  const backBtn = document.getElementById('backBtn');
-  if (!backBtn) return;
-
-  backBtn.onclick = null;
-  backBtn.removeAttribute('onclick');
-
-  backBtn.addEventListener('click', function (e) {
-    // 👇 add this guard so when success screen is active,
-    // the success-specific handler owns the Back behavior.
-    if (window.__orderSuccessActive) return;
-
-    e.preventDefault();
-    try { sessionStorage.setItem('jumpToProducts', '1'); } catch (_){}
-    location.replace(`index.html?ts=${Date.now()}#productList`);
-  });
-})();
-
-
-// === Hardware/gesture back on CART page → only redirect if cart changed ===
-(function trapCartHardwareBackSmart() {
-  if (window.__cartTrapInstalled) return;
-  window.__cartTrapInstalled = true;
-
-  try {
-    history.replaceState({ __cartBase: true }, '', location.href);
-    history.pushState({ __cartTrap: true }, '', location.href + (location.hash ? '' : '#_cart'));
-
-    const onPop = function () {
-      const dirty = (sessionStorage.getItem('cartDirty') === '1');
-      if (dirty) {
-        try { sessionStorage.setItem('jumpToProducts', '1'); } catch (_){}
-        location.replace(`index.html?ts=${Date.now()}#productList`);
-      } else {
-        window.removeEventListener('popstate', onPop);
-        history.back();
-      }
-    };
-
-    window.addEventListener('popstate', onPop);
-  } catch (_) {}
-})();
-
-
-
-    const toggleBtn = document.getElementById('themeToggle');
-
+  // theme toggle
+  const toggleBtn = document.getElementById('themeToggle');
   function applyTheme(mode) {
     if (mode === 'dark') {
       document.body.classList.add('dark-mode');
@@ -1094,7 +1109,6 @@ try { sessionStorage.setItem('cartDirty', '0'); } catch(_) {}
   document.addEventListener('DOMContentLoaded', () => {
     const savedMode = localStorage.getItem('theme') || 'light';
     applyTheme(savedMode);
-
     toggleBtn.addEventListener('click', () => {
       const isDark = document.body.classList.contains('dark-mode');
       applyTheme(isDark ? 'light' : 'dark');
@@ -1102,6 +1116,8 @@ try { sessionStorage.setItem('cartDirty', '0'); } catch(_) {}
   });
 </script>
 
+<!-- load Razorpay checkout (only if needed) -->
+<script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
 
 </body>
 </html>
