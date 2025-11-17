@@ -726,6 +726,25 @@ firebase.database().ref("orders").push(order).then(async () => {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload)
             });
+// after sendTelegramOrder finished successfully
+try {
+  await fetch('/.netlify/functions/save-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      orderId,
+      name,
+      phone,
+      cart: order.items,
+      totalAmount: order.totalAmount,
+      isPaid: true,
+      razorpay_payment_id: response.razorpay_payment_id
+    })
+  });
+  console.log('save-order called (paid)');
+} catch (err) {
+  console.warn('save-order (paid) failed:', err);
+}
 
             // success UI (same style as COD)
             document.querySelector(".container").innerHTML = `
@@ -874,6 +893,25 @@ firebase.database().ref("orders").push(order).then(async () => {
           messageText
         })
       });
+// after sendTelegramOrder finished successfully
+try {
+  await fetch('/.netlify/functions/save-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      orderId,
+      name,
+      phone,
+      cart: order.items,
+      totalAmount: order.totalAmount,
+      isPaid: true,
+      razorpay_payment_id: response.razorpay_payment_id
+    })
+  });
+  console.log('save-order called (paid)');
+} catch (err) {
+  console.warn('save-order (paid) failed:', err);
+}
 
       // Update spinner text when done & hide spinner
       const statusDiv = document.getElementById("backgroundStatus");
