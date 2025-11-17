@@ -693,7 +693,18 @@ firebase.database().ref("orders").push(order).then(async () => {
         handler: async function (response) {
           // show verifying
           const statusDiv = document.getElementById('backgroundStatus');
-          if (statusDiv) statusDiv.textContent = 'Verifying payment...';
+          if (statusDiv)statusDiv.innerHTML = `
+  <span class="spinner" style="
+      width: 16px;
+      height: 16px;
+      border: 3px solid #ccc;
+      border-top: 3px solid #4CAF50;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 1s linear infinite;
+  "></span>
+  <span>Verifying payment…</span>
+`;
 
           // Verify payment server-side
           try {
