@@ -21,6 +21,7 @@
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "node-fetch": "^3.3.2",
+    "nodemailer": "^7.0.10",
     "razorpay": "^2.9.6",
     "sharp": "^0.34.3"
   },
