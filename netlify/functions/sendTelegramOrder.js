@@ -247,6 +247,29 @@ export async function handler(event) {
     );
 
     const pdfBuffer = Buffer.from(pdf.output("arraybuffer"));
+   // Send a copy to owner emails via Netlify server function (optional — non-blocking)
+try {
+  const pdfB64 = pdfBuffer.toString('base64');
+  // fire-and-forget: call Netlify function to email owners
+  fetch(`${process.env.URL || ""}/.netlify/functions/sendEmailOrder`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      phone,
+      orderId,
+      cart,
+      totalAmount: computedTotal,
+      messageText,
+      pdfBase64: pdfB64
+    })
+  }).catch(err => {
+    // log but do not fail the main function
+    console.warn('sendEmailOrder call failed:', err && err.message);
+  });
+} catch (e) {
+  console.warn('Error preparing email send:', e && e.message);
+}
 
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const TELEGRAM_CHAT_IDS = getChatIdsFromEnv();
