@@ -25,7 +25,9 @@ async function fetchImageAsBase64(imgPath) {
 
     // If relative path, build full URL
     if (!/^https?:\/\//i.test(imgPath)) {
-      const siteUrl = process.env.URL || process.env.DEPLOY_URL || "";
+      const base = process.env.URL || process.env.SITE_URL || process.env.DEPLOY_URL || "";
+const siteUrl = base && base.startsWith("http") ? base : (base ? `https://${base.replace(/^https?:\/\//,"")}` : "");
+
       finalUrl = siteUrl.replace(/\/$/, "") + "/" + imgPath.replace(/^\/?/, "");
     }
 
@@ -269,6 +271,31 @@ try {
   });
 } catch (e) {
   console.warn('Error preparing email send:', e && e.message);
+}
+// after pdfBuffer created and maybe after owner email/fire-and-forget call
+try {
+  const pdfB64 = pdfBuffer.toString('base64');
+  // call Netlify function to send customer receipt via Brevo
+  if (body.email) {
+    fetch(`${process.env.URL || ""}/.netlify/functions/sendEmailCustomer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        phone,
+        email: body.email,
+        orderId,
+        cart,
+        totalAmount: computedTotal,
+        messageText,
+        pdfBase64: pdfB64
+      })
+    }).catch(err => {
+      console.warn('sendEmailCustomer call failed:', err && err.message);
+    });
+  }
+} catch (e) {
+  console.warn('Error calling sendEmailCustomer:', e && e.message);
 }
 
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;

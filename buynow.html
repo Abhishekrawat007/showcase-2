@@ -462,7 +462,26 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
 
       <input type="tel" id="customerPhone" placeholder="Mobile Number" required />
       <div id="phoneError" class="error-msg" style="display:none;">Please enter a valid 10-digit mobile number.</div>
-   
+       <input type="tel" id="customerPhone" placeholder="Mobile Number" required />
+  <div id="phoneError" class="error-msg" style="display:none;">Please enter a valid 10-digit mobile number.</div>
+
+  <!-- NEW: Customer Email (for receipts & verification) -->
+  <input type="email" id="customerEmail" placeholder="Email (for receipt & verification)" required />
+  <div id="emailError" class="error-msg" style="display:none;">Please enter a valid email address.</div>
+
+  <!-- NEW: Email verification panel (hidden until code sent) -->
+  <div id="emailVerifyPanel" style="display:none; margin-top:10px;">
+    <div style="margin-bottom:6px; font-size:14px;">
+      We've sent a 6-digit code to <strong><span id="verifyEmailAddr"></span></strong>
+    </div>
+    <input type="text" id="emailCode" placeholder="Enter verification code" maxlength="6" style="width:60%;display:inline-block" />
+    <button type="button" id="verifyCodeBtn" style="display:inline-block; margin-left:8px; padding:8px 12px; border-radius:8px;">Verify</button>
+    <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+      <button type="button" id="resendCodeBtn" style="padding:6px 10px; border-radius:8px;">Resend code</button>
+      <span id="emailVerifyMsg" style="color:#d32f2f; display:none;"></span>
+    </div>
+  </div>
+
     <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px;">Payment method</h3>
 
 <!-- Cash on Delivery -->
@@ -605,6 +624,114 @@ if (total < 199) {
       localStorage.setItem("cart", JSON.stringify(raw));
       location.href = "index.html";
     }
+/* ====== EMAIL VERIFICATION HELPERS (ADD BEFORE submitOrder) ====== */
+
+// Helper: basic email validator
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Show / hide verification UI
+function showVerifyPanel(email) {
+  document.getElementById('verifyEmailAddr').textContent = email;
+  document.getElementById('emailVerifyPanel').style.display = 'block';
+  document.getElementById('emailVerifyMsg').style.display = 'none';
+}
+function hideVerifyPanel() {
+  document.getElementById('emailVerifyPanel').style.display = 'none';
+  document.getElementById('emailCode').value = '';
+}
+
+// Server calls (Netlify functions you will add)
+async function sendVerificationCode(email, orderId) {
+  return fetch('/.netlify/functions/sendVerification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, orderId })
+  }).then(async r => {
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  });
+}
+
+async function verifyCodeOnServer(email, orderId, code) {
+  return fetch('/.netlify/functions/verifyEmail', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, orderId, code })
+  }).then(async r => {
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  });
+}
+
+// Attach verify/resend listeners (safe to call multiple times — checks DOM)
+(function attachEmailHandlers(){
+  if (!document.getElementById('verifyCodeBtn')) return;
+  const verifyBtn = document.getElementById('verifyCodeBtn');
+  const resendBtn = document.getElementById('resendCodeBtn');
+
+  verifyBtn.addEventListener('click', async function () {
+    const code = document.getElementById('emailCode').value.trim();
+    const email = document.getElementById('customerEmail').value.trim();
+    const orderId = window.currentOrderId || document.getElementById('pdfOrderId')?.textContent || null;
+    if (!orderId) {
+      document.getElementById('emailVerifyMsg').textContent = 'Order id missing. Refresh the page.';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      return;
+    }
+    if (!/^\d{6}$/.test(code)) {
+      document.getElementById('emailVerifyMsg').textContent = 'Please enter a 6-digit code.';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      return;
+    }
+    try {
+      verifyBtn.disabled = true;
+      document.getElementById('emailVerifyMsg').style.display = 'none';
+      await verifyCodeOnServer(email, orderId, code); // throws on fail
+      sessionStorage.setItem('emailVerified_' + orderId, '1');
+      hideVerifyPanel();
+      // proceed with the flow: re-trigger submit by simulating click on submit button
+      const formBtn = document.querySelector("#orderForm button[type='submit']");
+      if (formBtn) {
+        formBtn.disabled = false;
+        formBtn.click();
+      }
+    } catch (err) {
+      document.getElementById('emailVerifyMsg').textContent = 'Invalid or expired code. Try resend.';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      console.warn('verifyCode error', err);
+    } finally {
+      verifyBtn.disabled = false;
+    }
+  });
+
+  resendBtn.addEventListener('click', async function () {
+    const email = document.getElementById('customerEmail').value.trim();
+    const orderId = window.currentOrderId || document.getElementById('pdfOrderId')?.textContent || null;
+    if (!isValidEmail(email)) {
+      document.getElementById('emailError').style.display = 'block';
+      return;
+    }
+    try {
+      resendBtn.disabled = true;
+      await sendVerificationCode(email, orderId);
+      document.getElementById('emailVerifyMsg').textContent = 'Code resent.';
+      document.getElementById('emailVerifyMsg').style.color = '#2e7d32';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      setTimeout(()=> {
+        document.getElementById('emailVerifyMsg').style.display = 'none';
+      }, 4000);
+    } catch (err) {
+      document.getElementById('emailVerifyMsg').textContent = 'Resend failed. Try again later.';
+      document.getElementById('emailVerifyMsg').style.color = '#d32f2f';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      console.warn('resend error', err);
+    } finally {
+      resendBtn.disabled = false;
+    }
+  });
+})();
 
     async function submitOrder(e) {
       e.preventDefault();
@@ -639,6 +766,7 @@ const order = {
   orderId,
   name,
   phone,
+  email,
   items: [{
   id: product.id,
   title: product.name,
@@ -651,6 +779,45 @@ const order = {
 };
 
 firebase.database().ref("orders").push(order).then(async () => {
+  // ===== EMAIL VERIFICATION CHECK (ADDED) =====
+  // set current order id globally so verify handlers can access it
+  window.currentOrderId = orderId;
+
+  // read email from the newly added input
+  const emailInputVal = (document.getElementById('customerEmail')?.value || '').trim();
+
+  // validate email
+  if (!isValidEmail(emailInputVal)) {
+    document.getElementById('emailError').style.display = 'block';
+    // re-enable submit button so user can fix
+    const btn = document.querySelector("#orderForm button[type='submit']");
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm Order'; }
+    return; // stop processing until valid email given
+  } else {
+    document.getElementById('emailError').style.display = 'none';
+  }
+
+  // If not already verified in this session, ask for verification
+  if (sessionStorage.getItem('emailVerified_' + orderId) !== '1') {
+    try {
+      // send verification code (server will send email via Brevo)
+      await sendVerificationCode(emailInputVal, orderId);
+      // show verification UI and pause flow: user must enter code
+      showVerifyPanel(emailInputVal);
+      // re-enable submit so user can click Verify after entering code
+      const btn = document.querySelector("#orderForm button[type='submit']");
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirm Order'; }
+      return; // stop here until verification completes
+    } catch (err) {
+      console.warn('sendVerificationCode failed', err);
+      document.getElementById('emailVerifyMsg').textContent = 'Unable to send code. Try again later.';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      const btn = document.querySelector("#orderForm button[type='submit']");
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirm Order'; }
+      return;
+    }
+  }
+  // ===== END EMAIL VERIFICATION CHECK =====
 
   // Decide payment method
   const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
@@ -723,6 +890,7 @@ firebase.database().ref("orders").push(order).then(async () => {
             const payload = {
               name,
               phone,
+              email,
               orderId,
               cart: order.items,
               totalAmount: order.totalAmount,
