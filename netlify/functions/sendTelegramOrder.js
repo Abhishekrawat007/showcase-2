@@ -129,25 +129,52 @@ export async function handler(event) {
     // WhatsApp link
     const waLink = phone ? `https://wa.me/91${String(phone).replace(/\D/g, "")}` : "";
 
-    // Ensure messageText contains badge/title
+    // ---------- NEW: Preserve "Buy Now" if the request is a buy-now ----------
+    const lowerMsg = (messageText || "").toString().toLowerCase();
+    const isBuyNowIndicator = /buy now/.test(lowerMsg) || (body.orderType && body.orderType.toString().toLowerCase() === 'buy_now') || (body.source && body.source.toString().toLowerCase() === 'buynow');
+
     if (messageText && typeof messageText === "string" && messageText.trim().length > 0) {
-      if (!/^(🟢|🔴)/.test(messageText.trim()) && !/New Order Received/i.test(messageText)) {
-        messageText = `🧾 *New Order Received* ${statusBadge}\n` + messageText;
-      } else if (!/New Order Received/i.test(messageText)) {
-        messageText = `🧾 *New Order Received* ${statusBadge}\n` + messageText;
-      } else {
+      if (isBuyNowIndicator) {
+        // If it's already a buy-now style message, ensure badge is present and prefix appropriately
         if (!/^(🟢|🔴)/.test(messageText.trim())) {
-          messageText = messageText.replace(/^(🧾\s*\*New Order Received\*\s*)/i, `$1${statusBadge}\n`);
+          messageText = `🛒 *Buy Now Order* ${statusBadge}\n` + messageText;
+        } else {
+          // already has a badge - still ensure header text present
+          if (!/Buy Now Order/i.test(messageText)) {
+            messageText = messageText.replace(/^(🧾?\s*\*?New Order Received\*?\s*)/i, `🛒 *Buy Now Order* ${statusBadge}\n`);
+          }
+        }
+      } else {
+        // default behaviour: keep "New Order Received" header as before
+        if (!/^(🟢|🔴)/.test(messageText.trim()) && !/New Order Received/i.test(messageText)) {
+          messageText = `🧾 *New Order Received* ${statusBadge}\n` + messageText;
+        } else if (!/New Order Received/i.test(messageText)) {
+          messageText = `🧾 *New Order Received* ${statusBadge}\n` + messageText;
+        } else {
+          if (!/^(🟢|🔴)/.test(messageText.trim())) {
+            messageText = messageText.replace(/^(🧾\s*\*New Order Received\*\s*)/i, `$1${statusBadge}\n`);
+          }
         }
       }
     } else {
-      messageText = `🧾 *New Order Received* ${statusBadge}\n` +
-        `*Order ID:* ${orderId}\n` +
-        `${name ? `👤 *Name:* ${name}\n` : ""}` +
-        `${phone ? `📞 *Phone:* ${phone}\n` : ""}` +
-        `${waLink ? `💬 *WhatsApp:* [Chat](${waLink})\n` : ""}` +
-        `💰 *Total:* Rs. ${computedTotal}\n` +
-        `📦 *Items:*\n${itemLines}`;
+      // No custom messageText provided — build one.
+      if (isBuyNowIndicator) {
+        messageText = `🛒 *Buy Now Order* ${statusBadge}\n` +
+          `*Order ID:* ${orderId}\n` +
+          `${name ? `👤 *Name:* ${name}\n` : ""}` +
+          `${phone ? `📞 *Phone:* ${phone}\n` : ""}` +
+          `${waLink ? `💬 *WhatsApp:* [Chat](${waLink})\n` : ""}` +
+          `💰 *Total:* Rs. ${computedTotal}\n` +
+          `📦 *Items:*\n${itemLines}`;
+      } else {
+        messageText = `🧾 *New Order Received* ${statusBadge}\n` +
+          `*Order ID:* ${orderId}\n` +
+          `${name ? `👤 *Name:* ${name}\n` : ""}` +
+          `${phone ? `📞 *Phone:* ${phone}\n` : ""}` +
+          `${waLink ? `💬 *WhatsApp:* [Chat](${waLink})\n` : ""}` +
+          `💰 *Total:* Rs. ${computedTotal}\n` +
+          `📦 *Items:*\n${itemLines}`;
+      }
     }
 
     // --- Create PDF ---
