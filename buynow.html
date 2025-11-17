@@ -354,6 +354,10 @@ label:hover {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+@keyframes tinySpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 /* Continue shopping button */
 .btn-continue{
   display:inline-flex;align-items:center;gap:.6rem;margin-top:14px;
@@ -373,6 +377,9 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
  <script src="js/config.js"></script>
 <script src="js/init-firebase.js"></script>
+
+<!-- Razorpay -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
 <script>
@@ -459,7 +466,7 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
     <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px;">Payment method</h3>
 
 <!-- Cash on Delivery -->
-<label class="payment-method" data-method="cod" style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 14px 12px; margin-bottom: 16px; background: #fff; cursor: pointer;">
+<label class="payment-method" data-method="cod" style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 14px 12px; margin-bottom: 12px; background: #fff; cursor: pointer;">
   <input type="radio" name="paymentMethod" value="cod" checked style="margin-right: 12px; width: 18px; height: 18px;" />
   <div style="flex: 1;">
     <div style="font-weight: 600; font-size: 15px;">Cash on Delivery / Pay on Delivery</div>
@@ -468,6 +475,15 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
   <i class="fas fa-wallet" style="margin-right: 8px; color: #4CAF50;"></i>
 </label>
 
+<!-- Pay Online (Razorpay) -->
+<label class="payment-method" data-method="online" style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 14px 12px; margin-bottom: 16px; background: #fff; cursor: pointer;">
+  <input type="radio" name="paymentMethod" value="online" style="margin-right: 12px; width: 18px; height: 18px;" />
+  <div style="flex: 1;">
+    <div style="font-weight: 600; font-size: 15px;">Pay Online (Card / UPI / Wallets)</div>
+    <div style="font-size: 13px; color: #555;">Secure payments via Razorpay — instant confirmation.</div>
+  </div>
+  <i class="fas fa-credit-card" style="margin-right: 8px; color: #1e88e5;"></i>
+</label>
       
       <button type="submit">Confirm Order</button>
 
@@ -590,7 +606,7 @@ if (total < 199) {
       location.href = "index.html";
     }
 
-    function submitOrder(e) {
+    async function submitOrder(e) {
       e.preventDefault();
       const name = document.getElementById("customerName").value.trim();
       const phone = document.getElementById("customerPhone").value.trim();
@@ -628,28 +644,162 @@ const order = {
   title: product.name,
   qty: quantity,
   price: product.newPrice,
-  image: product.images[0] // Add this line
+  image: product.images[0]
 }],
   totalAmount: product.newPrice * quantity,
   timestamp: new Date().toISOString()
 };
-async function loadImageAsBase64(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.setAttribute("crossOrigin", "anonymous");
-    img.onload = function () {
-      const canvas = document.createElement("canvas");
-      canvas.width = this.naturalWidth;
-      canvas.height = this.naturalHeight;
-      canvas.getContext("2d").drawImage(this, 0, 0);
-      resolve(canvas.toDataURL("image/jpeg"));
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-firebase.database().ref("orders").push(order).then(() => {
-  // Show immediate success + spinner
+
+firebase.database().ref("orders").push(order).then(async () => {
+
+  // Decide payment method
+  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
+
+  // If online chosen, start razorpay flow (we push the order to firebase first to keep consistent orderId logging)
+  if (paymentMethod === 'online') {
+    // --- RAZORPAY FLOW ---
+    try {
+      const amountPaise = Math.round(order.totalAmount * 100);
+      // Create order on server
+      const createRes = await fetch('/.netlify/functions/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: amountPaise })
+      });
+      if (!createRes.ok) {
+        throw new Error('create-order failed');
+      }
+      const razorOrder = await createRes.json();
+
+      // Show a minimal UI while Razorpay loads
+      document.querySelector(".container").innerHTML = `
+        <div class="confirmed-box">
+          <h3>Processing Payment…</h3>
+          <div id="backgroundStatus" style="margin-top: 15px; font-size: 14px; color: #555; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <span class="spinner" style="width:16px;height:16px;border:3px solid #ccc;border-top:3px solid #4CAF50;border-radius:50%;display:inline-block;animation: tinySpin 1s linear infinite;"></span>
+            <span>Opening payment window...</span>
+          </div>
+        </div>
+      `;
+
+      const options = {
+        key: 'rzp_test_RfzszE7iee0S3d',
+        amount: razorOrder.amount,
+        currency: razorOrder.currency || 'INR',
+        name: 'Sublime Store',
+        description: 'Buy Now Payment',
+        order_id: razorOrder.id,
+        prefill: { name, contact: phone },
+        handler: async function (response) {
+          // show verifying
+          const statusDiv = document.getElementById('backgroundStatus');
+          if (statusDiv) statusDiv.textContent = 'Verifying payment...';
+
+          // Verify payment server-side
+          try {
+            const verifyRes = await fetch('/.netlify/functions/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(response)
+            });
+            const verifyJson = await verifyRes.json();
+
+            if (!verifyRes.ok || !verifyJson.ok) {
+              throw new Error(verifyJson.error || 'Verification failed');
+            }
+
+            // Payment verified — send to Telegram (mark as paid)
+            const payload = {
+              name,
+              phone,
+              orderId,
+              cart: order.items,
+              totalAmount: order.totalAmount,
+              payment: { status: 'paid', provider: 'razorpay', razorpay_payment_id: response.razorpay_payment_id },
+              amountPaid: order.totalAmount,
+              ts: Date.now()
+            };
+
+            // Use fetch; server handles PDF + telegram
+            await fetch('/.netlify/functions/sendTelegramOrder', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            // success UI (same style as COD)
+            document.querySelector(".container").innerHTML = `
+              <div class="confirmed-box">
+                <h3>✓ Payment & Order Confirmed</h3>
+                <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
+                <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
+                <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
+              </div>
+            `;
+
+            // clear buyNow marker
+            sessionStorage.removeItem('buyNowProduct');
+
+            try { localStorage.removeItem('cart'); } catch (_) {}
+
+            // stop spinner if any left
+            setTimeout(() => {
+              const sp = document.querySelector('.spinner');
+              if (sp) sp.style.display = 'none';
+            }, 200);
+
+            // wire continue/back behavior like you had
+            (function(){
+              const btn = document.getElementById('continueShopping');
+              if(!btn) return;
+              btn.addEventListener('click', function(e){
+                e.preventDefault();
+                try { sessionStorage.setItem('jumpToProducts', '1'); } catch(_){}
+                location.assign('index.html?ts=' + Date.now() + '#productList');
+              });
+            })();
+
+          } catch (err) {
+            console.error('Payment verify/send failed:', err);
+            const statusDiv = document.getElementById('backgroundStatus');
+            if (statusDiv) statusDiv.textContent = '⚠️ Payment succeeded but verification failed. Contact support.';
+          }
+        },
+        modal: {
+          ondismiss: function(){
+            // user closed the modal, return to buy now page state
+            // restore simple UI so they can retry
+            document.querySelector(".container").innerHTML = `
+              <div class="confirmed-box">
+                <h3>Payment Cancelled</h3>
+                <p>Please try again or choose Cash On Delivery.</p>
+                <a href="buynow.html?id=${product.id}" class="btn-continue">Try again</a>
+              </div>
+            `;
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+
+      return; // stop the COD background flow after creating the Razorpay flow
+    } catch (err) {
+      console.error('Razorpay flow error:', err);
+      // show fallback error + let user retry (restore basic UI)
+      document.querySelector(".container").innerHTML = `
+        <div class="confirmed-box">
+          <h3>⚠ Checkout error</h3>
+          <p>Unable to start online payment. Please try again or choose Cash on Delivery.</p>
+          <a href="buynow.html?id=${product.id}" class="btn-continue">Back</a>
+        </div>
+      `;
+      return;
+    }
+    // --- END RAZORPAY FLOW ---
+  }
+
+  // COD flow (unchanged behaviour)
   document.querySelector(".container").innerHTML = `
   <div class="confirmed-box">
     <h3>✓ Order Confirmed</h3>
@@ -698,10 +848,10 @@ firebase.database().ref("orders").push(order).then(() => {
     })();
   <\/script>
 `;
-;
+
   sessionStorage.removeItem("buyNowProduct");
 
-  // Async background process
+  // Async background process for COD (keeps your original sendTelegramOrder call)
   (async () => {
     try {
       const messageText = `🛒 *Buy Now Order*
@@ -725,15 +875,20 @@ firebase.database().ref("orders").push(order).then(() => {
         })
       });
 
-      // Update spinner text when done
+      // Update spinner text when done & hide spinner
       const statusDiv = document.getElementById("backgroundStatus");
-      if (statusDiv) statusDiv.textContent = "Order details sent successfully!";
+      if (statusDiv) {
+        statusDiv.textContent = "Order details sent successfully!";
+        const sp = statusDiv.querySelector('.spinner');
+        if (sp) sp.style.display = 'none';
+      }
     } catch (err) {
       console.error("Background send failed:", err);
       const statusDiv = document.getElementById("backgroundStatus");
       if (statusDiv) statusDiv.textContent = "⚠️ Failed to send order details.";
     }
   })();
+
 }).catch(err => {
   alert("Error saving order. Please try again.");
   button.disabled = false;
