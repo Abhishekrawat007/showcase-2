@@ -693,9 +693,11 @@ async function verifyCodeOnServer(email, code) {
       // proceed with the flow: re-trigger submit by simulating click on submit button
       const formBtn = document.querySelector("#orderForm button[type='submit']");
       if (formBtn) {
-        formBtn.disabled = false;
-        formBtn.click();
-      }
+    formBtn.disabled = false;
+    formBtn.textContent = "Confirm Order";
+    submitOrder(new Event("submit"));
+}
+
     } catch (err) {
       document.getElementById('emailVerifyMsg').textContent = 'Invalid or expired code. Try resend.';
       document.getElementById('emailVerifyMsg').style.display = 'inline';
@@ -731,6 +733,12 @@ async function verifyCodeOnServer(email, code) {
     }
   });
 })();
+let orderId = "ORD" + Date.now();
+function completeOrderAfterEmailVerification() {
+    const submitBtn = document.querySelector("#orderForm button[type='submit']");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Confirm Order";
+}
 
     async function submitOrder(e) {
       e.preventDefault();
@@ -759,7 +767,8 @@ async function verifyCodeOnServer(email, code) {
       button.disabled = true;
       button.textContent = "Processing...";
 
-      const orderId = "ORD" + Date.now();
+    // orderId already exists globally
+
    const email = (document.getElementById('customerEmail')?.value || '').trim();
 const order = {
   orderId,
