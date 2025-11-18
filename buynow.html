@@ -687,7 +687,7 @@ async function verifyCodeOnServer(email, code) {
     try {
       verifyBtn.disabled = true;
       document.getElementById('emailVerifyMsg').style.display = 'none';
-      await verifyCodeOnServer(email, orderId, code); // throws on fail
+      await verifyCodeOnServer(email, code); // throws on fail
       sessionStorage.setItem('emailVerified_' + orderId, '1');
       hideVerifyPanel();
       // proceed with the flow: re-trigger submit by simulating click on submit button
@@ -714,7 +714,7 @@ async function verifyCodeOnServer(email, code) {
     }
     try {
       resendBtn.disabled = true;
-      await sendVerificationCode(email, orderId);
+      await sendVerificationCode(email);
       document.getElementById('emailVerifyMsg').textContent = 'Code resent.';
       document.getElementById('emailVerifyMsg').style.color = '#2e7d32';
       document.getElementById('emailVerifyMsg').style.display = 'inline';
