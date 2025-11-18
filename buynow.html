@@ -672,7 +672,7 @@ async function verifyCodeOnServer(email, code) {
 
   verifyBtn.addEventListener('click', async function () {
     const code = document.getElementById('emailCode').value.trim();
-    const email = document.getElementById('customerEmail').value.trim();
+   const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
     const orderId = window.currentOrderId || document.getElementById('pdfOrderId')?.textContent || null;
     if (!orderId) {
       document.getElementById('emailVerifyMsg').textContent = 'Order id missing. Refresh the page.';
@@ -706,7 +706,7 @@ async function verifyCodeOnServer(email, code) {
   });
 
   resendBtn.addEventListener('click', async function () {
-    const email = document.getElementById('customerEmail').value.trim();
+    const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
     const orderId = window.currentOrderId || document.getElementById('pdfOrderId')?.textContent || null;
     if (!isValidEmail(email)) {
       document.getElementById('emailError').style.display = 'block';
@@ -783,7 +783,7 @@ firebase.database().ref("orders").push(order).then(async () => {
   window.currentOrderId = orderId;
 
   // read email from the newly added input
-  const emailInputVal = (document.getElementById('customerEmail')?.value || '').trim();
+  const emailInputVal = (document.getElementById('customerEmail')?.value || '').trim().toLowerCase();
 
   // validate email
   if (!isValidEmail(emailInputVal)) {
