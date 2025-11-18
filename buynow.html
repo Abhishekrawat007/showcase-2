@@ -642,22 +642,22 @@ function hideVerifyPanel() {
 }
 
 // Server calls (Netlify functions you will add)
-async function sendVerificationCode(email, orderId) {
+async function sendVerificationCode(email) {
   return fetch('/.netlify/functions/sendVerification', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, orderId })
+    body: JSON.stringify({ email })
   }).then(async r => {
     if (!r.ok) throw new Error(await r.text());
     return r.json();
   });
 }
 
-async function verifyCodeOnServer(email, orderId, code) {
+async function verifyCodeOnServer(email, code) {
   return fetch('/.netlify/functions/verifyEmail', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, orderId, code })
+    body: JSON.stringify({ email, code })
   }).then(async r => {
     if (!r.ok) throw new Error(await r.text());
     return r.json();
