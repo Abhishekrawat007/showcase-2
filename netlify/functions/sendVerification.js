@@ -1,116 +1,100 @@
 // netlify/functions/sendVerification.js
-// Robust fetch handling for Netlify functions
-let fetchFn = globalThis.fetch;
+import admin from "firebase-admin";
+import zlib from "zlib";
+import { promisify } from "util";
+import { fetch as undiciFetch } from "undici";
 
-if (!fetchFn) {
-  // Try undici (recommended) then node-fetch (v2 style)
-  try {
-    // undici is commonly available or can be installed; prefer undici.fetch
-    fetchFn = require('undici').fetch;
-  } catch (e1) {
-    try {
-      // node-fetch v2 supports require; v3 is ESM-only and will fail here.
-      fetchFn = require('node-fetch');
-    } catch (e2) {
-      console.error('No fetch available in function runtime', e1, e2);
-      // Throw so deploy fails loudly rather than doing strange runtime errors
-      throw new Error('Fetch API not available in function runtime');
-    }
-  }
+const gunzip = promisify(zlib.gunzip);
+
+let _saCache = null;
+let _initPromise = null;
+
+async function loadServiceAccount() {
+  if (_saCache) return _saCache;
+  const b64 = process.env.FIREBASE_SA_GZ;
+  if (!b64) throw new Error("Missing FIREBASE_SA_GZ");
+
+  const buff = Buffer.from(b64, "base64");
+  const jsonBuf = await gunzip(buff);
+  _saCache = JSON.parse(jsonBuf.toString());
+  return _saCache;
 }
 
-exports.handler = async function (event) {
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
+async function ensureFirebaseInit() {
+  if (admin.apps.length) return;
+  if (_initPromise) return _initPromise;
+  _initPromise = (async () => {
+    const sa = await loadServiceAccount();
+    admin.initializeApp({
+      credential: admin.credential.cert(sa),
+      databaseURL: process.env.FIREBASE_DB_URL
+    });
+  })();
+  return _initPromise;
+}
+
+export async function handler(event) {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method Not Allowed" };
+  }
 
   try {
-    const body = JSON.parse(event.body || '{}');
-    const email = (body.email || '').toString().trim().toLowerCase();
+    await ensureFirebaseInit();
+
+    const body = JSON.parse(event.body || "{}");
+    const email = (body.email || "").trim().toLowerCase();
+
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return { statusCode: 400, body: 'Invalid email' };
+      return { statusCode: 400, body: "Invalid email" };
     }
 
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const FROM_EMAIL = process.env.BREVO_FROM_EMAIL || process.env.FROM_EMAIL;
-    const FIREBASE_DB_URL = process.env.FIREBASE_DB_URL; // e.g. https://project-id-default-rtdb.firebaseio.com
-    const FIREBASE_SECRET = process.env.FIREBASE_SECRET || ''; // optional
 
     if (!BREVO_API_KEY || !FROM_EMAIL) {
-      console.error('Brevo config missing');
-      return { statusCode: 500, body: 'Mail config not set' };
-    }
-    if (!FIREBASE_DB_URL) {
-      console.error('FIREBASE_DB_URL missing');
-      return { statusCode: 500, body: 'Firebase DB url not configured' };
+      return { statusCode: 500, body: "Brevo config missing" };
     }
 
-    // create 6-digit numeric code
+    // Generate OTP
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // store in firebase via REST
-    const key = Buffer.from(email).toString('base64').replace(/\//g, '_');
+    const key = Buffer.from(email).toString("base64").replace(/\//g, "_");
     const now = Date.now();
-    const record = {
+
+    // Save OTP in Firebase
+    await admin.database().ref("emailVerifications/" + key).set({
       email,
       code,
       createdAt: now,
-      expiresAt: now + 10 * 60 * 1000 // 10 minutes
-    };
-
-    // write: PUT to /emailVerifications/<key>.json
-    const dbUrl = FIREBASE_DB_URL.replace(/\/$/, '');
-    const writeUrl = `${dbUrl}/emailVerifications/${encodeURIComponent(key)}.json${FIREBASE_SECRET ? `?auth=${FIREBASE_SECRET}` : ''}`;
-
-    const saveRes = await fetchFn(writeUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(record)
+      expiresAt: now + 10 * 60 * 1000
     });
-    if (!saveRes.ok) {
-      const errText = await saveRes.text();
-      console.error('Firebase write failed', errText);
-      return { statusCode: 500, body: 'Unable to save verification' };
-    }
 
-    // Send email via Brevo transactional API
-    const subject = `Your ${process.env.SITE_NAME || 'Sublime Store'} verification code`;
-    const htmlContent = `<p>Your verification code is <strong>${code}</strong>. It expires in 10 minutes.</p>
-      <p>If you didn't request this, ignore this email.</p>`;
-
+    // Send email through Brevo
     const payload = {
       sender: { email: FROM_EMAIL },
       to: [{ email }],
-      subject,
-      htmlContent
+      subject: "Your verification code",
+      htmlContent: `<p>Your code is <strong>${code}</strong>. Valid for 10 min.</p>`
     };
 
-    const mailRes = await fetchFn('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
+    const res = await undiciFetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'api-key': BREVO_API_KEY
+        "Content-Type": "application/json",
+        "api-key": BREVO_API_KEY
       },
       body: JSON.stringify(payload)
     });
 
-    let mailJson;
-    try {
-      mailJson = await mailRes.json();
-    } catch (err) {
-      // if Brevo returns non-JSON on error, capture text
-      const text = await mailRes.text().catch(() => '');
-      console.error('Brevo returned non-json response', text);
-      return { statusCode: 500, body: JSON.stringify({ error: 'Brevo returned non-JSON response' }) };
+    const json = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return { statusCode: 500, body: JSON.stringify({ error: json }) };
     }
 
-    if (!mailRes.ok) {
-      console.error('Brevo send failed', mailJson);
-      return { statusCode: 500, body: JSON.stringify({ error: mailJson }) };
-    }
-
-    return { statusCode: 200, body: JSON.stringify({ ok: true, sent: true }) };
+    return { statusCode: 200, body: JSON.stringify({ ok: true }) };
 
   } catch (err) {
-    console.error('sendVerification error', err && (err.stack || err.message || err));
-    return { statusCode: 500, body: JSON.stringify({ error: err && err.message ? err.message : String(err) }) };
+    console.error("sendVerification error:", err);
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
-};
+}

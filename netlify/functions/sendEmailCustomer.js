@@ -1,7 +1,7 @@
 // netlify/functions/sendEmailCustomer.js
-const fetch = require("node-fetch");
+import { fetch as undiciFetch } from "undici";
 
-exports.handler = async function (event) {
+export async function handler(event) {
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
 
   try {
@@ -19,7 +19,6 @@ exports.handler = async function (event) {
       return { statusCode: 500, body: "Brevo API key not configured" };
     }
 
-    // build items plain/html
     const itemsText = Array.isArray(cart) ? cart.map(it => {
       const title = it.title || it.name || it.product || "Item";
       const qty = it.qty ?? it.quantity ?? 1;
@@ -38,7 +37,6 @@ exports.handler = async function (event) {
       <p>We'll contact you to confirm delivery. — Sublime Store</p>
     `;
 
-    // Brevo payload (v3 SMTP send)
     const payload = {
       sender: { email: FROM_EMAIL },
       to: [{ email }],
@@ -46,15 +44,14 @@ exports.handler = async function (event) {
       htmlContent
     };
 
-    // attach PDF if present
     if (pdfBase64) {
       payload.attachment = [{
         name: `order-${orderId}.pdf`,
-        content: pdfBase64 // already base64 string
+        content: pdfBase64
       }];
     }
 
-    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    const res = await undiciFetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +60,7 @@ exports.handler = async function (event) {
       body: JSON.stringify(payload)
     });
 
-    const json = await res.json();
+    const json = await res.json().catch(() => null);
     if (!res.ok) {
       console.error("Brevo error:", json);
       return { statusCode: 500, body: JSON.stringify({ error: json }) };
@@ -73,9 +70,9 @@ exports.handler = async function (event) {
 
   } catch (err) {
     console.error("sendEmailCustomer error:", err && (err.stack || err.message || err));
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, body: JSON.stringify({ error: err && err.message ? err.message : String(err) }) };
   }
-};
+}
 
 function escapeHtml(str) {
   return String(str || "").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');

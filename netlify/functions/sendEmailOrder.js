@@ -1,7 +1,14 @@
 // netlify/functions/sendEmailOrder.js
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 
-exports.handler = async function (event) {
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
@@ -15,7 +22,7 @@ exports.handler = async function (event) {
       cart,
       totalAmount,
       messageText,
-      pdfBase64, // expected base64 string (optional but recommended)
+      pdfBase64,
     } = body;
 
     if (!name || !phone || !orderId || !cart || !totalAmount) {
@@ -23,47 +30,48 @@ exports.handler = async function (event) {
     }
 
     const ownerListRaw = process.env.OWNER_EMAILS || "";
-    const toEmails = ownerListRaw.split(",").map(s => s.trim()).filter(Boolean);
-    if (toEmails.length === 0) {
-      console.error("No OWNER_EMAILS configured");
-      return { statusCode: 500, body: "No owner emails configured" };
+    const toEmails = ownerListRaw.split(",").map((s) => s.trim());
+
+    if (!toEmails.length) {
+      return { statusCode: 500, body: "No OWNER_EMAILS configured" };
     }
 
     const gmailUser = process.env.GMAIL_USER;
     const gmailPass = process.env.GMAIL_APP_PASSWORD;
+
     if (!gmailUser || !gmailPass) {
-      console.error("Gmail SMTP credentials missing");
-      return { statusCode: 500, body: "Email credentials not configured" };
+      return { statusCode: 500, body: "Gmail SMTP missing" };
     }
 
-    // Build items HTML/text
-    const itemLines = Array.isArray(cart) ? cart.map(it => {
-      const title = it.title || it.name || it.product || "Item";
-      const qty = it.qty ?? it.quantity ?? 1;
-      const price = it.price ?? it.newPrice ?? 0;
-      return `${title} (x${qty}) - ₹${price * qty}`;
-    }).join("\n") : "";
+    const itemLines = Array.isArray(cart)
+      ? cart
+          .map((it) => {
+            const title = it.title || it.name || "Item";
+            const qty = it.qty ?? it.quantity ?? 1;
+            const price = it.price ?? it.newPrice ?? 0;
+            return `${title} (x${qty}) - ₹${price * qty}`;
+          })
+          .join("\n")
+      : "";
 
     const subject = `Order ${orderId} — ${name} — ₹${totalAmount}`;
-    const plain = (messageText && messageText.toString()) || `
-Order ID: ${orderId}
+
+    const plain =
+      messageText ||
+      `Order ID: ${orderId}
 Name: ${name}
 Phone: ${phone}
 Total: ₹${totalAmount}
 
 Items:
 ${itemLines}
-    `;
+`;
 
-    // Nodemailer transport (Gmail SMTP using app password)
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
-      auth: {
-        user: gmailUser,
-        pass: gmailPass
-      }
+      auth: { user: gmailUser, pass: gmailPass },
     });
 
     const attachments = [];
@@ -71,7 +79,7 @@ ${itemLines}
       attachments.push({
         filename: `order-${orderId}.pdf`,
         content: Buffer.from(pdfBase64, "base64"),
-        contentType: "application/pdf"
+        contentType: "application/pdf",
       });
     }
 
@@ -80,23 +88,21 @@ ${itemLines}
       to: toEmails.join(","),
       subject,
       text: plain,
-      html: `<pre style="font-family: monospace; white-space: pre-wrap;">${escapeHtml(plain)}</pre>`,
-      attachments
+      html: `<pre>${escapeHtml(plain)}</pre>`,
+      attachments,
     };
 
     await transporter.sendMail(mailOptions);
 
-    return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ ok: true }),
+    };
   } catch (err) {
-    console.error("sendEmailOrder error:", err && (err.stack || err.message || err));
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    console.error("sendEmailOrder error", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message }),
+    };
   }
-};
-
-function escapeHtml(str) {
-  return String(str || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
 }

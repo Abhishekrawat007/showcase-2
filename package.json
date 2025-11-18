@@ -1,7 +1,8 @@
 {
   "name": "showcase-2",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000m\u0000y\u0000-\u0000e\u0000c\u0000o\u0000m\u0000m\u0000e\u0000r\u0000c\u0000e\u0000-\u0000s\u0000i\u0000t\u0000e\u0000\r\u0000 \u0000",
+  "type": "module",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "generate-config": "node scripts/generate-config.js",
@@ -23,7 +24,8 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.10",
     "razorpay": "^2.9.6",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "undici": "^6.0.0"
   },
   "repository": {
     "type": "git",
