@@ -15,7 +15,7 @@ function getChatIdsFromEnv() {
 
 // --- Helper: Escape Markdown special chars ---
 function escapeMarkdown(text) {
-  return text.replace(/([_*[\]()~`>#+-=|{}.!])/g, "\\$1");
+  return text.replace(/([_*[\]()~`>#+\-=|{}.!])/g, "\\$1");
 }
 
 // --- Helper: Optimize Cloudinary URL or fetch & compress ---
@@ -26,8 +26,7 @@ async function fetchImageAsBase64(imgPath) {
     // If relative path, build full URL
     if (!/^https?:\/\//i.test(imgPath)) {
       const base = process.env.URL || process.env.SITE_URL || process.env.DEPLOY_URL || "";
-const siteUrl = base && base.startsWith("http") ? base : (base ? `https://${base.replace(/^https?:\/\//,"")}` : "");
-
+      const siteUrl = base && base.startsWith("http") ? base : (base ? `https://${base.replace(/^https?:\/\//,"")}` : "");
       finalUrl = siteUrl.replace(/\/$/, "") + "/" + imgPath.replace(/^\/?/, "");
     }
 
@@ -50,7 +49,7 @@ const siteUrl = base && base.startsWith("http") ? base : (base ? `https://${base
 
     return `data:image/jpeg;base64,${compressedBuffer.toString("base64")}`;
   } catch (err) {
-    console.error("Image fetch error:", imgPath, err.message);
+    console.error("Image fetch error:", imgPath, err && err.message ? err.message : err);
     return "";
   }
 }
@@ -58,6 +57,7 @@ const siteUrl = base && base.startsWith("http") ? base : (base ? `https://${base
 // --- Helper: Send Telegram text messages safely ---
 async function sendTelegramMessage(botToken, chatId, text) {
   const MAX_LENGTH = 4096;
+  if (!text) return;
   if (text.length <= MAX_LENGTH) {
     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: "POST",
@@ -228,16 +228,20 @@ export async function handler(event) {
       bodyStyles: { minCellHeight: 50, lineWidth: 0.5, lineColor: [0, 0, 0] },
       columnStyles: { 0: { cellWidth: 35 }, 1: { cellWidth: 50 }, 2: { cellWidth: 210 }, 3: { cellWidth: 50 }, 4: { cellWidth: 70 }, 5: { cellWidth: 80 } },
       didDrawCell: (data) => {
-        if (data.column.index === 1 && data.cell.raw?.image) {
-          const imgSize = 40;
-          const xCenter = data.cell.x + (data.cell.width - imgSize) / 2;
-          const yCenter = data.cell.y + (data.cell.height - imgSize) / 2;
-          pdf.addImage(data.cell.raw.image, "JPEG", xCenter, yCenter, imgSize, imgSize);
+        try {
+          if (data.column.index === 1 && data.cell.raw?.image) {
+            const imgSize = 40;
+            const xCenter = data.cell.x + (data.cell.width - imgSize) / 2;
+            const yCenter = data.cell.y + (data.cell.height - imgSize) / 2;
+            pdf.addImage(data.cell.raw.image, "JPEG", xCenter, yCenter, imgSize, imgSize);
+          }
+        } catch (e) {
+          // ignore image draw errors
         }
       }
     });
 
-    const finalY = pdf.lastAutoTable.finalY + 20;
+    const finalY = (pdf.lastAutoTable && pdf.lastAutoTable.finalY) ? pdf.lastAutoTable.finalY + 20 : y + 20;
     pdf.setFont("times", "italic");
     pdf.setFontSize(11);
     pdf.setTextColor(60);
@@ -319,8 +323,13 @@ try {
     for (const chatId of TELEGRAM_CHAT_IDS) {
       try {
         const formData = new FormData();
-        formData.append("document", pdfBuffer, "order.pdf");
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument?chat_id=${chatId}`, { method: "POST", body: formData });
+        formData.append("chat_id", chatId);
+        formData.append("document", pdfBuffer, {
+          filename: `order-${orderId}.pdf`,
+          contentType: "application/pdf"
+        });
+        const headers = formData.getHeaders ? formData.getHeaders() : {};
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: "POST", body: formData, headers });
       } catch (err) {
         console.error("sendDocument error for chat", chatId, err && err.message);
       }
@@ -329,7 +338,7 @@ try {
     return { statusCode: 200, body: JSON.stringify({ success: true }) };
 
   } catch (err) {
-    console.error("Error generating order PDF:", err);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    console.error("Error generating order PDF:", err && (err.stack || err.message || err));
+    return { statusCode: 500, body: JSON.stringify({ error: err && err.message ? err.message : String(err) }) };
   }
 }
