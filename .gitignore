@@ -30,5 +30,6 @@ js/config.js
 .env.local
 js/config.js
 # local editor possibly containing secrets
-js/editor.js
+
+netlify/functions/firebase-sa.json
 

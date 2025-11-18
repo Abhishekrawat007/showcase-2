@@ -1,9 +1,10 @@
 // netlify/functions/save-order.js
 import admin from "firebase-admin";
+import sa from "./firebase-sa.json"; // <- load service account JSON file
 
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
+    credential: admin.credential.cert(sa),
     databaseURL: process.env.FIREBASE_DB_URL
   });
 }

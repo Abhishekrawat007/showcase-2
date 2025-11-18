@@ -1,10 +1,10 @@
-// subscribe-topic.js
+// netlify/functions/subscribe-topic.js
 const admin = require('firebase-admin');
+const sa = require('./firebase-sa.json'); // <- load service account JSON file
 
 let appInit = false;
 function init() {
   if (appInit) return;
-  const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   admin.initializeApp({
     credential: admin.credential.cert(sa),
     databaseURL: process.env.FIREBASE_DB_URL

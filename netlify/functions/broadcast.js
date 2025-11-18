@@ -1,10 +1,10 @@
-// netlify/functions/broadcast.js  (replace current handler)
+// netlify/functions/broadcast.js
 const admin = require('firebase-admin');
+const sa = require('./firebase-sa.json'); // <- load service account JSON file
 
 let appInit = false;
 function init() {
   if (appInit) return;
-  const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   admin.initializeApp({
     credential: admin.credential.cert(sa),
     databaseURL: process.env.FIREBASE_DB_URL
@@ -27,7 +27,6 @@ exports.handler = async (event) => {
     if (!title || !body) return { statusCode: 400, body: JSON.stringify({ error: 'Missing title or body' }) };
 
     // === Try: send to tokens stored in DB for reliability ===
-    // Adjust path if you store tokens elsewhere. This expects tokens under /tokens node as { tokenId: { token: 'xxx' } }
     const dbRef = admin.database().ref('/tokens'); // change if you use Firestore or a different path
     const snap = await dbRef.once('value');
     const tokenObjs = snap.val() || {};
