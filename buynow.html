@@ -462,8 +462,7 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
 
       <input type="tel" id="customerPhone" placeholder="Mobile Number" required />
       <div id="phoneError" class="error-msg" style="display:none;">Please enter a valid 10-digit mobile number.</div>
-       <input type="tel" id="customerPhone" placeholder="Mobile Number" required />
-  <div id="phoneError" class="error-msg" style="display:none;">Please enter a valid 10-digit mobile number.</div>
+    
 
   <!-- NEW: Customer Email (for receipts & verification) -->
   <input type="email" id="customerEmail" placeholder="Email (for receipt & verification)" required />
@@ -761,7 +760,7 @@ async function verifyCodeOnServer(email, orderId, code) {
       button.textContent = "Processing...";
 
       const orderId = "ORD" + Date.now();
-
+   const email = (document.getElementById('customerEmail')?.value || '').trim();
 const order = {
   orderId,
   name,
