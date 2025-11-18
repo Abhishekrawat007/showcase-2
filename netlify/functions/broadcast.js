@@ -1,23 +1,41 @@
 // netlify/functions/broadcast.js
 const admin = require('firebase-admin');
-const sa = require('./firebase-sa.json'); // <- load service account JSON file
+const zlib = require('zlib');
+const { promisify } = require('util');
+const gunzip = promisify(zlib.gunzip);
 
-let appInit = false;
-function init() {
-  if (appInit) return;
-  admin.initializeApp({
-    credential: admin.credential.cert(sa),
-    databaseURL: process.env.FIREBASE_DB_URL
-  });
-  appInit = true;
+let _saCache = null;
+let _initPromise = null;
+
+async function loadServiceAccountFromEnv() {
+  if (_saCache) return _saCache;
+  const b64 = process.env.FIREBASE_SA_GZ;
+  if (!b64) throw new Error("Missing FIREBASE_SA_GZ env var");
+  const gzBuffer = Buffer.from(b64, 'base64');
+  const jsonBuf = await gunzip(gzBuffer);
+  _saCache = JSON.parse(jsonBuf.toString('utf8'));
+  return _saCache;
+}
+
+async function ensureFirebaseInit() {
+  if (admin.apps && admin.apps.length) return;
+  if (_initPromise) return _initPromise;
+  _initPromise = (async () => {
+    const sa = await loadServiceAccountFromEnv();
+    admin.initializeApp({
+      credential: admin.credential.cert(sa),
+      databaseURL: process.env.FIREBASE_DB_URL
+    });
+  })();
+  return _initPromise;
 }
 
 exports.handler = async (event) => {
-  init();
+  await ensureFirebaseInit();
+
   try {
     if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
 
-    // simple secret check
     const secret = (event.headers['x-broadcast-secret'] || event.headers['X-Broadcast-Secret'] || '');
     if (!secret || secret !== process.env.BROADCAST_SECRET) {
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
@@ -26,14 +44,12 @@ exports.handler = async (event) => {
     const { title, body, url, topic } = JSON.parse(event.body || '{}');
     if (!title || !body) return { statusCode: 400, body: JSON.stringify({ error: 'Missing title or body' }) };
 
-    // === Try: send to tokens stored in DB for reliability ===
-    const dbRef = admin.database().ref('/tokens'); // change if you use Firestore or a different path
+    const dbRef = admin.database().ref('/tokens');
     const snap = await dbRef.once('value');
     const tokenObjs = snap.val() || {};
     const tokens = Object.values(tokenObjs).map(o => o.token || o).filter(Boolean);
 
     if (!tokens.length) {
-      // fallback to topic if no tokens found
       const messageTopic = {
         topic: topic || 'all',
         notification: { title, body },
@@ -43,7 +59,6 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ ok: true, resp, info: 'sentToTopicFallback' }) };
     }
 
-    // send in chunks (sendMulticast supports up to 500 tokens at once)
     const chunkSize = 450;
     let aggregated = { successCount: 0, failureCount: 0, responses: [] };
 
