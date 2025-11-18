@@ -368,6 +368,50 @@ label:hover {
 .btn-continue::after{content:"→";font-size:1.1em}
 .btn-continue:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(0,0,0,.22)}
 body.dark-mode .btn-continue{background:#fff;color:#111}
+/* ---- verify hint ---- */
+.verify-hint {
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  margin-left:10px;
+  font-weight:700;
+  font-size:14px;
+  color:#c62828; /* red */
+  cursor:pointer;
+  user-select:none;
+  transform-origin:center;
+  animation: floatHint 1.6s ease-in-out infinite;
+}
+.verify-hint .arrow {
+  display:inline-block;
+  width:18px;
+  height:18px;
+  border-radius:4px;
+  background: linear-gradient(180deg, #f44336, #d32f2f);
+  color:#fff;
+  font-weight:900;
+  font-size:12px;
+  line-height:18px;
+  text-align:center;
+  box-shadow: 0 6px 18px rgba(196,24,24,0.18);
+}
+.verify-hint .pulse {
+  display:block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#ffebee;
+  margin-left:6px;
+  box-shadow:0 0 0 rgba(198,40,40,0.45);
+  animation: hintPulse 1.6s infinite;
+  opacity:0.95;
+}
+@keyframes hintPulse {
+  0% { transform: scale(1); box-shadow:0 0 0 0 rgba(198,40,40,0.45); }
+  70% { transform: scale(1.14); box-shadow:0 0 0 10px rgba(198,40,40,0); }
+  100% { transform: scale(1); box-shadow:0 0 0 0 rgba(198,40,40,0); }
+}
+@keyframes floatHint { 0%{ transform: translateY(0);}50%{ transform: translateY(-4px);}100%{ transform: translateY(0);} }
 
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -473,13 +517,30 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
     <div style="margin-bottom:6px; font-size:14px;">
       We've sent a 6-digit code to <strong><span id="verifyEmailAddr"></span></strong>
     </div>
-    <input type="text" id="emailCode" placeholder="Enter verification code" maxlength="6" style="width:60%;display:inline-block" />
-    <button type="button" id="verifyCodeBtn" style="display:inline-block; margin-left:8px; padding:8px 12px; border-radius:8px;">Verify</button>
-    <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
-      <button type="button" id="resendCodeBtn" style="padding:6px 10px; border-radius:8px;">Resend code</button>
-      <span id="emailVerifyMsg" style="color:#d32f2f; display:none;"></span>
-    </div>
-  </div>
+  <input type="text" id="emailCode" placeholder="Enter verification code" maxlength="6"
+       style="width:60%;display:inline-block" />
+
+<button type="button" id="verifyCodeBtn"
+        style="display:inline-block; margin-left:8px; padding:8px 12px; border-radius:8px;">
+  Verify
+</button>
+
+<!-- 🔥 Stylish "Click Here → Verify" Hint -->
+<span id="verifyHint" class="verify-hint" role="button" tabindex="0"
+      aria-label="Click here to verify code" style="margin-left:4px;">
+  <span>Click here to</span>
+  <span class="arrow">→</span>
+  <span style="margin-left:6px;">Verify</span>
+  <span class="pulse" aria-hidden="true"></span>
+</span>
+
+<!-- Resend Row -->
+<div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+  <button type="button" id="resendCodeBtn" style="padding:6px 10px; border-radius:8px;">
+    Resend code
+  </button>
+  <span id="emailVerifyMsg" style="color:#d32f2f; display:none;"></span>
+</div>
 
     <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px;">Payment method</h3>
 
@@ -629,6 +690,23 @@ if (total < 199) {
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+function setCodeSent(orderId) {
+  try { sessionStorage.setItem('codeSent_' + orderId, '1'); } catch(_) {}
+  const btn = document.querySelector("#orderForm button[type='submit']");
+  if (btn) { btn.disabled = true; btn.textContent = 'Confirm Order'; }
+  const hint = document.getElementById('verifyHint');
+  if (hint) hint.style.display = 'inline-flex';
+}
+
+function isCodeSent(orderId) {
+  return !!sessionStorage.getItem('codeSent_' + orderId);
+}
+
+function clearCodeSent(orderId) {
+  try { sessionStorage.removeItem('codeSent_' + orderId); } catch(_) {}
+  const hint = document.getElementById('verifyHint');
+  if (hint) hint.style.display = 'none';
+}
 
 // Show / hide verification UI
 function showVerifyPanel(email) {
@@ -669,6 +747,24 @@ async function verifyCodeOnServer(email, code) {
   if (!document.getElementById('verifyCodeBtn')) return;
   const verifyBtn = document.getElementById('verifyCodeBtn');
   const resendBtn = document.getElementById('resendCodeBtn');
+    const verifyHint = document.getElementById('verifyHint');
+  if (verifyHint) {
+    verifyHint.addEventListener('click', () => {
+      const codeInput = document.getElementById('emailCode');
+      codeInput.focus();
+      codeInput.scrollIntoView({behavior:'smooth',block:'center'});
+
+      const vBtn = document.getElementById('verifyCodeBtn');
+      vBtn.animate(
+        [{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}],
+        {duration:240,easing:'ease-in-out'}
+      );
+    });
+
+    verifyHint.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); verifyHint.click(); }
+    });
+  }
 
   verifyBtn.addEventListener('click', async function () {
     const code = document.getElementById('emailCode').value.trim();
