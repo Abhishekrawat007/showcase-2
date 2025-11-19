@@ -1011,7 +1011,8 @@ function clearCodeSent(orderId) {
   const hint = document.getElementById('verifyHint');
   if (hint) hint.style.display = 'none';
 }
-(function attachEmailHandlers(){
+function attachEmailHandlers(){
+  // If element not present, just return (idempotent)
   if (!document.getElementById('verifyCodeBtn')) return;
   const verifyBtn = document.getElementById('verifyCodeBtn');
   const resendBtn = document.getElementById('resendCodeBtn');
@@ -1052,7 +1053,6 @@ function clearCodeSent(orderId) {
       if (formBtn) {
         formBtn.disabled = false;
         formBtn.textContent = "Confirm Order";
-        // programmatically re-run handler
         handlePayment();
       }
     } catch (err) {
@@ -1087,7 +1087,7 @@ function clearCodeSent(orderId) {
       resendBtn.disabled = false;
     }
   });
-})();
+}
 
 
 // Unified payment handler (replaces older block)
@@ -1718,7 +1718,8 @@ async function generateAndSendPDF(orderData) {
 
 
   // Initial render
-  renderCart(); replacePaymentFormHTML();
+  renderCart(); replacePaymentFormHTML();attachEmailHandlers();
+
 
 
 // 👇 Mark cart as "clean" when you open the cart page
