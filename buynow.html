@@ -1241,6 +1241,273 @@ try {
     });
   });
   </script>
-  
+  <!-- START: Recent-inputs helper (paste before </body>) -->
+<style>
+/* Recent-input dropdown */
+.recent-suggestions {
+  position: absolute;
+  z-index: 99999;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  min-width: 200px;
+  max-width: 360px;
+  overflow: hidden;
+  font-size: 14px;
+}
+.recent-suggestions .suggestion {
+  padding: 10px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.recent-suggestions .suggestion:hover,
+.recent-suggestions .suggestion:focus {
+  background: #f5f8ff;
+  outline: none;
+}
+.recent-suggestions .suggestion small {
+  display:block; color:#666; font-size:12px; margin-top:4px;
+}
+.recent-suggestions.hidden { display:none; }
+.input-wrapper { position: relative; } /* ensure wrapper around inputs */
+</style>
+
+<script>
+(function () {
+  const KEYS = {
+    name: 'recent_names',
+    phone: 'recent_phones',
+    email: 'recent_emails'
+  };
+  const MAX_STORE = 6;   // number kept in storage
+  const SHOW_COUNT = 2;  // how many suggestions to show
+
+  function readList(key){ try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e){ return []; } }
+  function writeList(key, arr){ try { localStorage.setItem(key, JSON.stringify(arr.slice(0, MAX_STORE))); } catch(e){} }
+
+  function pushRecent(key, val){
+    if (!val) return;
+    const list = readList(key).filter(x => x !== val);
+    list.unshift(val);
+    writeList(key, list);
+  }
+
+  function makeDropdown(items){
+    const el = document.createElement('div');
+    el.className = 'recent-suggestions hidden';
+    items.forEach((it) => {
+      const item = document.createElement('div');
+      item.tabIndex = 0;
+      item.className = 'suggestion';
+      item.textContent = it;
+      item.dataset.val = it;
+      el.appendChild(item);
+    });
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function attachToInput(inputEl, typeKey){
+    if (!inputEl) return;
+    // ensure wrapper
+    if (!inputEl.parentElement.classList.contains('input-wrapper')) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'input-wrapper';
+      inputEl.parentElement.insertBefore(wrapper, inputEl);
+      wrapper.appendChild(inputEl);
+    }
+
+    let dropdown = null;
+
+    function positionDropdown() {
+      if (!dropdown) return;
+      const rect = inputEl.getBoundingClientRect();
+      dropdown.style.minWidth = Math.max(rect.width, 180) + 'px';
+      dropdown.style.left = (rect.left + window.scrollX) + 'px';
+      dropdown.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+    }
+
+    function hideDropdown(){
+      if (!dropdown) return;
+      dropdown.classList.add('hidden');
+      window.removeEventListener('resize', positionDropdown);
+      window.removeEventListener('scroll', positionDropdown, true);
+    }
+
+    function showDropdown() {
+      const key = KEYS[typeKey];
+      const list = readList(key) || [];
+      const toShow = list.slice(0, SHOW_COUNT);
+      if (!toShow.length) {
+        hideDropdown();
+        return;
+      }
+      if (!dropdown) dropdown = makeDropdown(toShow);
+      // rebuild contents (keep it fresh)
+      dropdown.innerHTML = '';
+      toShow.forEach(s => {
+        const item = document.createElement('div');
+        item.tabIndex = 0;
+        item.className = 'suggestion';
+        item.textContent = s;
+        item.dataset.val = s;
+        dropdown.appendChild(item);
+      });
+
+      // click handler
+      dropdown.onclick = (ev) => {
+        const t = ev.target.closest && ev.target.closest('.suggestion');
+        if (!t) return;
+        inputEl.value = t.dataset.val || t.textContent;
+        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        hideDropdown();
+        inputEl.focus();
+      };
+
+      dropdown.classList.remove('hidden');
+      positionDropdown();
+      window.addEventListener('resize', positionDropdown);
+      window.addEventListener('scroll', positionDropdown, true);
+    }
+
+    // show suggestions on focus (if empty) or filtered by prefix
+    inputEl.addEventListener('focus', () => {
+      const val = (inputEl.value || '').trim();
+      if (val.length === 0) {
+        showDropdown();
+      } else {
+        const key = KEYS[typeKey];
+        const list = readList(key).filter(x => x.toLowerCase().indexOf(val.toLowerCase()) === 0).slice(0, SHOW_COUNT);
+        if (!list.length) hideDropdown();
+        else {
+          if (!dropdown) dropdown = makeDropdown(list);
+          dropdown.innerHTML = '';
+          list.forEach(s => {
+            const item = document.createElement('div');
+            item.tabIndex = 0;
+            item.className = 'suggestion';
+            item.textContent = s;
+            item.dataset.val = s;
+            dropdown.appendChild(item);
+          });
+          dropdown.classList.remove('hidden');
+          positionDropdown();
+        }
+      }
+    });
+
+    inputEl.addEventListener('blur', () => {
+      setTimeout(hideDropdown, 150);
+    });
+
+    inputEl.addEventListener('keydown', (ev) => {
+      if ((ev.key === 'ArrowDown' || ev.key === 'Down') && dropdown && !dropdown.classList.contains('hidden')) {
+        const first = dropdown.querySelector('.suggestion');
+        if (first) first.focus();
+        ev.preventDefault();
+      }
+    });
+
+    // live filter while typing
+    inputEl.addEventListener('input', () => {
+      const val = (inputEl.value || '').trim();
+      const key = KEYS[typeKey];
+      const list = readList(key).filter(x => x.toLowerCase().indexOf(val.toLowerCase()) === 0).slice(0, SHOW_COUNT);
+      if (!list.length) hideDropdown();
+      else {
+        if (!dropdown) dropdown = makeDropdown(list);
+        dropdown.innerHTML = '';
+        list.forEach(s => {
+          const item = document.createElement('div');
+          item.tabIndex = 0;
+          item.className = 'suggestion';
+          item.textContent = s;
+          item.dataset.val = s;
+          dropdown.appendChild(item);
+        });
+        dropdown.classList.remove('hidden');
+        positionDropdown();
+      }
+    });
+  }
+
+  // Save on blur (with simple validation for phone/email)
+  function wireSaveOnEvents(){
+    function trySaveForInput(id, typeKey){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('blur', () => {
+        const val = (el.value || '').trim();
+        if (!val) return;
+        if (typeKey === 'phone') {
+          if (!/^[6-9]\d{9}$/.test(val)) return;
+        }
+        if (typeKey === 'email') {
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
+        }
+        pushRecent(KEYS[typeKey], val);
+      });
+    }
+    trySaveForInput('customerName', 'name');
+    trySaveForInput('customerPhone', 'phone');
+    trySaveForInput('customerEmail', 'email');
+  }
+
+  // Public init: call after DOM inputs exist
+  window.attachRecentInputs = function attachRecentInputs(){
+    const nameEl = document.getElementById('customerName');
+    const phoneEl = document.getElementById('customerPhone');
+    const emailEl = document.getElementById('customerEmail');
+
+    if (nameEl) attachToInput(nameEl, 'name');
+    if (phoneEl) attachToInput(phoneEl, 'phone');
+    if (emailEl) attachToInput(emailEl, 'email');
+
+    wireSaveOnEvents();
+  };
+
+  // retry helper used in cart.js earlier — safe to call if inputs not present yet
+  window.__attachRecentRetry = function(){
+    setTimeout(() => {
+      if (document.getElementById('customerName') && typeof window.attachRecentInputs === 'function') {
+        window.attachRecentInputs();
+      }
+    }, 120);
+  };
+
+  // Auto-init on DOM ready (idempotent)
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('customerName')) {
+      window.attachRecentInputs();
+    } else {
+      window.__attachRecentRetry();
+    }
+
+    // Observe container changing to success UI: when success appears, save recent inputs automatically
+    const container = document.querySelector('.container');
+    if (!container) return;
+    const mo = new MutationObserver((mutations) => {
+      // if container contains .confirmed-box (success UI), then save the current inputs into recents
+      if (container.querySelector('.confirmed-box')) {
+        const name = (document.getElementById('customerName')?.value || '').trim();
+        const phone = (document.getElementById('customerPhone')?.value || '').trim();
+        const email = (document.getElementById('customerEmail')?.value || '').trim().toLowerCase();
+        if (name) pushRecent(KEYS.name, name);
+        if (phone && /^[6-9]\d{9}$/.test(phone)) pushRecent(KEYS.phone, phone);
+        if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) pushRecent(KEYS.email, email);
+        // once saved, disconnect observer (no longer needed)
+        try { mo.disconnect(); } catch(e){ /* ignore */ }
+      }
+    });
+    mo.observe(container, { childList: true, subtree: true });
+  });
+
+})();
+</script>
+<!-- END: Recent-inputs helper -->
+
 </body>
 </html>
