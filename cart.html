@@ -1014,141 +1014,145 @@ async function handlePayment() {
       order_id: order.id,
       prefill: { name, contact: phone, email: '' },
       notes: { order_receipt: order.receipt || order.id },
-           handler: async function (response) {
-        // response contains: razorpay_payment_id, razorpay_order_id, razorpay_signature
-       // ---- REPLACE HANDLER BODY WITH THIS ----
-try {
-  // 1) Verify payment server-side (your existing endpoint)
-  const verifyRes = await fetch('/.netlify/functions/verify-payment', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(response)
-  });
-  const verifyJson = await verifyRes.json();
-  if (!verifyRes.ok || !verifyJson.ok) {
-    throw new Error(verifyJson.error || 'Payment verification failed');
-  }
+        handler: async function (response) {
+  // response contains: razorpay_payment_id, razorpay_order_id, razorpay_signature
+  // Robust online-payment handler: verify server-side + send single, well-shaped notification
 
-  // 2) Build cart/items and amounts (robust guards)
-  const cart = (typeof getCartFromLocalStorage === 'function') ? getCartFromLocalStorage() : [];
-  const totalAmount = (typeof calculateTotal === 'function') ? calculateTotal(cart) : 0;
-  // order.amount from server is in paise; convert to rupees if present
-  const amountPaid = (typeof order !== 'undefined' && order && order.amount) ? Number(order.amount) / 100 : totalAmount;
-
-  const orderId = (typeof order !== 'undefined' && order && order.id) ? order.id : ('ORD' + Date.now());
-  const name = (document.getElementById('customerName')?.value || '').trim();
-  const phone = (document.getElementById('customerPhone')?.value || '').trim();
-
-  // human-friendly item lines (same style as COD)
-  const itemLines = (cart || []).map(item => `• ${item.title} (x${item.qty}) - Rs. ${item.price * item.qty}`).join('\n');
-
- const waLink = phone ? `https://wa.me/91${phone}` : '';
-
-const messageText = `🧾 *New Order Received*\n` +
-  `*Order ID:* ${orderId}\n` +
-  `👤 *Name:* ${name}\n` +
-  `📞 *Phone:* ${phone}\n` +
-  `💬 *WhatsApp:* ${waLink ? `[Chat](${waLink})` : 'N/A'}\n` +
-  `💰 *Total:* Rs. ${amountPaid}\n` +
-  `📦 *Items:*\n${itemLines}`;
-
-
-  // Full payload: send structured fields + messageText
-  const payload = {
-    orderId,
-    name,
-    phone,
-    totalAmount,
-    amountPaid,
-    currency: order?.currency || 'INR',
-   items: (cart || []).map(i => ({
-  id: i.id,
-  title: i.title,
-  price: i.price,
-  qty: i.qty,
-  image: i.image || i.img || i.thumbnail || ""   // <-- include image URL for server PDF
-})),
-    payment: {
-      provider: 'Razorpay',
-      razorpay_payment_id: response.razorpay_payment_id,
-      razorpay_order_id: response.razorpay_order_id,
-      razorpay_signature: response.razorpay_signature,
-      method: 'online',
-      status: 'paid'
-    },
-    messageText,
-    ts: Date.now()
-  };
-
-  // 3) POST to server so you can see errors in Network panel
-    // 3) POST to server (single fire-and-forget call, safe)
   try {
-   // use deduping helper so we don't accidentally send twice
-sendOrderOnce(payload).catch(err => {
-  console.error('sendOrderOnce (online) failed', err);
-  // best-effort beacon fallback when fetch fails
-  try { if (navigator.sendBeacon) navigator.sendBeacon('/.netlify/functions/sendTelegramOrder', JSON.stringify(payload)); } catch(e){/*ignore*/ }
-});
+    // 1) Verify payment server-side (existing endpoint)
+    console.log('verify-payment: sending response to server', response);
+    const verifyRes = await fetch('/.netlify/functions/verify-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(response)
+    });
 
-  } catch (e) {
-    console.warn('sendTelegramOrder scheduling failed', e);
+    const verifyText = await verifyRes.text().catch(() => null);
+    let verifyJson = {};
+    try { verifyJson = verifyText ? JSON.parse(verifyText) : {}; } catch(e) { verifyJson = { ok: false, raw: verifyText }; }
+
+    if (!verifyRes.ok || !verifyJson.ok) {
+      console.error('verify-payment failed:', verifyRes.status, verifyText);
+      throw new Error(verifyJson.error || 'Payment verification failed');
+    }
+
+    // 2) Build final order/cart data (robust guards)
+    const cart = (typeof getCartFromLocalStorage === 'function') ? getCartFromLocalStorage() : [];
+    if (!cart || cart.length === 0) {
+      console.warn('Online handler: cart empty at payment handler — aborting notification');
+    }
+    const totalAmount = (typeof calculateTotal === 'function') ? calculateTotal(cart) : 0;
+    const amountPaid = (verifyJson && verifyJson.amount) ? Number(verifyJson.amount) / 100 : (typeof order !== 'undefined' && order && order.amount ? Number(order.amount)/100 : totalAmount);
+
+    // order.id usually like 'order_Rxxxxx' — keep it but also create human-friendly id
+    const razorOrderId = response.razorpay_order_id || (order && order.id) || null;
+    const orderId = razorOrderId || ('ORD' + Date.now());
+
+    const name = (document.getElementById('customerName')?.value || '').trim();
+    const phone = (document.getElementById('customerPhone')?.value || '').trim();
+
+    // Build a clear message text for Telegram/backends (same style as COD)
+    const itemLines = (cart || []).map(item => `• ${item.title} (x${item.qty}) - Rs. ${item.price * item.qty}`).join('\n');
+    const waLink = phone ? `https://wa.me/91${phone}` : '';
+
+    const messageText = `🧾 *New Order Received*\n` +
+      `*Order ID:* ${orderId}\n` +
+      `👤 *Name:* ${name}\n` +
+      `📞 *Phone:* ${phone}\n` +
+      `💬 *WhatsApp:* ${waLink ? `[Chat](${waLink})` : 'N/A'}\n` +
+      `💰 *Total:* Rs. ${amountPaid}\n` +
+      `📦 *Items:*\n${itemLines}`;
+
+    // 3) Build payload with explicit fields the server commonly expects
+    const payload = {
+      orderId,
+      razorOrderId: razorOrderId,
+      name,
+      phone,
+      totalAmount,
+      amountPaid,
+      currency: (order && order.currency) || verifyJson.currency || 'INR',
+      items: (cart || []).map(i => ({
+        id: i.id,
+        title: i.title,
+        price: i.price,
+        qty: i.qty,
+        image: i.image || i.img || i.thumbnail || ""
+      })),
+      payment: {
+        provider: 'Razorpay',
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_signature: response.razorpay_signature,
+        method: 'online',
+        status: 'paid'
+      },
+      rawOrder: order || verifyJson || null, // include raw server/order objects for easier server-side debugging
+      messageText,
+      ts: Date.now()
+    };
+
+    // 4) DEBUG: print payload to console before sending (inspect Network / function logs)
+    console.log('Sending order payload to /.netlify/functions/sendTelegramOrder', payload);
+
+    // 5) Send once (use sendOrderOnce helper). Await result so we can log server response
+    const sendResult = await sendOrderOnce(payload);
+    console.log('Razorpay -> sendOrderOnce result', sendResult);
+
+    // If server returned non-ok, show user-friendly message but still generate PDF
+    if (!sendResult.ok) {
+      console.warn('Notification endpoint returned non-ok:', sendResult.status, sendResult.text);
+      // helpful hint for debugging: log the full payload and server response to console
+      console.warn('Payload sent (for debugging):', payload);
+    }
+
+    // 6) Generate PDF (do NOT set __noNotify here so server receives notification already above)
+    setTimeout(() => {
+      try { generateAndSendPDF(Object.assign({}, payload, { __noNotify: true })); } catch (e) { console.warn('generate PDF failed', e); }
+    }, 300);
+
+    // 7) Success UI + clear cart (same user experience as COD)
+    const successHTML = `
+      <div style="padding:20px;text-align:center;color:green;">
+        <h3>✓ Payment & Order Confirmed</h3>
+        <p><strong>Order ID:</strong> ${orderId}</p>
+        <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
+        <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
+      </div>
+    `;
+    document.getElementById("orderForm").innerHTML = successHTML;
+    try { localStorage.removeItem('cart'); } catch(_) {}
+    document.getElementById("cartContainer").innerHTML = "";
+    document.getElementById("cartSummary").style.display = "none";
+    document.getElementById("cartTopBar").style.display = "none";
+    document.title = "Order Confirmed";
+    if (document.getElementById("spinnerOverlay")) document.getElementById("spinnerOverlay").style.display = "none";
+
+    // wire continue/back to clear + redirect
+    (function () {
+      const backBtn = document.getElementById('backBtn');
+      if (!backBtn) return;
+      backBtn.onclick = null;
+      backBtn.removeAttribute('onclick');
+      backBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        try { localStorage.removeItem('cart'); } catch(_) {}
+        location.replace(`index.html?ts=${Date.now()}#productList`);
+      });
+      document.getElementById('continueShopping')?.addEventListener('click', function(e){
+        e.preventDefault();
+        try { localStorage.removeItem('cart'); } catch(_) {}
+        location.replace(`index.html?ts=${Date.now()}#productList`);
+      });
+    })();
+
+  } catch (err) {
+    console.error('verify/after-payment error', err);
+    alert('Payment succeeded but verification or notification failed. Please contact us with your payment id: ' + (response.razorpay_payment_id || 'N/A'));
+    if (document.getElementById("spinnerOverlay")) document.getElementById("spinnerOverlay").style.display = "none";
   }
-// after sendOrderOnce completes (inside handler)
-sendOrderOnce(payload).then(r => {
-  console.log('Razorpay -> sendOrderOnce result', r);
-  // Generate PDF but instruct it to NOT re-send the notification.
-  setTimeout(() => {
-    try { generateAndSendPDF(Object.assign({}, payload, { __noNotify: true })); } catch(e) { console.warn('generate PDF failed', e); }
-  }, 300);
-}).catch(err => {
-  console.error('sendOrderOnce (online) failed', err);
-  // still try to generate PDF w/o notify
-  setTimeout(() => {
-    try { generateAndSendPDF(Object.assign({}, payload, { __noNotify: true })); } catch(e) {}
-  }, 300);
-});
+},
 
-  // 4) Show success UI & clear cart (same as your code)
-  const successHTML = `
-    <div style="padding:20px;text-align:center;color:green;">
-      <h3>✓ Payment & Order Confirmed</h3>
-      <p><strong>Order ID:</strong> ${orderId}</p>
-      <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
-      <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
-    </div>
-  `;
-  document.getElementById("orderForm").innerHTML = successHTML;
-  try { localStorage.removeItem('cart'); } catch(_) {}
-  document.getElementById("cartContainer").innerHTML = "";
-  document.getElementById("cartSummary").style.display = "none";
-  document.getElementById("cartTopBar").style.display = "none";
-  document.title = "Order Confirmed";
-  if (document.getElementById("spinnerOverlay")) document.getElementById("spinnerOverlay").style.display = "none";
-
-  // wire back/continue to clear + redirect (same logic as you used)
-  (function () {
-    const backBtn = document.getElementById('backBtn');
-    if (!backBtn) return;
-    backBtn.onclick = null;
-    backBtn.removeAttribute('onclick');
-    backBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      try { localStorage.removeItem('cart'); } catch(_) {}
-      location.replace(`index.html?ts=${Date.now()}#productList`);
-    });
-    document.getElementById('continueShopping')?.addEventListener('click', function(e){
-      e.preventDefault();
-      try { localStorage.removeItem('cart'); } catch(_) {}
-      location.replace(`index.html?ts=${Date.now()}#productList`);
-    });
-  })();
-
-} catch (err) {
-  console.error('verify/after-payment error', err);
-  alert('Payment succeeded but verification or notification failed. Please contact us with your payment id: ' + (response.razorpay_payment_id || 'N/A'));
-  if (document.getElementById("spinnerOverlay")) document.getElementById("spinnerOverlay").style.display = "none";
-}
-    },
       modal: { ondismiss: function(){ if (spinner) spinner.style.display = 'none'; } }
     };
 
