@@ -810,6 +810,37 @@ body.pwa-standalone .container{
 #emailVerifyPanel .otp-box:focus {
   scroll-margin-inline: calc(50% - 28px); /* helps center in some browsers */
 }
+/* Fix for the narrow band where OTP boxes were getting clipped */
+@media (min-width: 416px) and (max-width: 485px) {
+  #emailVerifyPanel .otp-wrap {
+    gap: 6px;                /* reduce horizontal gap */
+    padding: 4px 6px;        /* reduce padding so boxes have more room */
+    overflow-x: auto;        /* keep scrolling if needed */
+  }
+
+  #emailVerifyPanel .otp-inputs {
+    gap: 6px;
+  }
+
+  /* slightly smaller boxes & font in this mid-range */
+  #emailVerifyPanel .otp-box {
+    width: clamp(30px, 6.5vw, 46px) !important;
+    height: clamp(36px, 6.5vw, 46px) !important;
+    font-size: clamp(.95rem, 3vw, 1.05rem);
+    box-sizing: border-box;
+  }
+
+  /* make sure verify button doesn't try to sit inline and steal space */
+  #emailVerifyPanel .verify-row {
+    flex-wrap: wrap;
+  }
+  #emailVerifyPanel .verify-row .btn-verify {
+    flex-basis: 100%;
+    width: 100%;
+    margin-top: 8px;
+    justify-content: center;
+  }
+}
 
   </style>
 
