@@ -683,7 +683,38 @@ body.pwa-standalone header {
 }
 body.pwa-standalone .container{
   top:62px;
+} 
+/* ===== Fix: force OTP boxes to be a single row (override global #orderForm input) ===== */
+#emailVerifyPanel .otp-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+
+#emailVerifyPanel .otp-inputs { display: flex; gap: 10px; }
+
+/* Very specific selector to override your #orderForm input {width:100%} rule */
+#emailVerifyPanel .otp-box,
+#orderForm .otp-box {
+  display: inline-flex !important;   /* override block */
+  justify-content: center;
+  align-items: center;
+  width: 48px !important;
+  height: 52px !important;
+  min-width: 48px;
+  max-width: 56px;
+  padding: 0;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+  background: #fff;
+  box-sizing: border-box;
 }
+
+/* small screen tweak */
+@media (max-width:420px) {
+  #emailVerifyPanel .otp-box { width: 40px !important; height: 46px !important; font-size: 1.1rem; }
+}
+
   </style>
 
   <!-- Firebase -->
