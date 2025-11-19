@@ -899,42 +899,196 @@ function replacePaymentFormHTML() {
     </div>` : '';
 
   // keep markup minimal & compatible with your styles
-  form.innerHTML = `
-    ${warningMsg}
-    <input type="text" id="customerName" placeholder="Your Name" required autocomplete="off" />
-    <input type="tel" id="customerPhone" placeholder="Mobile Number" required autocomplete="off" />
-    <div id="phoneError" style="color: red; font-size: 13px; margin-top: -8px; margin-bottom: 10px; display: none;"></div>
+  // inside replacePaymentFormHTML() -- replace current form.innerHTML with this block
+form.innerHTML = `
+  ${warningMsg}
+  <input type="text" id="customerName" placeholder="Your Name" required autocomplete="off" />
+  <input type="tel" id="customerPhone" placeholder="Mobile Number" required autocomplete="off" />
+  <div id="phoneError" style="color: red; font-size: 13px; margin-top: -8px; margin-bottom: 10px; display: none;"></div>
 
-    <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 12px;">Payment method</h3>
+  <!-- NEW: Email input for receipts & verification -->
+  <input type="email" id="customerEmail" placeholder="Email (for receipt & verification)" required autocomplete="off" />
+  <div id="emailError" style="color: red; font-size: 13px; margin-top: -8px; margin-bottom: 10px; display: none;"></div>
 
-    <label class="payment-method" style="display:flex;align-items:center;border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:12px;background:#fff;cursor:pointer;">
-      <input id="pm_cod" type="radio" name="paymentMethod" value="cod" checked style="margin-right:12px;width:18px;height:18px;" />
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:15px;">Cash on Delivery</div>
-        <div style="font-size:13px;color:#555;">Pay when you receive the order.</div>
-      </div>
-      <i class="fas fa-truck" style="color:#4CAF50;margin-left:8px;"></i>
-    </label>
-
-    <label class="payment-method" style="display:flex;align-items:center;border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:12px;background:#fff;cursor:pointer;">
-      <input id="pm_online" type="radio" name="paymentMethod" value="online" style="margin-right:12px;width:18px;height:18px;" />
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:15px;">Pay Online (Card / UPI / Wallets)</div>
-        <div style="font-size:13px;color:#555;">Secure payments via Razorpay — instant confirmation.</div>
-      </div>
-      <i class="fas fa-credit-card" style="color:#1e88e5;margin-left:8px;"></i>
-    </label>
-
-    <div id="actionButtons" style="margin-top:12px;">
-      <button id="confirmOrderBtn" style="width:100%;padding:12px;border-radius:8px;font-size:16px;background:#1e88e5;color:#fff;border:none;cursor:pointer;">
-        Confirm Order
-      </button>
+  <!-- Email verification panel (hidden until code sent) -->
+  <div id="emailVerifyPanel" style="display:none; margin-top:10px;">
+    <div style="margin-bottom:6px; font-size:14px;">
+      We've sent a 6-digit code to <strong><span id="verifyEmailAddr"></span></strong>
     </div>
-  `;
+    <input type="text" id="emailCode" placeholder="Enter verification code" maxlength="6" style="width:60%;display:inline-block" />
+    <button type="button" id="verifyCodeBtn" style="display:inline-block; margin-left:8px; padding:8px 12px; border-radius:8px;">Verify</button>
+
+    <span id="verifyHint" class="verify-hint" role="button" tabindex="0" aria-label="Click here to verify code" style="margin-left:4px;">
+      <span>Click here to</span>
+      <span class="arrow">→</span>
+      <span style="margin-left:6px;">Verify</span>
+      <span class="pulse" aria-hidden="true"></span>
+    </span>
+
+    <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+      <button type="button" id="resendCodeBtn" style="padding:6px 10px; border-radius:8px;">Resend code</button>
+      <span id="emailVerifyMsg" style="color:#d32f2f; display:none;"></span>
+    </div>
+  </div>
+
+  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 12px;">Payment method</h3>
+
+  <label class="payment-method" style="display:flex;align-items:center;border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:12px;background:#fff;cursor:pointer;">
+    <input id="pm_cod" type="radio" name="paymentMethod" value="cod" checked style="margin-right:12px;width:18px;height:18px;" />
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:15px;">Cash on Delivery</div>
+      <div style="font-size:13px;color:#555;">Pay when you receive the order.</div>
+    </div>
+    <i class="fas fa-truck" style="color:#4CAF50;margin-left:8px;"></i>
+  </label>
+
+  <label class="payment-method" style="display:flex;align-items:center;border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:12px;background:#fff;cursor:pointer;">
+    <input id="pm_online" type="radio" name="paymentMethod" value="online" style="margin-right:12px;width:18px;height:18px;" />
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:15px;">Pay Online (Card / UPI / Wallets)</div>
+      <div style="font-size:13px;color:#555;">Secure payments via Razorpay — instant confirmation.</div>
+    </div>
+    <i class="fas fa-credit-card" style="color:#1e88e5;margin-left:8px;"></i>
+  </label>
+
+  <div id="actionButtons" style="margin-top:12px;">
+    <button id="confirmOrderBtn" style="width:100%;padding:12px;border-radius:8px;font-size:16px;background:#1e88e5;color:#fff;border:none;cursor:pointer;">
+      Confirm Order
+    </button>
+  </div>
+`;
 }
 
 // Run once (safe to call multiple times)
 replacePaymentFormHTML();
+// ---- Email / verification helpers (copy of buynow.html) ----
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function sendVerificationCode(email) {
+  return fetch('/.netlify/functions/sendVerification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  }).then(async r => {
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  });
+}
+
+async function verifyCodeOnServer(email, code) {
+  return fetch('/.netlify/functions/verifyEmail', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code })
+  }).then(async r => {
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  });
+}
+
+// UI show/hide helpers
+function showVerifyPanel(email) {
+  document.getElementById('verifyEmailAddr').textContent = email;
+  document.getElementById('emailVerifyPanel').style.display = 'block';
+  document.getElementById('emailVerifyMsg').style.display = 'none';
+}
+function hideVerifyPanel() {
+  document.getElementById('emailVerifyPanel').style.display = 'none';
+  document.getElementById('emailCode').value = '';
+}
+function setCodeSent(orderId) {
+  try { sessionStorage.setItem('codeSent_' + orderId, '1'); } catch(_) {}
+  const hint = document.getElementById('verifyHint');
+  if (hint) hint.style.display = 'inline-flex';
+}
+function isCodeSent(orderId) {
+  return !!sessionStorage.getItem('codeSent_' + orderId);
+}
+function clearCodeSent(orderId) {
+  try { sessionStorage.removeItem('codeSent_' + orderId); } catch(_) {}
+  const hint = document.getElementById('verifyHint');
+  if (hint) hint.style.display = 'none';
+}
+(function attachEmailHandlers(){
+  if (!document.getElementById('verifyCodeBtn')) return;
+  const verifyBtn = document.getElementById('verifyCodeBtn');
+  const resendBtn = document.getElementById('resendCodeBtn');
+  const verifyHint = document.getElementById('verifyHint');
+
+  if (verifyHint) {
+    verifyHint.addEventListener('click', () => {
+      const codeInput = document.getElementById('emailCode');
+      codeInput.focus();
+      codeInput.scrollIntoView({behavior:'smooth',block:'center'});
+      verifyBtn.animate([{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}],{duration:240,easing:'ease-in-out'});
+    });
+    verifyHint.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); verifyHint.click(); }});
+  }
+
+  verifyBtn.addEventListener('click', async function () {
+    const code = document.getElementById('emailCode').value.trim();
+    const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
+    const orderId = window.currentOrderId || null;
+    if (!orderId) {
+      document.getElementById('emailVerifyMsg').textContent = 'Order id missing. Refresh the page.';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      return;
+    }
+    if (!/^\d{6}$/.test(code)) {
+      document.getElementById('emailVerifyMsg').textContent = 'Please enter a 6-digit code.';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      return;
+    }
+    try {
+      verifyBtn.disabled = true;
+      document.getElementById('emailVerifyMsg').style.display = 'none';
+      await verifyCodeOnServer(email, code); // throws on fail
+      sessionStorage.setItem('emailVerified_' + orderId, '1');
+      hideVerifyPanel();
+      // re-trigger submit (user clicked verify)
+      const formBtn = document.querySelector("#confirmOrderBtn");
+      if (formBtn) {
+        formBtn.disabled = false;
+        formBtn.textContent = "Confirm Order";
+        // programmatically re-run handler
+        handlePayment();
+      }
+    } catch (err) {
+      document.getElementById('emailVerifyMsg').textContent = 'Invalid or expired code. Try resend.';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      console.warn('verifyCode error', err);
+    } finally {
+      verifyBtn.disabled = false;
+    }
+  });
+
+  resendBtn.addEventListener('click', async function () {
+    const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
+    const orderId = window.currentOrderId || null;
+    if (!isValidEmail(email)) {
+      document.getElementById('emailError').style.display = 'block';
+      return;
+    }
+    try {
+      resendBtn.disabled = true;
+      await sendVerificationCode(email);
+      document.getElementById('emailVerifyMsg').textContent = 'Code resent.';
+      document.getElementById('emailVerifyMsg').style.color = '#2e7d32';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      setTimeout(()=> { document.getElementById('emailVerifyMsg').style.display = 'none'; }, 4000);
+    } catch (err) {
+      document.getElementById('emailVerifyMsg').textContent = 'Resend failed. Try again later.';
+      document.getElementById('emailVerifyMsg').style.color = '#d32f2f';
+      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      console.warn('resend error', err);
+    } finally {
+      resendBtn.disabled = false;
+    }
+  });
+})();
+
 
 // Unified payment handler (replaces older block)
 async function handlePayment() {
@@ -977,21 +1131,77 @@ async function handlePayment() {
     if (typeof getCartFromLocalStorage !== 'function' || typeof calculateTotal !== 'function') {
       throw new Error('Cart helper functions missing');
     }
-    const cart = getCartFromLocalStorage();
-    if (!cart || cart.length === 0) throw new Error('Cart is empty');
-    const totalAmount = calculateTotal(cart);
-    const amountPaise = Math.round(totalAmount * 100);
+  // build cart & order object (and push to Firebase first, like buynow.html)
+const cart = getCartFromLocalStorage();
+if (!cart || cart.length === 0) throw new Error('Cart is empty');
+const totalAmount = calculateTotal(cart);
 
-    const createRes = await fetch('/.netlify/functions/create-order', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ amount: amountPaise })
-    });
-    if (!createRes.ok) {
-      const txt = await createRes.text();
-      throw new Error('create-order error: ' + txt);
-    }
-    const order = await createRes.json();
+// create a stable orderId and push to firebase BEFORE payment
+const orderId = "ORD" + Date.now();
+window.currentOrderId = orderId; // used by email verify handlers
+
+const orderObj = {
+  orderId,
+  name,
+  phone,
+  email: (document.getElementById('customerEmail')?.value || '').trim().toLowerCase(),
+  cart: cart.map(i => ({ id: i.id, title: i.title, price: i.price, qty: i.qty, image: i.image || "" })),
+  totalAmount,
+  timestamp: new Date().toISOString()
+};
+
+// push to firebase (non-blocking for user but we await to ensure saved)
+try {
+  await firebase.database().ref("orders").push(orderObj);
+  console.log('Firebase order saved (before online payment):', orderId);
+} catch (err) {
+  console.warn('Firebase push before payment failed:', err);
+  // we don't abort payment — we still attempt create-order so merchant doesn't lose sale
+}
+
+// Email verification: validate email & require verification if needed
+const emailVal = orderObj.email || '';
+if (!isValidEmail(emailVal)) {
+  document.getElementById('emailError').style.display = 'block';
+  if (spinner) spinner.style.display = 'none';
+  return;
+} else {
+  document.getElementById('emailError').style.display = 'none';
+}
+
+// if not verified in this session, send code and pause flow
+if (sessionStorage.getItem('emailVerified_' + orderId) !== '1') {
+  try {
+    await sendVerificationCode(emailVal);
+    showVerifyPanel(emailVal);
+    // re-enable button so user can interact
+    const btn = document.getElementById('confirmOrderBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm Order'; }
+    // set session marker that code sent
+    setCodeSent(orderId);
+    return; // stop here until user verifies
+  } catch (err) {
+    console.warn('sendVerificationCode failed', err);
+    document.getElementById('emailVerifyMsg').textContent = 'Unable to send code. Try again later.';
+    document.getElementById('emailVerifyMsg').style.display = 'inline';
+    if (spinner) spinner.style.display = 'none';
+    return;
+  }
+}
+
+// proceed to create Razorpay order on server
+const amountPaise = Math.round(totalAmount * 100);
+const createRes = await fetch('/.netlify/functions/create-order', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({ amount: amountPaise })
+});
+if (!createRes.ok) {
+  const txt = await createRes.text();
+  throw new Error('create-order error: ' + txt);
+}
+const order = await createRes.json();
+
 
     // ensure Razorpay lib available (wait short time if needed)
     if (!window.Razorpay) {
@@ -1070,6 +1280,7 @@ const payload = {
   razorOrderId: razorOrderId || null,
   name,
   phone,
+   email: (document.getElementById('customerEmail')?.value || '').trim().toLowerCase(),
   // server expects `cart` (not items). Send full cart array as `cart`.
   cart: (cart || []).map(i => ({
     id: i.id,
@@ -1277,6 +1488,7 @@ const payload = {
   orderId,
   name,
   phone,
+   email: (document.getElementById('customerEmail')?.value || '').trim().toLowerCase(),
   cart: (cart || []).map(i => ({
     id: i.id,
     title: i.title,
@@ -1291,6 +1503,24 @@ const payload = {
   messageText,
   ts: Date.now()
 };
+// Save order to Firebase (COD)
+try {
+  const orderToSave = {
+    orderId,
+    name,
+    phone,
+    email: (document.getElementById('customerEmail')?.value || '').trim().toLowerCase(),
+    cart: payload.cart,
+    totalAmount: payload.totalAmount,
+    isPaid: false,
+    payment: payload.payment,
+    timestamp: new Date().toISOString()
+  };
+  await firebase.database().ref("orders").push(orderToSave);
+  console.log('Firebase COD order saved:', orderId);
+} catch (err) {
+  console.warn('Firebase save for COD failed:', err);
+}
 
 
   
