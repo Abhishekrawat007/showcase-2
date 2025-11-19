@@ -749,6 +749,67 @@ body.pwa-standalone .container{
 /* Optional: hide scrollbar yet keep scrollable (thin / only for webkit) */
 #emailVerifyPanel .otp-wrap::-webkit-scrollbar { height: 6px; }
 #emailVerifyPanel .otp-wrap::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 999px; }
+/* ===== Responsive OTP + Verify layout ===== */
+
+/* Allow verify-row to wrap naturally so the button can drop under boxes */
+#emailVerifyPanel .verify-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap; /* allow wrap (overrides any nowrap) */
+}
+
+/* Make otp-wrap full width on narrow screens and keep horizontal scrolling if needed */
+#emailVerifyPanel .otp-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure the OTP inputs group centers and doesn't get squashed */
+#emailVerifyPanel .otp-inputs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Desktop: keep verify button inline beside boxes */
+@media (min-width: 420px) {
+  #emailVerifyPanel .verify-row { flex-wrap: nowrap; }
+  #emailVerifyPanel .verify-row .btn-verify { flex: 0 0 auto; width: auto; order: 2; }
+  #emailVerifyPanel .otp-wrap { order: 1; }
+}
+
+/* Mobile / narrow: place the Verify button under the boxes and make it full-width */
+@media (max-width: 419px) {
+  /* OTP area first, verify button second */
+  #emailVerifyPanel .otp-wrap { order: 1; }
+  #emailVerifyPanel .verify-row .btn-verify {
+    order: 2;
+    width: 100%;
+    display: inline-flex;
+    justify-content: center;
+    padding: 12px 14px;
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+
+  /* Make resend + message area aligned and comfortable */
+  #emailVerifyPanel > div:last-child { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  #emailVerifyPanel .resend-spinner { margin-left: 6px; }
+}
+
+/* Minor tweak: ensure focused OTP scrolls cleanly to center */
+#emailVerifyPanel .otp-box:focus {
+  scroll-margin-inline: calc(50% - 28px); /* helps center in some browsers */
+}
 
   </style>
 
@@ -1217,6 +1278,26 @@ function showVerifyPanel(email) {
   document.getElementById('emailVerifyPanel').style.display = 'block';
   document.getElementById('emailVerifyMsg').style.display = 'none';
 }
+function ensureVerifyPosition() {
+  const panel = document.getElementById('emailVerifyPanel');
+  if (!panel) return;
+  const otpWrap = panel.querySelector('.otp-wrap');
+  const verifyBtn = panel.querySelector('.btn-verify');
+  if (!otpWrap || !verifyBtn) return;
+  if (window.innerWidth <= 419) {
+    // move verify button after otpWrap
+    otpWrap.parentNode.insertBefore(verifyBtn, otpWrap.nextSibling);
+    verifyBtn.style.width = '100%';
+  } else {
+    // restore inline (put verifyBtn back inside verify-row)
+    const verifyRow = panel.querySelector('.verify-row');
+    if (verifyRow && verifyRow.appendChild) verifyRow.appendChild(verifyBtn);
+    verifyBtn.style.width = '';
+  }
+}
+window.addEventListener('resize', ensureVerifyPosition);
+setTimeout(ensureVerifyPosition, 80); // run once after panel inserted
+
 function hideVerifyPanel() {
   document.getElementById('emailVerifyPanel').style.display = 'none';
   document.getElementById('emailCode').value = '';
