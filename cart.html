@@ -811,7 +811,7 @@ body.pwa-standalone .container{
   scroll-margin-inline: calc(50% - 28px); /* helps center in some browsers */
 }
 /* Fix for the narrow band where OTP boxes were getting clipped */
-@media (min-width: 416px) and (max-width: 485px) {
+@media (min-width: 320px) and (max-width: 485px) {
   #emailVerifyPanel .otp-wrap {
     gap: 6px;                /* reduce horizontal gap */
     padding: 4px 6px;        /* reduce padding so boxes have more room */
@@ -840,6 +840,71 @@ body.pwa-standalone .container{
     margin-top: 8px;
     justify-content: center;
   }
+}
+/* ---------- OTP resilient layout ---------- */
+
+/* Always allow the OTP area to scroll if needed and center it */
+#emailVerifyPanel .otp-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+/* inputs row should be inline-flex so children can shrink */
+#emailVerifyPanel .otp-inputs {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-type: x proximity;
+}
+
+/* responsive box sizing (safe defaults) */
+#emailVerifyPanel .otp-box {
+  flex: 0 0 auto;
+  width: clamp(30px, 7vw, 56px) !important;
+  height: clamp(36px, 7vw, 56px) !important;
+  min-width: 30px;
+  padding: 0;
+  text-align: center;
+  font-size: clamp(0.95rem, 3.6vw, 1.25rem);
+  line-height: 1;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  scroll-snap-align: center;
+  box-sizing: border-box;
+}
+
+/* Force verify button below on narrower screens and keep spacing */
+@media (max-width: 485px) {
+  #emailVerifyPanel .verify-row {
+    display: flex;
+    flex-direction: column;   /* stack verify under OTP row */
+    gap: 8px;
+    align-items: stretch;
+  }
+  #emailVerifyPanel .verify-row .btn-verify {
+    width: 100%;
+    flex: 0 0 auto;
+    justify-content: center;
+    margin-top: 6px;
+  }
+
+  /* reduce gaps a touch where space is tight */
+  #emailVerifyPanel .otp-inputs { gap: 6px; }
+  #emailVerifyPanel .otp-wrap { gap: 6px; padding: 4px 6px; }
+  #emailVerifyPanel .otp-box { width: clamp(30px, 8vw, 46px) !important; height: clamp(34px, 8vw, 46px) !important; }
+}
+
+/* Extra tiny tweak for extremely narrow phones */
+@media (max-width: 360px) {
+  #emailVerifyPanel .otp-box { width: clamp(28px, 9vw, 44px) !important; height: clamp(32px, 9vw, 44px) !important; font-size: 0.95rem; }
 }
 
   </style>
@@ -2253,6 +2318,38 @@ try { sessionStorage.setItem('cartDirty', '0'); } catch(_) {}
       applyTheme(isDark ? 'light' : 'dark');
     });
   });
+  // Ensure OTP boxes are visible and verify button stacked when needed
+function ensureOtpFit() {
+  const wrap = document.querySelector('#emailVerifyPanel .otp-wrap');
+  const inputs = document.querySelector('#emailVerifyPanel .otp-inputs');
+  const verifyRow = document.querySelector('#emailVerifyPanel .verify-row');
+  if (!wrap || !inputs || !verifyRow) return;
+
+  // if inputs total width > available, allow scroll + stack verify
+  const inputsWidth = Array.from(inputs.children).reduce((w, el) => {
+    const r = el.getBoundingClientRect();
+    return w + (r.width || parseFloat(getComputedStyle(el).width) || 0);
+  }, 0);
+
+  const avail = wrap.getBoundingClientRect().width;
+  if (inputsWidth + 24 > avail) { // 24px buffer for gaps/padding
+    verifyRow.style.flexDirection = 'column';
+    verifyRow.querySelector('.btn-verify')?.style.setProperty('width','100%');
+    wrap.style.overflowX = 'auto';
+  } else {
+    verifyRow.style.flexDirection = '';
+    verifyRow.querySelector('.btn-verify')?.style.removeProperty('width');
+    wrap.style.overflowX = 'visible';
+  }
+}
+
+// call on load + on resize + when OTP panel shows
+window.addEventListener('resize', ensureOtpFit);
+setTimeout(ensureOtpFit, 100);
+const observer = new MutationObserver(() => { setTimeout(ensureOtpFit, 40); });
+const panel = document.getElementById('emailVerifyPanel');
+if (panel) observer.observe(panel, { childList: true, subtree: true, attributes: true });
+
 </script>
 
 
