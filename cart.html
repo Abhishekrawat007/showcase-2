@@ -1064,33 +1064,36 @@ async function handlePayment() {
       `📦 *Items:*\n${itemLines}`;
 
     // 3) Build payload with explicit fields the server commonly expects
-    const payload = {
-      orderId,
-      razorOrderId: razorOrderId,
-      name,
-      phone,
-      totalAmount,
-      amountPaid,
-      currency: (order && order.currency) || verifyJson.currency || 'INR',
-      items: (cart || []).map(i => ({
-        id: i.id,
-        title: i.title,
-        price: i.price,
-        qty: i.qty,
-        image: i.image || i.img || i.thumbnail || ""
-      })),
-      payment: {
-        provider: 'Razorpay',
-        razorpay_payment_id: response.razorpay_payment_id,
-        razorpay_order_id: response.razorpay_order_id,
-        razorpay_signature: response.razorpay_signature,
-        method: 'online',
-        status: 'paid'
-      },
-      rawOrder: order || verifyJson || null, // include raw server/order objects for easier server-side debugging
-      messageText,
-      ts: Date.now()
-    };
+    // replace existing payload = { ... } with this:
+const payload = {
+  orderId, // order id from razorpay or fallback
+  razorOrderId: razorOrderId || null,
+  name,
+  phone,
+  // server expects `cart` (not items). Send full cart array as `cart`.
+  cart: (cart || []).map(i => ({
+    id: i.id,
+    title: i.title,
+    price: i.price,
+    qty: i.qty,
+    image: i.image || i.img || i.thumbnail || ""
+  })),
+  // server also checks one of these amount fields; include both totalAmount and amountPaid
+  totalAmount: totalAmount,     // rupees (number)
+  amountPaid: amountPaid,       // rupees (number)
+  currency: (order && order.currency) || verifyJson.currency || 'INR',
+  payment: {
+    provider: 'Razorpay',
+    razorpay_payment_id: response.razorpay_payment_id,
+    razorpay_order_id: response.razorpay_order_id,
+    razorpay_signature: response.razorpay_signature,
+    method: 'online',
+    status: 'paid'
+  },
+  rawOrder: order || verifyJson || null,
+  messageText,
+  ts: Date.now()
+};
 
     // 4) DEBUG: print payload to console before sending (inspect Network / function logs)
     console.log('Sending order payload to /.netlify/functions/sendTelegramOrder', payload);
@@ -1274,20 +1277,21 @@ const payload = {
   orderId,
   name,
   phone,
-  totalAmount,
+  cart: (cart || []).map(i => ({
+    id: i.id,
+    title: i.title,
+    price: i.price,
+    qty: i.qty,
+    image: i.image || i.img || i.thumbnail || ""
+  })),
+  totalAmount: totalAmount,
   amountPaid: totalAmount,
   currency: 'INR',
-  items: (cart || []).map(i => ({
-  id: i.id,
-  title: i.title,
-  price: i.price,
-  qty: i.qty,
-  image: i.image || i.img || i.thumbnail || ""   // <-- include image URL for server PDF
-})),
   payment: { provider: 'COD', method: 'cod', status: 'pending' },
   messageText,
   ts: Date.now()
 };
+
 
   
 
