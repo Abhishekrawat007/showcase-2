@@ -529,43 +529,87 @@ body.dark-mode .btn-continue{background:#fff;color:#111}
 
 /* secondary resend */
 /* ----- Resend button: new background + spinner color ----- */
-/* Example palette: warm orange accent */
+/* ===== Resend high-contrast look ===== */
 .btn-resend {
-  background: linear-gradient(180deg, #fff8f3, #fff3ea); /* soft warm surface */
-  color: #d84315; /* warm orange text */
-  border: 1px solid rgba(216,67,21,0.12);
-  box-shadow: 0 6px 18px rgba(216,67,21,0.06);
+  /* stronger contrast: warm orange filled button (more visible on white) */
+  background: linear-gradient(180deg, #ff7043, #e64a19);
+  color: #fff;                     /* white text for contrast */
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(230,74,25,0.14);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.98rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Hover/press states tuned to orange */
-.btn-resend:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(216,67,21,0.10);
-}
-.btn-resend:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 12px rgba(216,67,21,0.06);
-}
+/* Icon color inside button */
+.btn-resend i { color: rgba(255,255,255,0.95); }
 
-/* Spinner inside resend: use same orange accent */
-.btn-resend .btn-spinner {
-  border: 2px solid rgba(216,67,21,0.12);
-  border-top-color: #d84315; /* visible orange spinner */
+/* Hover / active */
+.btn-resend:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(230,74,25,0.18); }
+.btn-resend:active { transform: translateY(0); box-shadow: 0 6px 12px rgba(0,0,0,0.06); }
+
+/* ===== Spinner variants ===== */
+/* default spinner for primary (white on blue) kept for .btn-verify */
+.btn-spinner {
   width: 16px;
   height: 16px;
-  vertical-align: middle;
-  animation: btn-spin 0.9s linear infinite;
   border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: rgba(255,255,255,1);
+  animation: btn-spin 0.9s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
 }
 
-/* If a light-border is needed when placed next to text */
-.btn-resend i { color: #d84315; }
+/* spinner used inside .btn-resend: dark/orange spinner so it is visible on white/orange */
+.btn-resend .btn-spinner,
+.btn-resend .resend-spinner .btn-spinner {
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: rgba(255,255,255,0.95); /* keeps visible on orange */
+}
 
-/* Disabled style keeps toned look but subdued */
-.btn-resend[disabled] {
-  opacity: 0.6;
-  box-shadow: none;
-  cursor: not-allowed;
+/* If you prefer an orange-on-white style (alternate) — uncomment to use:
+.btn-resend {
+  background: #fff8f3;
+  color: #d84315;
+  border: 1px solid rgba(216,67,21,0.12);
+}
+.btn-resend .btn-spinner {
+  border: 2px solid rgba(216,67,21,0.12);
+  border-top-color: #d84315;
+}
+*/
+
+/* spin keyframes */
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* ===== OTP boxes styling ===== */
+.otp-box {
+  width: 48px;
+  height: 52px;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+  background: #fff;
+  -moz-appearance: textfield;
+}
+
+.otp-box:focus {
+  border-color: #1e88e5;
+  box-shadow: 0 8px 28px rgba(30,136,229,0.12);
+}
+
+/* smaller screens: reduce size */
+@media (max-width:420px) {
+  .otp-box { width: 40px; height: 46px; font-size:1.1rem; }
 }
 
 /* icon sizes */
@@ -1016,11 +1060,23 @@ form.innerHTML = `
   </div>
 
   <div class="verify-row" style="margin-bottom:8px;">
-    <input type="text" id="emailCode" placeholder="Enter verification code" maxlength="6" style="width:40%;display:inline-block" />
-    <button type="button" id="verifyCodeBtn" class="btn-verify" aria-live="polite" aria-busy="false" style="display:inline-flex;">
-      <span class="verify-label"><i class="fas fa-check"></i> Verify</span>
-      <span class="verify-spinner" style="display:none; margin-left:4px;"></span>
-    </button>
+   <!-- 6-box OTP input -->
+<div class="otp-wrap" style="display:inline-flex; gap:8px; align-items:center;">
+  <div class="otp-inputs" aria-hidden="false">
+    <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otp-1" />
+    <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otp-2" />
+    <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otp-3" />
+    <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otp-4" />
+    <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otp-5" />
+    <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otp-6" />
+  </div>
+
+  <button type="button" id="verifyCodeBtn" class="btn-verify" aria-live="polite" aria-busy="false" style="display:inline-flex; align-items:center;">
+    <span class="verify-label"><i class="fas fa-check"></i> Verify</span>
+    <span class="verify-spinner" aria-hidden="true" style="display:none; margin-left:8px;"></span>
+  </button>
+</div>
+
   </div>
 
   <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
@@ -1162,7 +1218,7 @@ function attachEmailHandlers(){
   }
 
   verifyBtn.addEventListener('click', async function () {
-    const code = (document.getElementById('emailCode').value || '').trim();
+   const code = getOtpValue();
     const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
     const orderId = window.currentOrderId || null;
     if (!orderId) {
@@ -1227,6 +1283,80 @@ function attachEmailHandlers(){
     }
   });
 }
+// --- OTP box helpers: attach to DOM when verify panel shown ---
+function setupOtpBoxes() {
+  const boxes = Array.from(document.querySelectorAll('.otp-box'));
+  if (!boxes || boxes.length === 0) return;
+
+  boxes.forEach((box, idx) => {
+    box.addEventListener('input', (e) => {
+      const val = box.value.replace(/[^0-9]/g,'');
+      box.value = val;
+      if (val && idx < boxes.length - 1) boxes[idx+1].focus();
+    });
+
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && idx > 0) {
+        boxes[idx-1].focus();
+      } else if (e.key === 'ArrowLeft' && idx > 0) {
+        boxes[idx-1].focus();
+      } else if (e.key === 'ArrowRight' && idx < boxes.length - 1) {
+        boxes[idx+1].focus();
+      }
+    });
+
+    // allow mobile numeric keyboard
+    box.setAttribute('inputmode', 'numeric');
+    box.setAttribute('autocomplete', 'one-time-code');
+  });
+
+  // paste support: if user pastes 6-digit code into any box, distribute
+  boxes.forEach(box => box.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const pasted = (e.clipboardData || window.clipboardData).getData('text') || '';
+    const digits = pasted.replace(/[^\d]/g,'').slice(0,6);
+    if (!digits) return;
+    for (let i=0;i<boxes.length;i++){
+      boxes[i].value = digits[i] || '';
+    }
+    // focus last filled
+    const firstEmpty = boxes.find(b => !b.value);
+    (firstEmpty || boxes[boxes.length-1]).focus();
+  }));
+}
+
+// call setupOtpBoxes when panel shown
+const realShowVerifyPanel = showVerifyPanel;
+showVerifyPanel = function (email) {
+  realShowVerifyPanel(email);
+  // small timeout to ensure DOM inserted
+  setTimeout(() => {
+    setupOtpBoxes();
+    // focus first box
+    const b = document.getElementById('otp-1');
+    if (b) b.focus();
+  }, 60);
+};
+
+// small helper to read joined OTP code
+function getOtpValue() {
+  const boxes = Array.from(document.querySelectorAll('.otp-box'));
+  if (!boxes || boxes.length===0) {
+    // fallback to single input
+    return (document.getElementById('emailCode')?.value || '').trim();
+  }
+  return boxes.map(b => (b.value||'')).join('');
+}
+
+// adjust verify handler to read combined OTP
+const oldVerifyHandler = document.getElementById && document.getElementById('verifyCodeBtn') && document.getElementById('verifyCodeBtn').onclick;
+// if verify listener already added inside attachEmailHandlers you'll be fine — modify verify flow above:
+// inside verifyBtn click handler, replace reading code with:
+  // const code = getOtpValue();
+  // keep rest same
+
+// update showButtonLoading to inject spinner with .btn-spinner class (already used by your helpers)
+// Ensured earlier helper creates <span class="btn-spinner"></span> so CSS will style it appropriately.
 
 
 // Unified payment handler (replaces older block)
