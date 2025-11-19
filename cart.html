@@ -503,6 +503,75 @@ label:hover {
 .btn-continue::after{content:"→";font-size:1.1em}
 .btn-continue:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(0,0,0,.22)}
 body.dark-mode .btn-continue{background:#fff;color:#111}
+/* --- Verify / Resend button styles --- */
+.btn-verify, .btn-resend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.08);
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  will-change: transform;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* primary verify */
+.btn-verify {
+  background: linear-gradient(180deg,#1e88e5,#1565c0);
+  color: #fff;
+}
+
+/* secondary resend */
+.btn-resend {
+  background: linear-gradient(180deg,#fff,#f6f9ff);
+  color: #1e88e5;
+  border: 1px solid rgba(30,136,229,0.12);
+}
+
+/* icon sizes */
+.btn-verify i, .btn-resend i { font-size: 1.05rem; }
+
+/* pressed/hover */
+.btn-verify:hover, .btn-resend:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(16,24,40,0.12); }
+.btn-verify:active, .btn-resend:active { transform: translateY(0); }
+
+/* disabled state */
+.btn-verify[disabled], .btn-resend[disabled] {
+  opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none;
+}
+
+/* inline spinner inside button */
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: rgba(255,255,255,1);
+  animation: btn-spin 0.9s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* when spinner shown on light button (resend) use dark border */
+.btn-resend .btn-spinner {
+  border: 2px solid rgba(30,136,229,0.12);
+  border-top-color: rgba(30,136,229,1);
+}
+
+/* spin keyframes */
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* small responsive tweaks */
+#emailVerifyPanel { gap: 8px; }
+#emailVerifyPanel input#emailCode { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; }
+#emailVerifyPanel .verify-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
 /* Show banner at top and style it blue for PWA only */
 body.pwa-standalone {
   --pwa-banner-height: 56px;   /* keep banner at 56 */
@@ -911,25 +980,27 @@ form.innerHTML = `
   <div id="emailError" style="color: red; font-size: 13px; margin-top: -8px; margin-bottom: 10px; display: none;"></div>
 
   <!-- Email verification panel (hidden until code sent) -->
-  <div id="emailVerifyPanel" style="display:none; margin-top:10px;">
-    <div style="margin-bottom:6px; font-size:14px;">
-      We've sent a 6-digit code to <strong><span id="verifyEmailAddr"></span></strong>
-    </div>
-    <input type="text" id="emailCode" placeholder="Enter verification code" maxlength="6" style="width:60%;display:inline-block" />
-    <button type="button" id="verifyCodeBtn" style="display:inline-block; margin-left:8px; padding:8px 12px; border-radius:8px;">Verify</button>
-
-    <span id="verifyHint" class="verify-hint" role="button" tabindex="0" aria-label="Click here to verify code" style="margin-left:4px;">
-      <span>Click here to</span>
-      <span class="arrow">→</span>
-      <span style="margin-left:6px;">Verify</span>
-      <span class="pulse" aria-hidden="true"></span>
-    </span>
-
-    <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
-      <button type="button" id="resendCodeBtn" style="padding:6px 10px; border-radius:8px;">Resend code</button>
-      <span id="emailVerifyMsg" style="color:#d32f2f; display:none;"></span>
-    </div>
+<div id="emailVerifyPanel" style="display:none; margin-top:10px;">
+  <div style="margin-bottom:6px; font-size:14px;">
+    We've sent a 6-digit code to <strong><span id="verifyEmailAddr"></span></strong>
   </div>
+
+  <div class="verify-row" style="margin-bottom:8px;">
+    <input type="text" id="emailCode" placeholder="Enter verification code" maxlength="6" style="width:40%;display:inline-block" />
+    <button type="button" id="verifyCodeBtn" class="btn-verify" aria-live="polite" aria-busy="false" style="display:inline-flex;">
+      <span class="verify-label"><i class="fas fa-check"></i> Verify</span>
+      <span class="verify-spinner" style="display:none; margin-left:4px;"></span>
+    </button>
+  </div>
+
+  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <button type="button" id="resendCodeBtn" class="btn-resend" aria-live="polite" aria-busy="false">
+      <i class="fas fa-redo"></i><span style="margin-left:6px;">Resend code</span>
+      <span class="resend-spinner" style="display:none; margin-left:6px;"></span>
+    </button>
+    <span id="emailVerifyMsg" style="color:#d32f2f; display:none; font-size:0.95rem;"></span>
+  </div>
+</div>
 
   <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 12px;">Payment method</h3>
 
@@ -1017,6 +1088,38 @@ function attachEmailHandlers(){
   const verifyBtn = document.getElementById('verifyCodeBtn');
   const resendBtn = document.getElementById('resendCodeBtn');
   const verifyHint = document.getElementById('verifyHint');
+  const emailMsg = document.getElementById('emailVerifyMsg');
+
+  function showButtonLoading(btn) {
+    if (!btn) return;
+    btn.setAttribute('disabled','');
+    btn.setAttribute('aria-busy','true');
+    const spinnerHolder = btn.querySelector('.verify-spinner') || btn.querySelector('.resend-spinner');
+    if (spinnerHolder) {
+      spinnerHolder.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>';
+      spinnerHolder.style.display = 'inline-block';
+    } else {
+      // fallback: append spinner
+      const s = document.createElement('span');
+      s.className = 'btn-spinner';
+      s.style.marginLeft = '8px';
+      btn.appendChild(s);
+    }
+  }
+  function hideButtonLoading(btn) {
+    if (!btn) return;
+    btn.removeAttribute('disabled');
+    btn.setAttribute('aria-busy','false');
+    const spinnerHolder = btn.querySelector('.verify-spinner') || btn.querySelector('.resend-spinner');
+    if (spinnerHolder) {
+      spinnerHolder.style.display = 'none';
+      spinnerHolder.innerHTML = '';
+    } else {
+      // remove any appended spinner fallback
+      const s = btn.querySelector('.btn-spinner');
+      if (s) s.remove();
+    }
+  }
 
   if (verifyHint) {
     verifyHint.addEventListener('click', () => {
@@ -1029,22 +1132,25 @@ function attachEmailHandlers(){
   }
 
   verifyBtn.addEventListener('click', async function () {
-    const code = document.getElementById('emailCode').value.trim();
+    const code = (document.getElementById('emailCode').value || '').trim();
     const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
     const orderId = window.currentOrderId || null;
     if (!orderId) {
-      document.getElementById('emailVerifyMsg').textContent = 'Order id missing. Refresh the page.';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      emailMsg.textContent = 'Order id missing. Refresh the page.';
+      emailMsg.style.color = '#d32f2f';
+      emailMsg.style.display = 'inline';
       return;
     }
     if (!/^\d{6}$/.test(code)) {
-      document.getElementById('emailVerifyMsg').textContent = 'Please enter a 6-digit code.';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      emailMsg.textContent = 'Please enter a 6-digit code.';
+      emailMsg.style.color = '#d32f2f';
+      emailMsg.style.display = 'inline';
       return;
     }
+
     try {
-      verifyBtn.disabled = true;
-      document.getElementById('emailVerifyMsg').style.display = 'none';
+      showButtonLoading(verifyBtn);
+      emailMsg.style.display = 'none';
       await verifyCodeOnServer(email, code); // throws on fail
       sessionStorage.setItem('emailVerified_' + orderId, '1');
       hideVerifyPanel();
@@ -1056,11 +1162,12 @@ function attachEmailHandlers(){
         handlePayment();
       }
     } catch (err) {
-      document.getElementById('emailVerifyMsg').textContent = 'Invalid or expired code. Try resend.';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      emailMsg.textContent = 'Invalid or expired code. Try resend.';
+      emailMsg.style.color = '#d32f2f';
+      emailMsg.style.display = 'inline';
       console.warn('verifyCode error', err);
     } finally {
-      verifyBtn.disabled = false;
+      hideButtonLoading(verifyBtn);
     }
   });
 
@@ -1072,19 +1179,21 @@ function attachEmailHandlers(){
       return;
     }
     try {
-      resendBtn.disabled = true;
+      // show countdown-like disabled state
+      showButtonLoading(resendBtn);
+      document.getElementById('emailVerifyMsg').style.display = 'none';
       await sendVerificationCode(email);
-      document.getElementById('emailVerifyMsg').textContent = 'Code resent.';
-      document.getElementById('emailVerifyMsg').style.color = '#2e7d32';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
-      setTimeout(()=> { document.getElementById('emailVerifyMsg').style.display = 'none'; }, 4000);
+      emailMsg.textContent = 'Code resent.';
+      emailMsg.style.color = '#2e7d32';
+      emailMsg.style.display = 'inline';
+      setTimeout(()=> { emailMsg.style.display = 'none'; }, 4000);
     } catch (err) {
-      document.getElementById('emailVerifyMsg').textContent = 'Resend failed. Try again later.';
-      document.getElementById('emailVerifyMsg').style.color = '#d32f2f';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
+      emailMsg.textContent = 'Resend failed. Try again later.';
+      emailMsg.style.color = '#d32f2f';
+      emailMsg.style.display = 'inline';
       console.warn('resend error', err);
     } finally {
-      resendBtn.disabled = false;
+      hideButtonLoading(resendBtn);
     }
   });
 }
