@@ -544,47 +544,76 @@ body.dark-mode .btn-cancel {
   background-color: #218838;
 }
   </style>
+    <!-- Firebase SDKs used by the editor -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+
   <script src="js/config.js"></script>
 <script src="js/init-firebase.js"></script>
 
 <!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
+<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
 <script>
 (function(){
-  // alias for new code
-  window.db = window.database || null;
+  // Install shim once firebase is ready; if not ready, wait for event.
+  function installShim() {
+    // alias for new code (back-compat)
+    window.db = window.database || window.db || null;
 
-  // expose window.database getter so other code can read window.database even if they read it later
-  try {
-    Object.defineProperty(window, 'database', {
-      get: function() { return window.db; },
-      configurable: true
-    });
-  } catch (e) {
-    // fallback if defineProperty blocked
-    if (!window.database) window.database = window.db;
+    // expose window.database getter so other code can read window.database even if they read it later
+    try {
+      Object.defineProperty(window, 'database', {
+        get: function() { return window.db; },
+        configurable: true
+      });
+    } catch (e) {
+      if (!window.database) window.database = window.db;
+    }
+
+    // If firebase present and not patched, patch it to return window.db where appropriate
+    if (window.firebase && !firebase.__dbPatched) {
+      firebase.__dbPatched = true;
+      firebase.__originalDatabaseFn = firebase.database || null;
+      firebase.database = function() {
+        if (window.db) return window.db;
+        if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
+        return null;
+      };
+      console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
+    } else if (window.firebase && firebase.__dbPatched) {
+      // already patched but ensure log shows current state
+      console.log('✅ Firebase compatibility shim already installed. window.db:', !!window.db);
+    } else {
+      // Not ready yet — wait for init, but also attempt a fallback after a short timeout
+      console.warn('⚠️ Firebase not ready yet — shim will install once initialized. window.db:', !!window.db);
+    }
   }
 
-  // Monkey-patch firebase.database() so old code keeps working.
-  // Ensure firebase SDK is loaded and only patch once.
-  if (window.firebase && !firebase.__dbPatched) {
-    firebase.__dbPatched = true;
-    // Preserve original if present (for safety)
-    firebase.__originalDatabaseFn = firebase.database || null;
-    firebase.database = function() {
-      // return underlying db reference created by init-firebase.js
-      if (window.db) return window.db;
-      // fallback: if original exists, call it
-      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
-      // otherwise return null to avoid throwing in caller
-      return null;
-    };
-    // Helpful console info for debugging
-    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
+  // If firebase already present and db set, install immediately; otherwise wait for "firebase-ready"
+  if (window.firebase && (window.db !== undefined && window.db !== null)) {
+    installShim();
   } else {
-    // still log so you can diagnose missing init
-    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
+    // install when init script dispatches firebase-ready (our init-firebase.js will dispatch it)
+    document.addEventListener('firebase-ready', function onReady() {
+      try { installShim(); } catch(e) { console.error('Shim install error', e); }
+    }, { once: true });
+
+    // fallback attempt in case event missed
+    setTimeout(() => {
+      try { installShim(); } catch(e) { /* ignore */ }
+    }, 1500);
   }
 })();
+</script>
+
+<!-- Provide convenient local aliases for other scripts -->
+<script>
+  // Make sure init-firebase ran and exposed window.database
+  window.db = window.database || null;            // use window.db or window.database in other scripts
+  window.CLOUDINARY_URL = window.__CONFIG?.cloudinary?.url || '';
+  window.CLOUDINARY_PRESET = window.__CONFIG?.cloudinary?.preset || '';
+  console.log('CONFIG loaded:', !!window.__CONFIG, 'Firebase DB:', !!window.db, 'Cloudinary:', !!window.CLOUDINARY_URL);
 </script>
 </head>
 <body>
