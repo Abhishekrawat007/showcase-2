@@ -12,14 +12,16 @@ const products = [
     "images": [
       "images/moonlamp1.jpg",
       "images/moonlamp2.jpg",
-      "images/moonlamp3.jpg"
+      "images/moonlamp3.jpg",
+      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1763629447/ly9m0f0ow4iwzpjaklif.jpg"
     ],
     "video": "https://youtube.com/watch?v=TcAZwTE0dDI",
     "oldPrice": 450,
     "newPrice": 400,
     "discount": "11%",
     "mediaCount": "3 photos + video",
-    "inStock": true
+    "inStock": true,
+    "descriptionHTML": "Moon Lamp – Realistic 3D Surface | Touch + Remote | Rechargeable\nTransform your room with the enchanting glow of this ultra-realistic 3D Moon Lamp. Crafted using advanced 3D printing technology, the lamp captures the detailed craters and texture of the actual moon.\nFeatures include warm & white light options, adjustable brightness, touch-sensitive controls, and a convenient remote for switching modes.\nThe built-in rechargeable battery ensures long-lasting illumination, making it ideal for bedrooms, living rooms, décor setups, night lamps, romantic lighting, and gifting."
   },
   {
     "id": 2,
