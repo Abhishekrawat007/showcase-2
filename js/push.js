@@ -219,7 +219,7 @@
             const reg = await swRegistrationPromise;
             const messaging = window.firebase.messaging();
             const token = await messaging.getToken({
-              vapidKey: "BGqOSVUBJJiN8RroZyQ5kmiAzIfdLR-Y85JNYx4vsWxefv-8guZyZJlIWYBOYuFJ16i1DmH_bQlWvwPJpZM7ndM",
+              vapidKey: "BHBFlNFxt6EUM9f6NYU_o006ti5ZG0a-VMPJ-dWHYH_X6iqlWpEu3DDB7fvq6OSOaIoIeJBqpw7iZSDntJV-KMk",
               serviceWorkerRegistration: reg || undefined
             });
 
