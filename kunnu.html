@@ -82,57 +82,61 @@
 </head>
 <body>
 
-  <div class="login-box">
+ <div class="login-box">
     <h2>🔐 Admin Login</h2>
-    <div class="input-group">
-      <input type="password" id="adminPassword" placeholder="Enter Admin Password" />
-      <span class="toggle-eye" onclick="togglePassword()">👁️</span>
-    </div>
-    <button onclick="login()">Login</button>
+
+    <!-- wrap in a form to satisfy the browser -->
+    <form onsubmit="login(event)">
+      <div class="input-group">
+        <input type="password" id="adminPassword" placeholder="Enter Admin Password" />
+        <span class="toggle-eye" onclick="togglePassword()">👁️</span>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+
     <div class="error" id="errorText"></div>
   </div>
 
   <script>
-async function togglePassword() {
-  const input = document.getElementById("adminPassword");
-  const eye = document.querySelector(".toggle-eye");
-  if (input.type === "password") {
-    input.type = "text";
-    eye.textContent = "🙈";
-  } else {
-    input.type = "password";
-    eye.textContent = "👁";
-  }
-}
-
-async function login() {
-  const enteredPassword = document.getElementById("adminPassword").value;
-  const errorText = document.getElementById("errorText");
-  errorText.textContent = "";
-
-  try {
-    const res = await fetch("/.netlify/functions/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: enteredPassword })
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      errorText.textContent = "❌ " + (data.error || "Login failed");
-      return;
+  function togglePassword() {
+    const input = document.getElementById("adminPassword");
+    const eye = document.querySelector(".toggle-eye");
+    if (input.type === "password") {
+      input.type = "text";
+      eye.textContent = "🙈";
+    } else {
+      input.type = "password";
+      eye.textContent = "👁";
     }
-
-    // store token and redirect
-    sessionStorage.setItem("adminToken", data.token);
-    window.location.href = "editor.html";
-  } catch (err) {
-    console.error(err);
-    errorText.textContent = "❌ Network error";
   }
-}
-</script>
 
+  async function login(e) {
+    if (e) e.preventDefault(); // stop form's default submit
+    const enteredPassword = document.getElementById("adminPassword").value;
+    const errorText = document.getElementById("errorText");
+    errorText.textContent = "";
+
+    try {
+      const res = await fetch("/.netlify/functions/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: enteredPassword })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        errorText.textContent = "❌ " + (data.error || "Login failed");
+        return;
+      }
+
+      sessionStorage.setItem("adminToken", data.token);
+      window.location.href = "editor.html";
+    } catch (err) {
+      console.error(err);
+      errorText.textContent = "❌ Network error";
+    }
+  }
+  </script>
 
 </body>
 </html>
