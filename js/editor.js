@@ -453,7 +453,7 @@ const res = await fetch("/.netlify/functions/updateProduct", {
     "Content-Type": "application/json",
     Authorization: "Bearer " + (token || "")
   },
-  body: JSON.stringify({ owner: "Abhishekrawat007", repo: "my-ecommerce-site", path: "js/product.js", content: fileContent }),
+ body: JSON.stringify({ owner: "Abhishekrawat007", repo: "showcase-2", path: "js/product.js", content: fileContent }),
 });
 
 
@@ -511,11 +511,11 @@ export default newArrivals;
         Authorization: "Bearer " + token
       },
       body: JSON.stringify({
-        owner: "Abhishekrawat007",
-        repo: "my-ecommerce-site",
-        path: "js/newArrivals.js",
-        content: fileContent
-      })
+  owner: "Abhishekrawat007",
+  repo: "showcase-2",
+  path: "js/newArrivals.js",
+  content: fileContent
+})
     });
 
     const text = await res.text();
@@ -916,11 +916,11 @@ sendBtn?.addEventListener('click', async () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
         body: JSON.stringify({
-          owner: "Abhishekrawat007",
-          repo: "my-ecommerce-site",
-          path: "js/stylishPages.js",
-          content
-        })
+  owner: "Abhishekrawat007",
+  repo: "showcase-2",
+  path: "js/stylishPages.js",
+  content
+})
       });
       const text = await res.text();
       let data;
