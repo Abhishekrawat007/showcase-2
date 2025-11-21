@@ -36,6 +36,17 @@
       document.body.style.overflow = '';
     } catch (_) {}
   }
+// Debounce reconciler so it doesn't run repeatedly on focus/visibility/etc.
+let __sublime_reconcile_last = 0;
+function reconcileShouldRun() {
+  try {
+    const now = Date.now();
+    const last = parseInt(localStorage.getItem('sublime:reconcileLast') || '0', 10);
+    if (now - last < 6000) return false; // 6s throttle
+    localStorage.setItem('sublime:reconcileLast', String(now));
+    return true;
+  } catch (e) { return true; }
+}
 
   // Service worker registration safe wrapper
   let swRegistrationPromise = null;
@@ -130,6 +141,15 @@
       // Save under pushSubscribers/<token> (idempotent)
       await firebase.database().ref("pushSubscribers/" + token).set(payload);
       log('Push token saved to DB ✅', token, context);
+   // also mirror token to /tokens so server broadcast (legacy) can read it
+try {
+  // use a short stable key derived from token to avoid huge key names
+  const shortKey = token.slice(0, 24).replace(/[^a-zA-Z0-9_-]/g, '');
+  await firebase.database().ref("/tokens/" + shortKey).set({ token });
+  log('Mirrored token to /tokens/' + shortKey);
+} catch (e) {
+  warn('mirror to /tokens failed', e);
+}
 
       // non-blocking subscribe call (best-effort)
       fetch("/.netlify/functions/subscribe-topic", {
@@ -184,6 +204,8 @@
       return null;
     }
   }
+  // expose for outside callers + debugging
+try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
 
 
   // Display modal safely (supports both new and old IDs)
@@ -341,16 +363,16 @@
 
   }); // DOMContentLoaded
  // Reconcile tokens on install / visibility change — ensures PWA token is recorded when user installs app
-  async function reconcileOnContext() {
-    try {
-      // Only attempt when permission is granted
-      if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') return;
-      // create & save token for current context (web vs pwa)
-      await createAndSaveToken('reconcile');
-    } catch (e) {
-      console.warn('reconcileOnContext failed', e);
-    }
+ async function reconcileOnContext() {
+  try {
+    if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') return;
+    if (!reconcileShouldRun()) return;   // <--- throttle here
+    await createAndSaveToken('reconcile');
+  } catch (e) {
+    console.warn('reconcileOnContext failed', e);
   }
+}
+
 
   window.addEventListener('appinstalled', () => reconcileOnContext());
   window.addEventListener('focus', () => reconcileOnContext());

@@ -70,7 +70,8 @@ function notificationFromPayload(payload) {
 messaging.onBackgroundMessage((payload) => {
   try {
     const { title, options } = notificationFromPayload(payload);
-    return self.registration.showNotification(title, options);
+    console.log('[sw] showNotification', title, options && options.tag);
+return self.registration.showNotification(title, options);
   } catch (err) {
     console.error('onBackgroundMessage error', err);
   }

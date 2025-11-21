@@ -62,7 +62,7 @@ export async function handler(event) {
         body: JSON.stringify({ error: "Missing title or body" }),
       };
 
-    const dbRef = admin.database().ref("/tokens");
+    const dbRef = admin.database().ref("/pushSubscribers");
     const snap = await dbRef.once("value");
     const tokenObjs = snap.val() || {};
     const tokens = Object.values(tokenObjs)
@@ -82,12 +82,14 @@ export async function handler(event) {
         body: JSON.stringify({ ok: true, resp, info: "sentToTopicFallback" }),
       };
     }
+// tokens currently might include duplicates — dedupe
+const uniqueTokens = Array.from(new Set(tokens));
 
     const chunkSize = 450;
     let aggregated = { successCount: 0, failureCount: 0, responses: [] };
 
-    for (let i = 0; i < tokens.length; i += chunkSize) {
-      const chunk = tokens.slice(i, i + chunkSize);
+   for (let i = 0; i < uniqueTokens.length; i += chunkSize) {
+  const chunk = uniqueTokens.slice(i, i + chunkSize);
     const multicast = {
   tokens: chunk,
   notification: { title, body },
