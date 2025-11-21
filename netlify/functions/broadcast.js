@@ -88,11 +88,19 @@ export async function handler(event) {
 
     for (let i = 0; i < tokens.length; i += chunkSize) {
       const chunk = tokens.slice(i, i + chunkSize);
-      const multicast = {
-        tokens: chunk,
-        notification: { title, body },
-        webpush: { fcmOptions: { link: url || "/" } },
-      };
+    const multicast = {
+  tokens: chunk,
+  notification: { title, body },
+  webpush: {
+    notification: {
+      icon: 'https://showcase-2.netlify.app/web-app-manifest-192x192.png',
+      badge: 'https://showcase-2.netlify.app/web-app-manifest-192x192.png',
+      tag: 'sublime-notification' // keeps them collapsing
+    },
+    fcmOptions: { link: url || "/" }
+  }
+};
+
 
       const r = await admin.messaging().sendMulticast(multicast);
       aggregated.successCount += r.successCount;
