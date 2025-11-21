@@ -85,30 +85,64 @@ export async function handler(event) {
 // tokens currently might include duplicates — dedupe
 const uniqueTokens = Array.from(new Set(tokens));
 
-    const chunkSize = 450;
-    let aggregated = { successCount: 0, failureCount: 0, responses: [] };
+    // chunk sending with runtime fallback for environments where sendMulticast may be missing
+const chunkSize = 450;
+let aggregated = { successCount: 0, failureCount: 0, responses: [] };
 
-   for (let i = 0; i < uniqueTokens.length; i += chunkSize) {
-  const chunk = uniqueTokens.slice(i, i + chunkSize);
-    const multicast = {
-  tokens: chunk,
-  notification: { title, body },
-  webpush: {
+// helper to attempt sendMulticast, otherwise fallback to sendAll
+async function sendChunk(chunkTokens) {
+  // Build common payload pieces
+  const notification = { title, body };
+  const webpush = {
     notification: {
       icon: 'https://showcase-2.netlify.app/web-app-manifest-192x192.png',
       badge: 'https://showcase-2.netlify.app/web-app-manifest-192x192.png',
-      tag: 'sublime-notification' // keeps them collapsing
+      tag: 'sublime-notification'
     },
     fcmOptions: { link: url || "/" }
+  };
+
+  const messaging = admin.messaging();
+  // Defensive logging for debugging
+  console.log('admin.messaging() exists?', !!messaging, 'has sendMulticast?', typeof messaging.sendMulticast === 'function', 'has sendAll?', typeof messaging.sendAll === 'function');
+
+  // Preferred path: sendMulticast if supported
+  if (typeof messaging.sendMulticast === 'function') {
+    const multicast = {
+      tokens: chunkTokens,
+      notification,
+      webpush
+    };
+    return await messaging.sendMulticast(multicast);
   }
-};
 
+  // Fallback: build messages array and use sendAll (supported widely)
+  const messages = chunkTokens.map(t => ({
+    token: t,
+    notification,
+    webpush
+  }));
 
-      const r = await admin.messaging().sendMulticast(multicast);
-      aggregated.successCount += r.successCount;
-      aggregated.failureCount += r.failureCount;
-      aggregated.responses.push({ chunkSize: chunk.length, ...r });
-    }
+  // sendAll returns { successCount, failureCount, responses: [...] }
+  return await messaging.sendAll(messages);
+}
+
+for (let i = 0; i < uniqueTokens.length; i += chunkSize) {
+  const chunk = uniqueTokens.slice(i, i + chunkSize);
+  try {
+    const r = await sendChunk(chunk);
+    // Normalise response shape: sendMulticast returns { successCount, failureCount, responses }
+    // sendAll returns same keys as well — keep it safe
+    aggregated.successCount += r.successCount || 0;
+    aggregated.failureCount += r.failureCount || 0;
+    aggregated.responses.push({ chunkSize: chunk.length, ...r });
+  } catch (err) {
+    console.error('send chunk error', err);
+    // push an error record so you can inspect failures in function logs / returned payload
+    aggregated.responses.push({ chunkSize: chunk.length, error: err && err.message ? err.message : String(err) });
+  }
+}
+
 
     return {
       statusCode: 200,
