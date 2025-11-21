@@ -83,39 +83,54 @@
     // do not forcibly set display:none in case other logic relies on it
   }
 
-  function shouldShowPopup() {
+    async function shouldShowPopup() {
     try {
-      // if either namespaced or legacy stored '1', skip
+      const perm = (typeof Notification !== 'undefined') ? Notification.permission : 'default';
+      // Try Permissions API for more accurate state
+      if (navigator.permissions && navigator.permissions.query) {
+        try {
+          const p = await navigator.permissions.query({ name: 'notifications' });
+          if (p && p.state === 'denied') return false;
+          if (p && p.state === 'granted') { try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch(_){}; return false; }
+        } catch(_) {}
+      }
+
+      if (perm === 'denied') return false;
+      if (perm === 'granted') { try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch(_){}; return false; }
+      if (perm === 'default') return true;
+    } catch (e) { /* fallback to legacy code */ }
+
+    // old logic fallback
+    try {
       if (lsGet(LS_SHOWN_KEYS) === '1') return false;
     } catch (_) {}
-
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch (_) {}
-      return false;
-    }
-    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
-      log('Permission previously denied — skipping prompt.');
-      return false;
-    }
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-      log('First-time user (permission default) — show prompt.');
-      return true;
-    }
-
     const lastShown = lsGet(LS_LAST_KEYS);
     if (!lastShown) return true;
     const elapsed = Date.now() - parseInt(lastShown || '0', 10);
     return elapsed > REPEAT_INTERVAL;
   }
 
-  async function savePushToken(token) {
+
+    async function savePushToken(token, context = 'web') {
     try {
       if (!window.firebase || !firebase.database) {
         warn('Firebase DB not available; token not saved.');
         return;
       }
-      await firebase.database().ref("pushSubscribers/" + token).set({ token, time: Date.now() });
-      log('Push token saved to DB ✅');
+
+      // Build payload with metadata so we can reason about tokens later
+      const payload = {
+        token,
+        context,              // 'web' or 'pwa'
+        ua: navigator.userAgent || null,
+        origin: location.origin || null,
+        time: Date.now()
+      };
+
+      // Save under pushSubscribers/<token> (idempotent)
+      await firebase.database().ref("pushSubscribers/" + token).set(payload);
+      log('Push token saved to DB ✅', token, context);
+
       // non-blocking subscribe call (best-effort)
       fetch("/.netlify/functions/subscribe-topic", {
         method: "POST",
@@ -126,6 +141,50 @@
       warn('savePushToken failed', e);
     }
   }
+    // detect PWA / standalone display-mode
+  function isRunningAsPWA() {
+    try {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+        || window.navigator.standalone === true
+        || document.referrer && document.referrer.startsWith('android-app://');
+    } catch (_) { return false; }
+  }
+
+  async function createAndSaveToken(reason = 'manual') {
+    if (!window.firebase || typeof firebase.messaging !== 'function') {
+      warn('Firebase messaging not available');
+      return null;
+    }
+
+    const messaging = firebase.messaging();
+    const reg = await swRegistrationPromise.catch(()=>null);
+    const context = isRunningAsPWA() ? 'pwa' : 'web';
+
+    try {
+      const token = await messaging.getToken({
+        vapidKey: "BHBFlNFxt6EUM9f6NYU_o006ti5ZG0a-VMPJ-dWHYH_X6iqlWpEu3DDB7fvq6OSOaIoIeJBqpw7iZSDntJV-KMk",
+        serviceWorkerRegistration: reg || undefined
+      });
+
+      if (!token) {
+        warn('No token from getToken()');
+        return null;
+      }
+
+      // Save token with metadata
+      await savePushToken(token, context);
+
+      // Optionally store last-known token locally for quick checks
+      try { localStorage.setItem(PREFIX + 'LastPushToken', token); } catch(_) {}
+
+      log('createAndSaveToken ok', { token, context, reason });
+      return token;
+    } catch (err) {
+      err('createAndSaveToken error', err);
+      return null;
+    }
+  }
+
 
   // Display modal safely (supports both new and old IDs)
   function showNotifModal() {
@@ -208,50 +267,36 @@
           return;
         }
 
-        // get FCM token
-        (async () => {
-          try {
-            if (!window.firebase || !firebase.messaging) {
-              err('firebase.messaging() missing!');
-              if (toast && toastText) { toastText.textContent = 'FCM unavailable'; }
-              return;
-            }
-            const reg = await swRegistrationPromise;
-            const messaging = window.firebase.messaging();
-            const token = await messaging.getToken({
-              vapidKey: "BHBFlNFxt6EUM9f6NYU_o006ti5ZG0a-VMPJ-dWHYH_X6iqlWpEu3DDB7fvq6OSOaIoIeJBqpw7iZSDntJV-KMk",
-              serviceWorkerRegistration: reg || undefined
-            });
-
-            if (token) {
-              log('Got FCM token', token);
-              try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch (_) {}
-              await savePushToken(token);
-              if (toast && toastText && toastSpinner) {
-                toastSpinner.style.display = 'none';
-                toastText.textContent = 'Notifications enabled ✅';
-                clearTimeout(localTimer);
-                localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2000);
+                  // get FCM token (centralized)
+            (async () => {
+              try {
+                const token = await createAndSaveToken('user-click');
+                if (token) {
+                  try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch (_) {}
+                  if (toast && toastText && toastSpinner) {
+                    toastSpinner.style.display = 'none';
+                    toastText.textContent = 'Notifications enabled ✅';
+                    clearTimeout(localTimer);
+                    localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2000);
+                  }
+                } else {
+                  if (toast && toastText && toastSpinner) {
+                    toastSpinner.style.display = 'none';
+                    toastText.textContent = 'Error generating token ❌';
+                    clearTimeout(localTimer);
+                    localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2500);
+                  }
+                }
+              } catch (e) {
+                err('FCM token error:', e);
+                if (toast && toastText) {
+                  toastText.textContent = 'Error enabling notifications';
+                  clearTimeout(localTimer);
+                  localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2500);
+                }
+                restoreScroll();
               }
-            } else {
-              warn('No token received from messaging.getToken()');
-              if (toast && toastText && toastSpinner) {
-                toastSpinner.style.display = 'none';
-                toastText.textContent = 'Error generating token ❌';
-                clearTimeout(localTimer);
-                localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2500);
-              }
-            }
-          } catch (e) {
-            err('FCM token error:', e);
-            if (toast && toastText) {
-              toastText.textContent = 'Error enabling notifications';
-              clearTimeout(localTimer);
-              localTimer = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2500);
-            }
-            restoreScroll();
-          }
-        })();
+            })();
       }).catch(e => {
         err('requestPermission() failed:', e);
         restoreScroll();
@@ -297,3 +342,21 @@
   }); // DOMContentLoaded
 
 })(); // IIFE end
+  // Reconcile tokens on install / visibility change — ensures PWA token is recorded when user installs app
+  async function reconcileOnContext() {
+    try {
+      // Only attempt when permission is granted
+      if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') return;
+      // create & save token for current context (web vs pwa)
+      await createAndSaveToken('reconcile');
+    } catch (e) {
+      console.warn('reconcileOnContext failed', e);
+    }
+  }
+
+  window.addEventListener('appinstalled', () => reconcileOnContext());
+  window.addEventListener('focus', () => reconcileOnContext());
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reconcileOnContext(); });
+
+  // Also run once now (best-effort)
+  (async () => { await reconcileOnContext(); })();
