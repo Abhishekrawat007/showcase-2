@@ -340,9 +340,7 @@
     } catch(_) {}
 
   }); // DOMContentLoaded
-
-})(); // IIFE end
-  // Reconcile tokens on install / visibility change — ensures PWA token is recorded when user installs app
+ // Reconcile tokens on install / visibility change — ensures PWA token is recorded when user installs app
   async function reconcileOnContext() {
     try {
       // Only attempt when permission is granted
@@ -360,3 +358,6 @@
 
   // Also run once now (best-effort)
   (async () => { await reconcileOnContext(); })();
+
+})(); // IIFE end
+ 
