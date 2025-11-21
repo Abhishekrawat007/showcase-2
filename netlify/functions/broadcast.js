@@ -40,6 +40,22 @@ function chunkArray(arr, size) {
   return out;
 }
 
+function tokenShort(t) { return (t && t.slice ? t.slice(0, 16) : String(t)).replace(/\s+/g, ''); }
+
+async function removeInvalidTokens(tokensToRemove = []) {
+  if (!tokensToRemove.length) return;
+  for (const t of tokensToRemove) {
+    try {
+      await admin.database().ref('/pushSubscribers/' + t).remove();
+      const shortKey = t.slice(0, 24).replace(/[^a-zA-Z0-9_-]/g, '');
+      await admin.database().ref('/tokens/' + shortKey).remove().catch(()=>{});
+      console.log('Removed invalid token from DB:', tokenShort(t));
+    } catch (e) {
+      console.warn('Failed to remove invalid token', tokenShort(t), e && e.message);
+    }
+  }
+}
+
 export async function handler(event) {
   try {
     await ensureFirebaseInit();
@@ -49,41 +65,31 @@ export async function handler(event) {
   }
 
   try {
-    if (event.httpMethod !== "POST") {
-      // Allow a quick GET debug/test path: ?testToken=1
-      if (event.httpMethod === "GET" && event.queryStringParameters?.testToken === "1") {
-        const snap = await admin.database().ref("/pushSubscribers").limitToFirst(1).once("value");
-        const tokensObj = snap.val() || {};
-        const tokens = Object.values(tokensObj).map(o => o.token || o).filter(Boolean);
-        if (!tokens.length) return { statusCode: 200, body: JSON.stringify({ ok: false, msg: "no tokens in /pushSubscribers" }) };
+    // Quick GET debug/test path: ?testToken=1
+    if (event.httpMethod === "GET" && event.queryStringParameters?.testToken === "1") {
+      const snap = await admin.database().ref("/pushSubscribers").limitToFirst(1).once("value");
+      const tokensObj = snap.val() || {};
+      const tokens = Object.values(tokensObj).map(o => o.token || o).filter(Boolean);
+      if (!tokens.length) return { statusCode: 200, body: JSON.stringify({ ok: false, msg: "no tokens in /pushSubscribers" }) };
 
-        const token = tokens[0];
-        const payload = {
+      const token = tokens[0];
+      const mg = admin.messaging();
+      console.log("Test send -> token:", tokenShort(token));
+      // Try single message send
+      try {
+        const resp = await mg.send({
           token,
-          notification: { title: "Test notification", body: "If you don't see this, server send failed" },
+          notification: { title: "Test notification", body: "Server send test" },
           webpush: { fcmOptions: { link: "/" } }
-        };
-
-        // Try a single-message send; whichever API exists
-        const mg = admin.messaging();
-        console.log("available messaging keys:", Object.keys(mg));
-        if (typeof mg.send === "function") {
-          try {
-            const resp = await mg.send({
-              token,
-              notification: payload.notification,
-              webpush: payload.webpush
-            });
-            return { statusCode: 200, body: JSON.stringify({ ok: true, testSend: true, resp }) };
-          } catch (err) {
-            return { statusCode: 500, body: JSON.stringify({ ok: false, error: err.message, stack: err.stack }) };
-          }
-        } else {
-          return { statusCode: 500, body: JSON.stringify({ ok: false, error: "admin.messaging().send not available" }) };
-        }
+        });
+        return { statusCode: 200, body: JSON.stringify({ ok: true, testSend: true, resp }) };
+      } catch (err) {
+        console.error('test single send error', err);
+        return { statusCode: 500, body: JSON.stringify({ ok: false, error: err.message, stack: err.stack }) };
       }
-      return { statusCode: 405, body: "Method not allowed" };
     }
+
+    if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
 
     // AUTH
     const secret = event.headers["x-broadcast-secret"] || event.headers["X-Broadcast-Secret"] || "";
@@ -91,27 +97,31 @@ export async function handler(event) {
       return { statusCode: 401, body: JSON.stringify({ error: "Unauthorized" }) };
     }
 
-    const { title, body, url, topic } = JSON.parse(event.body || "{}");
-    if (!title || !body) return { statusCode: 400, body: JSON.stringify({ error: "Missing title or body" }) };
+    const bodyJson = JSON.parse(event.body || "{}");
+    const title = bodyJson.title;
+    const bodyText = bodyJson.body;
+    const url = bodyJson.url || "/";
+    const topic = bodyJson.topic || "all";
+
+    if (!title || !bodyText) return { statusCode: 400, body: JSON.stringify({ error: "Missing title or body" }) };
 
     // Read tokens
     const dbRef = admin.database().ref("/pushSubscribers");
     const snap = await dbRef.once("value");
     const tokenObjs = snap.val() || {};
-    const tokens = Object.values(tokenObjs).map(o => o.token || o).filter(Boolean);
+    const tokens = Object.values(tokenObjs).map(o => (o && o.token) ? o.token : o).filter(Boolean);
 
-    // Quick debug logs
     console.log("tokens count:", tokens.length);
 
     if (!tokens.length) {
-      // fallback to topic send if you use topics
-      const messageTopic = {
-        topic: topic || "all",
-        notification: { title, body },
-        webpush: { fcmOptions: { link: url || "/" } },
-      };
+      // fallback to topic send
+      console.log('No tokens found -> sending to topic fallback:', topic);
       try {
-        const resp = await admin.messaging().send(messageTopic);
+        const resp = await admin.messaging().send({
+          topic: topic,
+          notification: { title, body: bodyText },
+          webpush: { fcmOptions: { link: url } }
+        });
         return { statusCode: 200, body: JSON.stringify({ ok: true, resp, info: "sentToTopicFallback" }) };
       } catch (err) {
         console.error("topic send error", err);
@@ -119,27 +129,25 @@ export async function handler(event) {
       }
     }
 
-    // dedupe tokens
     const uniqueTokens = Array.from(new Set(tokens));
     console.log("uniqueTokens:", uniqueTokens.length);
 
-    // chunk size (sendMulticast supports up to 500)
     const chunkSize = 450;
     const chunks = chunkArray(uniqueTokens, chunkSize);
 
     const mg = admin.messaging();
-    console.log("admin.messaging() keys:", Object.keys(mg));
+    console.log("admin.messaging() has:", Object.keys(mg || {}));
     const supportsMulticast = typeof mg.sendMulticast === "function";
     const supportsSendAll = typeof mg.sendAll === "function";
 
     const aggregated = { successCount: 0, failureCount: 0, responses: [] };
 
     for (const chunk of chunks) {
+      // Build message body
       if (supportsMulticast) {
-        // sendMulticast (preferred)
         const multicast = {
           tokens: chunk,
-          notification: { title, body },
+          notification: { title, body: bodyText },
           webpush: {
             notification: {
               icon: process.env.PUSH_ICON || "https://sublimestore.in/web-app-manifest-192x192.png",
@@ -154,46 +162,99 @@ export async function handler(event) {
           aggregated.successCount += r.successCount || 0;
           aggregated.failureCount += r.failureCount || 0;
           aggregated.responses.push({ chunkSize: chunk.length, ok: true, r });
+
+          // Detect invalid tokens from r.responses
+          const toRemove = [];
+          if (Array.isArray(r.responses)) {
+            r.responses.forEach((resp, idx) => {
+              if (!resp.success) {
+                const msg = (resp.error && (resp.error.code || resp.error.message)) ? (resp.error.code || resp.error.message) : String(resp.error || '');
+                if (
+                  msg.includes('registration-token-not-registered') ||
+                  msg.includes('invalid-registration-token') ||
+                  msg.includes('mismatched-sender-id') ||
+                  msg.includes('NotRegistered') ||
+                  msg.includes('InvalidRegistration')
+                ) {
+                  toRemove.push(chunk[idx]);
+                }
+              }
+            });
+          }
+          if (toRemove.length) {
+            console.log('Invalid tokens detected, removing:', toRemove.map(tokenShort));
+            await removeInvalidTokens(toRemove);
+          }
+
         } catch (err) {
-          console.error("sendMulticast error for chunk:", err);
+          console.error("sendMulticast error for chunk:", err && err.message || err);
           aggregated.responses.push({ chunkSize: chunk.length, ok: false, error: err.message || String(err) });
         }
+
       } else if (supportsSendAll) {
-        // fallback to sendAll (send array of messages)
         const messages = chunk.map(t => ({
           token: t,
-          notification: { title, body },
+          notification: { title, body: bodyText },
           webpush: { fcmOptions: { link: url || "/" }, notification: { icon: process.env.PUSH_ICON, badge: process.env.PUSH_ICON, tag: 'sublime-notification' } }
         }));
+
         try {
           const r = await mg.sendAll(messages);
           aggregated.successCount += r.successCount || 0;
           aggregated.failureCount += r.failureCount || 0;
           aggregated.responses.push({ chunkSize: chunk.length, ok: true, r });
+
+          // cleanup invalid tokens
+          const toRemove = [];
+          if (Array.isArray(r.responses)) {
+            r.responses.forEach((resp, idx) => {
+              if (!resp.success) {
+                const msg = (resp.error && (resp.error.code || resp.error.message)) ? (resp.error.code || resp.error.message) : String(resp.error || '');
+                if (msg.includes('registration-token-not-registered') || msg.includes('invalid-registration-token') || msg.includes('mismatched-sender-id')) {
+                  toRemove.push(chunk[idx]);
+                }
+              }
+            });
+          }
+          if (toRemove.length) {
+            console.log('Invalid tokens detected (sendAll), removing:', toRemove.map(tokenShort));
+            await removeInvalidTokens(toRemove);
+          }
+
         } catch (err) {
-          console.error("sendAll error for chunk:", err);
+          console.error("sendAll error for chunk:", err && err.message || err);
           aggregated.responses.push({ chunkSize: chunk.length, ok: false, error: err.message || String(err) });
         }
+
       } else {
-        // final fallback: try to send to each token individually
+        // final fallback: per-token send
         const perTokenResults = [];
+        const toRemove = [];
         for (const t of chunk) {
           try {
             const resp = await mg.send({
               token: t,
-              notification: { title, body },
+              notification: { title, body: bodyText },
               webpush: { fcmOptions: { link: url || "/" }, notification: { icon: process.env.PUSH_ICON, badge: process.env.PUSH_ICON, tag: 'sublime-notification' } }
             });
-            perTokenResults.push({ token: t.slice(0, 12), ok: true, resp });
+            perTokenResults.push({ token: tokenShort(t), ok: true, resp });
             aggregated.successCount++;
           } catch (err) {
-            perTokenResults.push({ token: t.slice(0, 12), ok: false, error: err.message });
+            const msg = (err && (err.code || err.message)) ? (err.code || err.message) : String(err || '');
+            perTokenResults.push({ token: tokenShort(t), ok: false, error: msg });
             aggregated.failureCount++;
+            if (msg.includes('registration-token-not-registered') || msg.includes('invalid-registration-token') || msg.includes('mismatched-sender-id')) {
+              toRemove.push(t);
+            }
           }
         }
+        if (toRemove.length) {
+          console.log('Invalid tokens detected (per-token), removing:', toRemove.map(tokenShort));
+          await removeInvalidTokens(toRemove);
+        }
         aggregated.responses.push({ chunkSize: chunk.length, ok: true, perTokenResults });
-      }
-    }
+      } // end chunk handling
+    } // end chunks loop
 
     return { statusCode: 200, body: JSON.stringify({ ok: true, aggregated }) };
 
