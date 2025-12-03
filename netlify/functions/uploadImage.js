@@ -22,22 +22,23 @@ export const handler = async (event) => {
     }
 
     const body = JSON.parse(event.body);
-    const imageData = body.imageData;
+    let imageData = body.imageData;
 
-    // Use undici (already in package.json)
+    // ✅ FIX: If it's a data URL, keep as-is. If it's raw base64, add prefix
+    if (!imageData.startsWith('data:')) {
+      imageData = 'data:image/jpeg;base64,' + imageData;
+    }
+
     const { fetch: undiciFetch } = await import('undici');
+    const { FormData } = await import('undici');
 
-    // Send to Cloudinary
-    const formBody = new URLSearchParams();
-    formBody.append('file', imageData);
-    formBody.append('upload_preset', CLOUDINARY_PRESET);
+    const form = new FormData();
+    form.append('file', imageData);
+    form.append('upload_preset', CLOUDINARY_PRESET);
 
     const response = await undiciFetch(CLOUDINARY_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: formBody.toString()
+      body: form
     });
 
     const data = await response.json();
@@ -49,7 +50,7 @@ export const handler = async (event) => {
       };
     } else {
       console.error('Cloudinary error:', data);
-      throw new Error(data.error?.message || 'Upload failed');
+      throw new Error(data.error?.message || JSON.stringify(data.error) || 'Upload failed');
     }
 
   } catch (error) {
