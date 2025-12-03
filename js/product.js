@@ -13,7 +13,7 @@ const products = [
       "images/moonlamp1.jpg",
       "images/moonlamp2.jpg",
       "images/moonlamp3.jpg",
-      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1763629447/ly9m0f0ow4iwzpjaklif.jpg"
+      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1764749018/gschwdv9wyq69bdljgbe.png"
     ],
     "video": "https://youtube.com/watch?v=TcAZwTE0dDI",
     "oldPrice": 450,
