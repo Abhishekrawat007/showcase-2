@@ -279,7 +279,7 @@ async function handleImageUpload(files, index) {
           "Content-Type": "application/json",
           "Authorization": "Bearer " + (token || "")
         },
-        body: JSON.stringify({ imageData })
+        body: JSON.stringify({ imageData: imageData }) // Send full data URL
       });
       
       const data = await res.json();
