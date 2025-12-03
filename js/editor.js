@@ -1,9 +1,3 @@
-// 🌩️ Cloudinary config
-// 🌩️ Cloudinary config (read from window.__CONFIG when available)
-
-
-
-// at top of editor.js — auth check on script load
 (async function ensureAuth() {
   const token = sessionStorage.getItem("adminToken");
   if (!token) {

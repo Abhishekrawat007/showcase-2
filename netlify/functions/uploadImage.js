@@ -14,18 +14,25 @@ export const handler = async (event) => {
     const CLOUDINARY_URL = process.env.CLOUDINARY_URL;
     const CLOUDINARY_PRESET = process.env.CLOUDINARY_PRESET;
 
+    if (!CLOUDINARY_URL || !CLOUDINARY_PRESET) {
+      return { 
+        statusCode: 500, 
+        body: JSON.stringify({ error: 'Cloudinary config missing' }) 
+      };
+    }
+
     const body = JSON.parse(event.body);
-    const imageData = body.imageData; // Full data URL like: data:image/png;base64,iVBOR...
+    const imageData = body.imageData;
 
-    // Import fetch
-    const fetch = (await import('node-fetch')).default;
+    // Use undici (already in package.json)
+    const { fetch: undiciFetch } = await import('undici');
 
-    // Send directly to Cloudinary (it accepts data URLs)
+    // Send to Cloudinary
     const formBody = new URLSearchParams();
     formBody.append('file', imageData);
     formBody.append('upload_preset', CLOUDINARY_PRESET);
 
-    const response = await fetch(CLOUDINARY_URL, {
+    const response = await undiciFetch(CLOUDINARY_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -42,7 +49,7 @@ export const handler = async (event) => {
       };
     } else {
       console.error('Cloudinary error:', data);
-      throw new Error(data.error?.message || 'Cloudinary upload failed');
+      throw new Error(data.error?.message || 'Upload failed');
     }
 
   } catch (error) {
