@@ -34,15 +34,15 @@
    <link rel="stylesheet" href="css/cart.css">
 
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+ 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script> 
 
 <script src="js/config.js"></script>
 <script src="js/init-firebase.js"></script>
+<script src="js/safe-storage.js"></script>
+
 
 <!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
 <script>
@@ -213,29 +213,57 @@
   
 <script>
   
-  const savedMode = localStorage.getItem('darkMode') || 'light';
-  if (savedMode === 'dark') {
-    document.documentElement.classList.remove('light-mode');
-    document.body.classList.add('dark-mode');
-  } else {
-    document.body.classList.remove('dark-mode');
-  }
 
   
-  
-  function getCartFromLocalStorage() {
-    const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
-    return Object.values(rawCart).map(cartItem => {
-      const product = products.find(p => p.id == cartItem.id);
-      return {
-        id: cartItem.id,
-        title: product?.name || "Unknown",
-        price: product?.newPrice || 0,
-        qty: cartItem.qty,
-        image: product?.images?.[0] || "img/default.jpg"
-      };
-    });
+function getCartFromLocalStorage() {
+  let raw = "{}";
+
+  try {
+    // 1) Try safeStorage first
+    if (window.safeStorage && typeof window.safeStorage.getItem === "function") {
+      raw = window.safeStorage.getItem("cart") || "{}";
+
+      // If safeStorage is empty, fall back to localStorage
+      if (raw === "{}" || raw === null) {
+        const lsRaw = localStorage.getItem("cart");
+        if (lsRaw && lsRaw !== "{}") {
+          raw = lsRaw;
+        }
+      }
+    } else {
+      // 2) No safeStorage -> use localStorage directly
+      raw = localStorage.getItem("cart") || "{}";
+    }
+  } catch (e) {
+    console.warn("⚠️ Cart read failed in cart.html, using fallback {}", e);
+    raw = "{}";
   }
+
+  let rawCart;
+  try {
+    rawCart = JSON.parse(raw || "{}");
+  } catch (e) {
+    console.warn("⚠️ Cart JSON parse failed in cart.html:", e);
+    rawCart = {};
+  }
+
+  // Filter out broken/null entries so they don't crash anything
+  const items = Object.values(rawCart).filter(
+    item => item && typeof item.qty === "number"
+  );
+
+  return items.map(cartItem => {
+    const product = products.find(p => String(p.id) === String(cartItem.id));
+    return {
+      id: cartItem.id,
+      title: product?.name || "Unknown",
+      price: product?.newPrice || 0,
+      qty: cartItem.qty,
+      image: product?.images?.[0] || "img/default.jpg"
+    };
+  });
+}
+
 
   function calculateTotal(cart) {
     return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -520,9 +548,14 @@ window.addEventListener('resize', ensureVerifyPosition);
 setTimeout(ensureVerifyPosition, 80); // run once after panel inserted
 
 function hideVerifyPanel() {
-  document.getElementById('emailVerifyPanel').style.display = 'none';
-  document.getElementById('emailCode').value = '';
+  const panel = document.getElementById('emailVerifyPanel');
+  if (panel) panel.style.display = 'none';
+
+  // clear all OTP boxes instead of #emailCode
+  const boxes = document.querySelectorAll('.otp-box');
+  boxes.forEach(box => { box.value = ''; });
 }
+
 function setCodeSent(orderId) {
   try { sessionStorage.setItem('codeSent_' + orderId, '1'); } catch(_) {}
   const hint = document.getElementById('verifyHint');
@@ -814,7 +847,14 @@ if (sessionStorage.getItem('emailVerified_' + orderId) !== '1') {
   } else {
     // fallback UI if submitOrderFast missing
     document.getElementById('orderForm').innerHTML = `<div style="padding:20px;text-align:center;color:green"><h3>✓ Order Confirmed</h3><p>Order ID: ORD${Date.now()}</p></div>`;
-    try { localStorage.removeItem('cart'); } catch(_) {}
+    try {
+      if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
+        window.safeStorage.removeItem('cart');
+      }
+      if (window.localStorage) {
+        window.localStorage.removeItem('cart');
+      }
+    } catch(_) {}
     if (spinner) spinner.style.display = 'none';
     return;
   }
@@ -1041,7 +1081,14 @@ const payload = {
       </div>
     `;
     document.getElementById("orderForm").innerHTML = successHTML;
-    try { localStorage.removeItem('cart'); } catch(_) {}
+    try {
+      if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
+        window.safeStorage.removeItem('cart');
+      }
+      if (window.localStorage) {
+        window.localStorage.removeItem('cart');
+      }
+    } catch(_) {}
     document.getElementById("cartContainer").innerHTML = "";
     document.getElementById("cartSummary").style.display = "none";
     document.getElementById("cartTopBar").style.display = "none";
@@ -1056,12 +1103,26 @@ const payload = {
       backBtn.removeAttribute('onclick');
       backBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        try { localStorage.removeItem('cart'); } catch(_) {}
+        try {
+          if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
+            window.safeStorage.removeItem('cart');
+          }
+          if (window.localStorage) {
+            window.localStorage.removeItem('cart');
+          }
+        } catch(_) {}
         location.replace(`index.html?ts=${Date.now()}#productList`);
       });
       document.getElementById('continueShopping')?.addEventListener('click', function(e){
         e.preventDefault();
-        try { localStorage.removeItem('cart'); } catch(_) {}
+        try {
+          if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
+            window.safeStorage.removeItem('cart');
+          }
+          if (window.localStorage) {
+            window.localStorage.removeItem('cart');
+          }
+        } catch(_) {}
         location.replace(`index.html?ts=${Date.now()}#productList`);
       });
     })();
@@ -1097,7 +1158,14 @@ function simpleSuccessUI({ name, phone, orderId }) {
     </div>
   `;
   document.getElementById("orderForm").innerHTML = successHTML;
-  try { localStorage.removeItem('cart'); } catch(_) {}
+  try {
+    if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
+      window.safeStorage.removeItem('cart');
+    }
+    if (window.localStorage) {
+      window.localStorage.removeItem('cart');
+    }
+  } catch(_) {}
   document.getElementById("cartContainer").innerHTML = "";
   document.getElementById("cartSummary").style.display = "none";
   document.getElementById("cartTopBar").style.display = "none";
@@ -1117,23 +1185,73 @@ document.body.addEventListener('click', (e) => {
 
 
 
-  function updateQty(id, delta) {
-  const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
+function updateQty(id, delta) {
+  // 🔄 Read from safeStorage/localStorage, write back to both
+  let rawCart = {};
+  try {
+    if (window.safeStorage && typeof window.safeStorage.getItem === "function") {
+      rawCart = JSON.parse(window.safeStorage.getItem("cart") || "{}");
+    } else if (window.localStorage) {
+      rawCart = JSON.parse(window.localStorage.getItem("cart") || "{}");
+    }
+  } catch (e) {
+    console.warn("⚠️ Cart parse failed in updateQty:", e);
+    rawCart = {};
+  }
   if (!rawCart[id]) return;
+
   rawCart[id].qty += delta;
   if (rawCart[id].qty < 1) rawCart[id].qty = 1;
-  localStorage.setItem("cart", JSON.stringify(rawCart));
+
+  const cartStr = JSON.stringify(rawCart);
+
+  try {
+    if (window.safeStorage && typeof window.safeStorage.setItem === "function") {
+      window.safeStorage.setItem("cart", cartStr);
+    }
+    if (window.localStorage) {
+      window.localStorage.setItem("cart", cartStr);
+    }
+  } catch (e) {
+    console.warn("⚠️ Cart save failed in updateQty:", e);
+  }
+
   try { sessionStorage.setItem('cartDirty', '1'); } catch(_){}
   renderCart();
 }
 
 function removeFromCart(id) {
-  const rawCart = JSON.parse(localStorage.getItem("cart") || "{}");
+  let rawCart = {};
+  try {
+    if (window.safeStorage && typeof window.safeStorage.getItem === "function") {
+      rawCart = JSON.parse(window.safeStorage.getItem("cart") || "{}");
+    } else if (window.localStorage) {
+      rawCart = JSON.parse(window.localStorage.getItem("cart") || "{}");
+    }
+  } catch (e) {
+    console.warn("⚠️ Cart parse failed in removeFromCart:", e);
+    rawCart = {};
+  }
+
   delete rawCart[id];
-  localStorage.setItem("cart", JSON.stringify(rawCart));
+
+  const cartStr = JSON.stringify(rawCart);
+
+  try {
+    if (window.safeStorage && typeof window.safeStorage.setItem === "function") {
+      window.safeStorage.setItem("cart", cartStr);
+    }
+    if (window.localStorage) {
+      window.localStorage.setItem("cart", cartStr);
+    }
+  } catch (e) {
+    console.warn("⚠️ Cart save failed in removeFromCart:", e);
+  }
+
   try { sessionStorage.setItem('cartDirty', '1'); } catch(_){}
   renderCart();
 }
+
 
 function loadImageAsBase64(url) {
   return new Promise((resolve, reject) => {
@@ -1284,7 +1402,14 @@ document.getElementById("orderForm").innerHTML = successHTML;
     window.__orderSuccessActive = false;
     setSS('jumpToProducts','1');
     setSS('clearCartOnHome','1');
-    try { localStorage.removeItem('cart'); } catch (_){}
+    try {
+      if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
+        window.safeStorage.removeItem('cart');
+      }
+      if (window.localStorage) {
+        window.localStorage.removeItem('cart');
+      }
+    } catch (_){}
     location.replace(`index.html?ts=${Date.now()}#productList`);
   });
 })();
@@ -1322,7 +1447,14 @@ document.getElementById("orderForm").innerHTML = successHTML;
       window.removeEventListener('popstate', onPop);
       setSS('jumpToProducts', '1');
       setSS('clearCartOnHome', '1');
-      try { localStorage.removeItem('cart'); } catch (_){}
+      try {
+        if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
+          window.safeStorage.removeItem('cart');
+        }
+        if (window.localStorage) {
+          window.localStorage.removeItem('cart');
+        }
+      } catch (_){}
       location.replace(`index.html?ts=${Date.now()}#productList`);
     };
 
@@ -1340,7 +1472,14 @@ document.getElementById("orderForm").innerHTML = successHTML;
 })();
 
 // Clear local cart + UI
-localStorage.removeItem("cart");
+try {
+  if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
+    window.safeStorage.removeItem("cart");
+  }
+  if (window.localStorage) {
+    window.localStorage.removeItem("cart");
+  }
+} catch (_) {}
 document.getElementById("cartContainer").innerHTML = "";
 document.getElementById("cartSummary").style.display = "none";
 document.getElementById("cartTopBar").style.display = "none";
@@ -1453,30 +1592,41 @@ try { sessionStorage.setItem('cartDirty', '0'); } catch(_) {}
 })();
 
 
+const toggleBtn = document.getElementById('themeToggle');
 
+function applyTheme(mode) {
+  if (mode === 'dark') {
+    document.body.classList.add('dark-mode');
+    if (toggleBtn) toggleBtn.textContent = '☀️';
+  } else {
+    document.body.classList.remove('dark-mode');
+    if (toggleBtn) toggleBtn.textContent = '🌙';
+  }
+  try {
+    window.safeStorage.setItem('theme', mode);
+  } catch (e) {
+    console.warn('⚠️ theme save failed in cart.html', e);
+  }
+}
 
-    const toggleBtn = document.getElementById('themeToggle');
-
-  function applyTheme(mode) {
-    if (mode === 'dark') {
-      document.body.classList.add('dark-mode');
-      toggleBtn.textContent = '☀️';
-    } else {
-      document.body.classList.remove('dark-mode');
-      toggleBtn.textContent = '🌙';
-    }
-    localStorage.setItem('theme', mode);
+document.addEventListener('DOMContentLoaded', () => {
+  let savedMode = 'light';
+  try {
+    savedMode = window.safeStorage.getItem('theme') || 'light';
+  } catch (e) {
+    console.warn('⚠️ theme read failed in cart.html', e);
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const savedMode = localStorage.getItem('theme') || 'light';
-    applyTheme(savedMode);
+  applyTheme(savedMode);
 
+  if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
       const isDark = document.body.classList.contains('dark-mode');
       applyTheme(isDark ? 'light' : 'dark');
     });
-  });
+  }
+});
+
   function ensureOtpFit() {
   const panel = document.getElementById('emailVerifyPanel');
   if (!panel) return;

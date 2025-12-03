@@ -1,16 +1,61 @@
 // js/mini-cart.js
+
 function initMiniCartBadges() {
+  // Read cart from safeStorage if available, otherwise from localStorage
   function readCart() {
-    try { return JSON.parse(localStorage.getItem("cart")) || {}; } catch { return {}; }
+    let raw = "{}";
+
+    try {
+      if (window.safeStorage && typeof window.safeStorage.getItem === "function") {
+        raw = window.safeStorage.getItem("cart") || "{}";
+
+        // If wrapper looks empty, fall back to localStorage
+        if (!raw || raw === "{}") {
+          const lsRaw = localStorage.getItem("cart");
+          if (lsRaw && lsRaw !== "{}") raw = lsRaw;
+        }
+      } else {
+        raw = localStorage.getItem("cart") || "{}";
+      }
+    } catch (e) {
+      console.warn("mini-cart: storage read failed, using {}", e);
+      raw = "{}";
+    }
+
+    let obj;
+    try {
+      obj = JSON.parse(raw || "{}");
+    } catch (e) {
+      console.warn("mini-cart: JSON parse failed, using {}", e);
+      obj = {};
+    }
+
+    if (!obj || typeof obj !== "object") obj = {};
+
+    // 🔒 Clean up any null / broken entries so we never do null.qty
+    Object.keys(obj).forEach(key => {
+      const val = obj[key];
+      if (!val || typeof val.qty !== "number") {
+        delete obj[key];
+      }
+    });
+
+    return obj;
   }
 
   function updateBadges() {
     const cart = readCart();
-    const count = Object.values(cart).reduce((sum, i) => sum + (i.qty || 0), 0);
+
+    const items = Object.values(cart); // all entries are now valid objects with number qty
+    const count = items.reduce((sum, i) => {
+      return sum + (typeof i.qty === "number" ? i.qty : 0);
+    }, 0);
+
     const badges = [
       document.getElementById("cartCountBadge"),
       document.getElementById("cartCountBadgeMobile")
     ];
+
     badges.forEach(b => {
       if (!b) return;
       if (count > 0) {
@@ -31,6 +76,8 @@ function initMiniCartBadges() {
   // Listen for updates from anywhere in the app
   document.addEventListener("cart:maybeUpdated", updateBadges);
   document.addEventListener("cart:cleared", updateBadges);
+
+  // React if some other tab/page changes "cart"
   window.addEventListener("storage", (e) => {
     if (e.key === "cart") updateBadges();
   });

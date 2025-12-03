@@ -1,5 +1,35 @@
 // --- Cart Logic ---
-let cart = JSON.parse(localStorage.getItem("cart")) || {};
+
+// Central helper: read cart from safeStorage first, then localStorage
+function readCartFromStorage() {
+  let raw = "{}";
+
+  try {
+    if (window.safeStorage && typeof window.safeStorage.getItem === "function") {
+      raw = window.safeStorage.getItem("cart") || "{}";
+    } else {
+      raw = localStorage.getItem("cart") || "{}";
+    }
+  } catch (e) {
+    console.warn("⚠️ readCartFromStorage safeStorage failed, falling back to localStorage:", e);
+    try {
+      raw = localStorage.getItem("cart") || "{}";
+    } catch (e2) {
+      console.warn("⚠️ readCartFromStorage localStorage also failed:", e2);
+      raw = "{}";
+    }
+  }
+
+  try {
+    return JSON.parse(raw || "{}");
+  } catch (e) {
+    console.warn("⚠️ readCartFromStorage JSON parse failed:", e);
+    return {};
+  }
+}
+
+// initial cart load (shared with cart.html)
+let cart = readCartFromStorage();
 
 // Resync if user returned via back/forward or another page marked the cart dirty
 function resyncIfNeeded() {
@@ -31,9 +61,30 @@ window.addEventListener('pageshow', (e) => {
 });
 
 function updateCartStorage() {
-  localStorage.setItem("cart", JSON.stringify(cart));
+  const str = JSON.stringify(cart);
+
+  // ✅ Write to safeStorage (if available) AND localStorage
+  try {
+    if (window.safeStorage && typeof window.safeStorage.setItem === "function") {
+      window.safeStorage.setItem("cart", str);
+    }
+  } catch (e) {
+    console.warn("⚠️ updateCartStorage safeStorage failed:", e);
+  }
+
+  try {
+    localStorage.setItem("cart", str);
+  } catch (e) {
+    console.warn("⚠️ updateCartStorage localStorage failed:", e);
+  }
+
+  // mark dirty for other pages (like cart.html)
+  try {
+    sessionStorage.setItem('cartDirty', '1');
+  } catch (_) {}
+
   updateFloatingCartBar();
-  // lightweight local broadcast
+  // lightweight local broadcast (same as before)
   document.dispatchEvent(new CustomEvent("cart:maybeUpdated"));
 }
 
@@ -60,18 +111,14 @@ function updateFloatingCartBar() {
 }
 
 function refreshCartFromStorage() {
-  try {
-    cart = JSON.parse(localStorage.getItem("cart") || "{}");
-  } catch (_) {
-    cart = {};
-  }
+  cart = readCartFromStorage();
   updateFloatingCartBar();
 }
 
 // Keep product-card buttons and qty controls in sync with current `cart`
 function syncProductCardButtons() {
   // Re-read cart in case caller forgot
-  try { cart = JSON.parse(localStorage.getItem("cart") || "{}"); } catch(_) { cart = {}; }
+  cart = readCartFromStorage();
 
   // For every product card on the page, toggle its add/qty UI
   document.querySelectorAll('.quantity-controls[data-id]').forEach(qtyDiv => {
@@ -148,7 +195,7 @@ document.addEventListener("click", e => {
 
 // ✅ On page load: sync bar, buttons, and consume cartDirty
 window.addEventListener("DOMContentLoaded", () => {
-  refreshCartFromStorage();    // re-read from localStorage
+  refreshCartFromStorage();    // re-read from storage (safeStorage/localStorage)
   syncProductCardButtons();    // update + / – / Add buttons
   resyncIfNeeded();            // handle navigation return (back)
 });

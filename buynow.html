@@ -37,6 +37,7 @@
 
 <!-- Razorpay -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="js/safe-storage.js"></script>
 
 <!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
 <script>
@@ -224,552 +225,572 @@
     We’ll call or WhatsApp you to confirm your order.
   </div>
 </div>
-  <script src="js/product.js"></script>
-  <script>
-    
-
-    const urlParams = new URLSearchParams(window.location.search);
-const productId = urlParams.get("id") || sessionStorage.getItem("buyNowProduct"); 
-    const product = products.find(p => p.id == productId);
-    let quantity = 1;
-
-    if (!product) {
-      document.getElementById("productSection").innerHTML = "<p>Product not found.</p>";
-      document.querySelector(".summary").style.display = "none";
-    } else {
-      renderProduct(product);
-    }
-
-    function renderProduct(prod) {
-      const div = document.getElementById("productSection");
-      div.innerHTML = `
-        <div class="product">
-          <img src="${prod.images[0]}" alt="${prod.name}" />
-          <div class="product-info">
-            <div class="product-title">${prod.name}</div>
-            <div class="product-price">Price: ₹${prod.newPrice}</div>
-            <div class="quantity-controls">
-              <button onclick="changeQty(-1)">−</button>
-              <span id="qtyValue">${quantity}</span>
-              <button onclick="changeQty(1)">+</button>
-            </div>
-          </div>
-        </div>
-      `;
-      updateTotal();
-    }
-
-    function changeQty(delta) {
-      quantity += delta;
-      if (quantity < 1) quantity = 1;
-      document.getElementById("qtyValue").textContent = quantity;
-      updateTotal();
-    }
-
-    function updateTotal() {
-      const total = product.newPrice * quantity;
-      document.getElementById("totalPrice").textContent = total;
-      const deliveryNote = document.getElementById("deliveryNote");
-if (total < 199) {
-  deliveryNote.innerHTML = 
-    `<div style="
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-      padding: 10px 14px;
-      border-radius: 8px;
-      margin-top: 10px;
-      font-size: 14px;
-      font-weight: 500;
-    ">
-      ⚠️ Delivery charges may apply on orders below ₹199.
-    </div>`
-  ;
-  deliveryNote.style.display = "block";
-} else {
-  deliveryNote.style.display = "none";
-}
-    }
-
-    function addToCartAndGoBack() {
-      const raw = JSON.parse(localStorage.getItem("cart") || "{}");
-      raw[product.id] = { ...product, qty: quantity };
-      localStorage.setItem("cart", JSON.stringify(raw));
-      location.href = "index.html";
-    }
-/* ====== EMAIL VERIFICATION HELPERS (ADD BEFORE submitOrder) ====== */
-
-// Helper: basic email validator
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-function setCodeSent(orderId) {
-  try { sessionStorage.setItem('codeSent_' + orderId, '1'); } catch(_) {}
-  const btn = document.querySelector("#orderForm button[type='submit']");
-  if (btn) { btn.disabled = true; btn.textContent = 'Confirm Order'; }
-  const hint = document.getElementById('verifyHint');
-  if (hint) hint.style.display = 'inline-flex';
-}
-
-function isCodeSent(orderId) {
-  return !!sessionStorage.getItem('codeSent_' + orderId);
-}
-
-function clearCodeSent(orderId) {
-  try { sessionStorage.removeItem('codeSent_' + orderId); } catch(_) {}
-  const hint = document.getElementById('verifyHint');
-  if (hint) hint.style.display = 'none';
-}
-
-// Show / hide verification UI
-function showVerifyPanel(email) {
-  document.getElementById('verifyEmailAddr').textContent = email;
-  document.getElementById('emailVerifyPanel').style.display = 'block';
-  document.getElementById('emailVerifyMsg').style.display = 'none';
-}
-function hideVerifyPanel() {
-  document.getElementById('emailVerifyPanel').style.display = 'none';
-  document.getElementById('emailCode').value = '';
-}
-
-// Server calls (Netlify functions you will add)
-async function sendVerificationCode(email) {
-  return fetch('/.netlify/functions/sendVerification', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email })
-  }).then(async r => {
-    if (!r.ok) throw new Error(await r.text());
-    return r.json();
-  });
-}
-
-async function verifyCodeOnServer(email, code) {
-  return fetch('/.netlify/functions/verifyEmail', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, code })
-  }).then(async r => {
-    if (!r.ok) throw new Error(await r.text());
-    return r.json();
-  });
-}
-
-// Attach verify/resend listeners (safe to call multiple times — checks DOM)
-(function attachEmailHandlers(){
-  if (!document.getElementById('verifyCodeBtn')) return;
-  const verifyBtn = document.getElementById('verifyCodeBtn');
-  const resendBtn = document.getElementById('resendCodeBtn');
-    const verifyHint = document.getElementById('verifyHint');
-  if (verifyHint) {
-    verifyHint.addEventListener('click', () => {
-      const codeInput = document.getElementById('emailCode');
-      codeInput.focus();
-      codeInput.scrollIntoView({behavior:'smooth',block:'center'});
-
-      const vBtn = document.getElementById('verifyCodeBtn');
-      vBtn.animate(
-        [{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}],
-        {duration:240,easing:'ease-in-out'}
-      );
-    });
-
-    verifyHint.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); verifyHint.click(); }
-    });
+ <script src="js/product.js"></script>
+<script>
+  // ---------- Safe sessionStorage helpers ----------
+  function ssGet(key) {
+    try { return sessionStorage.getItem(key); }
+    catch (e) { console.warn('⚠️ sessionStorage get blocked:', key); return null; }
+  }
+  function ssSet(key, val) {
+    try { sessionStorage.setItem(key, val); }
+    catch (e) { console.warn('⚠️ sessionStorage set blocked:', key); }
+  }
+  function ssRemove(key) {
+    try { sessionStorage.removeItem(key); }
+    catch (e) { console.warn('⚠️ sessionStorage remove blocked:', key); }
   }
 
-  verifyBtn.addEventListener('click', async function () {
-    const code = document.getElementById('emailCode').value.trim();
-   const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
-    const orderId = window.currentOrderId || document.getElementById('pdfOrderId')?.textContent || null;
-    if (!orderId) {
-      document.getElementById('emailVerifyMsg').textContent = 'Order id missing. Refresh the page.';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
-      return;
-    }
-    if (!/^\d{6}$/.test(code)) {
-      document.getElementById('emailVerifyMsg').textContent = 'Please enter a 6-digit code.';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
-      return;
-    }
-    try {
-      verifyBtn.disabled = true;
-      document.getElementById('emailVerifyMsg').style.display = 'none';
-      await verifyCodeOnServer(email, code); // throws on fail
-      sessionStorage.setItem('emailVerified_' + orderId, '1');
-      hideVerifyPanel();
-      // proceed with the flow: re-trigger submit by simulating click on submit button
-      const formBtn = document.querySelector("#orderForm button[type='submit']");
-      if (formBtn) {
-    formBtn.disabled = false;
-    formBtn.textContent = "Confirm Order";
-    submitOrder(new Event("submit"));
-}
+  // ---------- Product selection (Buy Now) ----------
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get("id") || ssGet("buyNowProduct");
+  const product = products.find(p => String(p.id) === String(productId));
+  let quantity = 1;
 
-    } catch (err) {
-      document.getElementById('emailVerifyMsg').textContent = 'Invalid or expired code. Try resend.';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
-      console.warn('verifyCode error', err);
-    } finally {
-      verifyBtn.disabled = false;
-    }
-  });
+  if (!product) {
+    const section = document.getElementById("productSection");
+    if (section) section.innerHTML = "<p>Product not found.</p>";
+    const summary = document.querySelector(".summary");
+    if (summary) summary.style.display = "none";
+  } else {
+    renderProduct(product);
+  }
 
-  resendBtn.addEventListener('click', async function () {
-    const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
-    const orderId = window.currentOrderId || document.getElementById('pdfOrderId')?.textContent || null;
-    if (!isValidEmail(email)) {
-      document.getElementById('emailError').style.display = 'block';
-      return;
+  function renderProduct(prod) {
+    const div = document.getElementById("productSection");
+    if (!div) return;
+    div.innerHTML = `
+      <div class="product">
+        <img src="${prod.images[0]}" alt="${prod.name}" />
+        <div class="product-info">
+          <div class="product-title">${prod.name}</div>
+          <div class="product-price">Price: ₹${prod.newPrice}</div>
+          <div class="quantity-controls">
+            <button onclick="changeQty(-1)">−</button>
+            <span id="qtyValue">${quantity}</span>
+            <button onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+    updateTotal();
+  }
+
+  function changeQty(delta) {
+    quantity += delta;
+    if (quantity < 1) quantity = 1;
+    const el = document.getElementById("qtyValue");
+    if (el) el.textContent = quantity;
+    updateTotal();
+  }
+
+  function updateTotal() {
+    if (!product) return;
+    const total = Number(product.newPrice) * quantity;
+    const totalSpan = document.getElementById("totalPrice");
+    if (totalSpan) totalSpan.textContent = total;
+
+    const deliveryNote = document.getElementById("deliveryNote");
+    if (!deliveryNote) return;
+
+    if (total < 199) {
+      deliveryNote.innerHTML = `
+        <div style="
+          background: #fff3cd;
+          color: #856404;
+          border: 1px solid #ffeeba;
+          padding: 10px 14px;
+          border-radius: 8px;
+          margin-top: 10px;
+          font-size: 14px;
+          font-weight: 500;
+        ">
+          ⚠️ Delivery charges may apply on orders below ₹199.
+        </div>`;
+      deliveryNote.style.display = "block";
+    } else {
+      deliveryNote.style.display = "none";
     }
+  }
+
+  // ---------- Add to cart & go back (uses safeStorage, id+qty only) ----------
+  function addToCartAndGoBack() {
+    if (!product) return;
+
+    let rawCart = {};
     try {
-      resendBtn.disabled = true;
-      await sendVerificationCode(email);
-      document.getElementById('emailVerifyMsg').textContent = 'Code resent.';
-      document.getElementById('emailVerifyMsg').style.color = '#2e7d32';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
-      setTimeout(()=> {
-        document.getElementById('emailVerifyMsg').style.display = 'none';
-      }, 4000);
-    } catch (err) {
-      document.getElementById('emailVerifyMsg').textContent = 'Resend failed. Try again later.';
-      document.getElementById('emailVerifyMsg').style.color = '#d32f2f';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
-      console.warn('resend error', err);
-    } finally {
-      resendBtn.disabled = false;
+      rawCart = JSON.parse(window.safeStorage.getItem("cart") || "{}");
+    } catch (e) {
+      console.warn("⚠️ Cart parse failed on BuyNow:", e);
+      rawCart = {};
     }
-  });
-})();
-let orderId = "ORD" + Date.now();
-function completeOrderAfterEmailVerification() {
+
+    const key = String(product.id);
+    const existingQty = Number(rawCart[key]?.qty) || 0;
+    rawCart[key] = { id: key, qty: existingQty + quantity };
+
+    try {
+      window.safeStorage.setItem("cart", JSON.stringify(rawCart));
+    } catch (e) {
+      console.warn("⚠️ Cart save failed on BuyNow:", e);
+    }
+
+    // Let other pages know cart changed
+    ssSet("cartDirty", "1");
+    document.dispatchEvent(new CustomEvent("cart:maybeUpdated"));
+
+    location.href = "index.html";
+  }
+
+  /* ====== EMAIL VERIFICATION HELPERS (safe sessionStorage) ====== */
+
+  // Basic email validator
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function setCodeSent(orderId) {
+    ssSet('codeSent_' + orderId, '1');
+    const btn = document.querySelector("#orderForm button[type='submit']");
+    if (btn) { btn.disabled = true; btn.textContent = 'Confirm Order'; }
+    const hint = document.getElementById('verifyHint');
+    if (hint) hint.style.display = 'inline-flex';
+  }
+
+  function isCodeSent(orderId) {
+    return !!ssGet('codeSent_' + orderId);
+  }
+
+  function clearCodeSent(orderId) {
+    ssRemove('codeSent_' + orderId);
+    const hint = document.getElementById('verifyHint');
+    if (hint) hint.style.display = 'none';
+  }
+
+  // Show / hide verification UI
+  function showVerifyPanel(email) {
+    document.getElementById('verifyEmailAddr').textContent = email;
+    document.getElementById('emailVerifyPanel').style.display = 'block';
+    document.getElementById('emailVerifyMsg').style.display = 'none';
+  }
+  function hideVerifyPanel() {
+    document.getElementById('emailVerifyPanel').style.display = 'none';
+    document.getElementById('emailCode').value = '';
+  }
+
+  // Netlify functions for email
+  async function sendVerificationCode(email) {
+    const res = await fetch('/.netlify/functions/sendVerification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
+  async function verifyCodeOnServer(email, code) {
+    const res = await fetch('/.netlify/functions/verifyEmail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
+  // Attach verify / resend
+  (function attachEmailHandlers() {
+    const verifyBtn = document.getElementById('verifyCodeBtn');
+    const resendBtn = document.getElementById('resendCodeBtn');
+    const verifyHint = document.getElementById('verifyHint');
+    if (!verifyBtn || !resendBtn) return;
+
+    if (verifyHint) {
+      verifyHint.addEventListener('click', () => {
+        const codeInput = document.getElementById('emailCode');
+        if (!codeInput) return;
+        codeInput.focus();
+        codeInput.scrollIntoView({ behavior:'smooth', block:'center' });
+
+        verifyBtn.animate(
+          [{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}],
+          {duration:240, easing:'ease-in-out'}
+        );
+      });
+
+      verifyHint.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); verifyHint.click(); }
+      });
+    }
+
+    verifyBtn.addEventListener('click', async function () {
+      const code = (document.getElementById('emailCode').value || '').trim();
+      const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
+      const orderId = window.currentOrderId || document.getElementById('pdfOrderId')?.textContent || null;
+
+      const msgEl = document.getElementById('emailVerifyMsg');
+      if (!orderId) {
+        msgEl.textContent = 'Order id missing. Refresh the page.';
+        msgEl.style.display = 'inline';
+        return;
+      }
+      if (!/^\d{6}$/.test(code)) {
+        msgEl.textContent = 'Please enter a 6-digit code.';
+        msgEl.style.display = 'inline';
+        return;
+      }
+
+      try {
+        verifyBtn.disabled = true;
+        msgEl.style.display = 'none';
+        await verifyCodeOnServer(email, code);
+        ssSet('emailVerified_' + orderId, '1');
+        hideVerifyPanel();
+
+        // Re-run submit flow
+        const formBtn = document.querySelector("#orderForm button[type='submit']");
+        if (formBtn) {
+          formBtn.disabled = false;
+          formBtn.textContent = "Confirm Order";
+          submitOrder(new Event("submit"));
+        }
+      } catch (err) {
+        msgEl.textContent = 'Invalid or expired code. Try resend.';
+        msgEl.style.display = 'inline';
+        console.warn('verifyCode error', err);
+      } finally {
+        verifyBtn.disabled = false;
+      }
+    });
+
+    resendBtn.addEventListener('click', async function () {
+      const email = (document.getElementById('customerEmail').value || '').trim().toLowerCase();
+      const msgEl = document.getElementById('emailVerifyMsg');
+
+      if (!isValidEmail(email)) {
+        document.getElementById('emailError').style.display = 'block';
+        return;
+      }
+
+      try {
+        resendBtn.disabled = true;
+        await sendVerificationCode(email);
+        msgEl.textContent = 'Code resent.';
+        msgEl.style.color = '#2e7d32';
+        msgEl.style.display = 'inline';
+        setTimeout(() => { msgEl.style.display = 'none'; }, 4000);
+      } catch (err) {
+        msgEl.textContent = 'Resend failed. Try again later.';
+        msgEl.style.color = '#d32f2f';
+        msgEl.style.display = 'inline';
+        console.warn('resend error', err);
+      } finally {
+        resendBtn.disabled = false;
+      }
+    });
+  })();
+
+  let orderId = "ORD" + Date.now();
+
+  function completeOrderAfterEmailVerification() {
     const submitBtn = document.querySelector("#orderForm button[type='submit']");
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Confirm Order";
-}
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Confirm Order";
+    }
+  }
 
-    async function submitOrder(e) {
-      e.preventDefault();
-      const name = document.getElementById("customerName").value.trim();
-      const phone = document.getElementById("customerPhone").value.trim();
-      const nameError = document.getElementById("nameError");
-      const phoneError = document.getElementById("phoneError");
+  // ---------- MAIN submitOrder (COD + Razorpay) ----------
+  async function submitOrder(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!product) return;
 
-      let valid = true;
-      nameError.style.display = "none";
-      phoneError.style.display = "none";
+    const name = (document.getElementById("customerName").value || "").trim();
+    const phone = (document.getElementById("customerPhone").value || "").trim();
+    const email = (document.getElementById("customerEmail").value || "").trim().toLowerCase();
 
-      if (!name || name.length < 2) {
-        nameError.style.display = "block";
-        valid = false;
-      }
+    const nameError = document.getElementById("nameError");
+    const phoneError = document.getElementById("phoneError");
+    const emailError = document.getElementById("emailError");
 
-      if (!/^[6-9]\d{9}$/.test(phone)) {
-        phoneError.style.display = "block";
-        valid = false;
-      }
+    let valid = true;
+    nameError.style.display = "none";
+    phoneError.style.display = "none";
+    emailError.style.display = "none";
 
-      if (!valid) return;
+    if (!name || name.length < 2) {
+      nameError.style.display = "block";
+      valid = false;
+    }
 
-      const button = document.querySelector("#orderForm button[type='submit']");
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      phoneError.style.display = "block";
+      valid = false;
+    }
+
+    if (!isValidEmail(email)) {
+      emailError.style.display = "block";
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    const button = document.querySelector("#orderForm button[type='submit']");
+    if (button) {
       button.disabled = true;
       button.textContent = "Processing...";
-
-    // orderId already exists globally
-
-   const email = (document.getElementById('customerEmail')?.value || '').trim();
-const order = {
-  orderId,
-  name,
-  phone,
-  email,
-  items: [{
-  id: product.id,
-  title: product.name,
-  qty: quantity,
-  price: product.newPrice,
-  image: product.images[0]
-}],
-  totalAmount: product.newPrice * quantity,
-  timestamp: new Date().toISOString()
-};
-
-firebase.database().ref("orders").push(order).then(async () => {
-  // ===== EMAIL VERIFICATION CHECK (ADDED) =====
-  // set current order id globally so verify handlers can access it
-  window.currentOrderId = orderId;
-
-  // read email from the newly added input
-  const emailInputVal = (document.getElementById('customerEmail')?.value || '').trim().toLowerCase();
-
-  // validate email
-  if (!isValidEmail(emailInputVal)) {
-    document.getElementById('emailError').style.display = 'block';
-    // re-enable submit button so user can fix
-    const btn = document.querySelector("#orderForm button[type='submit']");
-    if (btn) { btn.disabled = false; btn.textContent = 'Confirm Order'; }
-    return; // stop processing until valid email given
-  } else {
-    document.getElementById('emailError').style.display = 'none';
-  }
-
-  // If not already verified in this session, ask for verification
-  if (sessionStorage.getItem('emailVerified_' + orderId) !== '1') {
-    try {
-      // send verification code (server will send email via Brevo)
-      await sendVerificationCode(emailInputVal, orderId);
-      // show verification UI and pause flow: user must enter code
-      showVerifyPanel(emailInputVal);
-      // re-enable submit so user can click Verify after entering code
-      const btn = document.querySelector("#orderForm button[type='submit']");
-      if (btn) { btn.disabled = false; btn.textContent = 'Confirm Order'; }
-      return; // stop here until verification completes
-    } catch (err) {
-      console.warn('sendVerificationCode failed', err);
-      document.getElementById('emailVerifyMsg').textContent = 'Unable to send code. Try again later.';
-      document.getElementById('emailVerifyMsg').style.display = 'inline';
-      const btn = document.querySelector("#orderForm button[type='submit']");
-      if (btn) { btn.disabled = false; btn.textContent = 'Confirm Order'; }
-      return;
     }
-  }
-  // ===== END EMAIL VERIFICATION CHECK =====
 
-  // Decide payment method
-  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
-
-  // If online chosen, start razorpay flow (we push the order to firebase first to keep consistent orderId logging)
-  if (paymentMethod === 'online') {
-    // --- RAZORPAY FLOW ---
-    try {
-      const amountPaise = Math.round(order.totalAmount * 100);
-      // Create order on server
-      const createRes = await fetch('/.netlify/functions/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: amountPaise })
-      });
-      if (!createRes.ok) {
-        throw new Error('create-order failed');
-      }
-      const razorOrder = await createRes.json();
-
-      // Show a minimal UI while Razorpay loads
-      document.querySelector(".container").innerHTML = `
-        <div class="confirmed-box">
-          <h3>Processing Payment…</h3>
-          <div id="backgroundStatus" style="margin-top: 15px; font-size: 14px; color: #555; display:flex; align-items:center; justify-content:center; gap:8px;">
-            <span class="spinner" style="width:16px;height:16px;border:3px solid #ccc;border-top:3px solid #4CAF50;border-radius:50%;display:inline-block;animation: tinySpin 1s linear infinite;"></span>
-            <span>Opening payment window...</span>
-          </div>
-        </div>
-      `;
-
-      const options = {
-        key: 'rzp_test_RfzszE7iee0S3d',
-        amount: razorOrder.amount,
-        currency: razorOrder.currency || 'INR',
-        name: 'Sublime Store',
-        description: 'Buy Now Payment',
-        order_id: razorOrder.id,
-        prefill: { name, contact: phone },
-        handler: async function (response) {
-          // show verifying
-          const statusDiv = document.getElementById('backgroundStatus');
-          if (statusDiv)statusDiv.innerHTML = `
-  <span class="spinner" style="
-      width: 16px;
-      height: 16px;
-      border: 3px solid #ccc;
-      border-top: 3px solid #4CAF50;
-      border-radius: 50%;
-      display: inline-block;
-      animation: spin 1s linear infinite;
-  "></span>
-  <span>Verifying payment…</span>
-`;
-
-          // Verify payment server-side
-          try {
-            const verifyRes = await fetch('/.netlify/functions/verify-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(response)
-            });
-            const verifyJson = await verifyRes.json();
-
-            if (!verifyRes.ok || !verifyJson.ok) {
-              throw new Error(verifyJson.error || 'Verification failed');
-            }
-
-            // Payment verified — send to Telegram (mark as paid)
-            const payload = {
-              name,
-              phone,
-              email,
-              orderId,
-              cart: order.items,
-              totalAmount: order.totalAmount,
-              payment: { status: 'paid', provider: 'razorpay', razorpay_payment_id: response.razorpay_payment_id },
-              amountPaid: order.totalAmount,
-              ts: Date.now()
-            };
-
-            // Use fetch; server handles PDF + telegram
-            await fetch('/.netlify/functions/sendTelegramOrder', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-// after sendTelegramOrder finished successfully
-try {
-  await fetch('/.netlify/functions/save-order', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+    const order = {
       orderId,
       name,
       phone,
-      cart: order.items,
-      totalAmount: order.totalAmount,
-      isPaid: true,
-      razorpay_payment_id: response.razorpay_payment_id
-    })
-  });
-  console.log('save-order called (paid)');
-} catch (err) {
-  console.warn('save-order (paid) failed:', err);
-}
+      email,
+      items: [{
+        id: product.id,
+        title: product.name,
+        qty: quantity,
+        price: product.newPrice,
+        image: product.images[0]
+      }],
+      totalAmount: Number(product.newPrice) * quantity,
+      timestamp: new Date().toISOString()
+    };
 
-            // success UI (same style as COD)
-            document.querySelector(".container").innerHTML = `
-              <div class="confirmed-box">
-                <h3>✓ Payment & Order Confirmed</h3>
-                <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
-                <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
-                <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
-              </div>
-            `;
+    try {
+      await firebase.database().ref("orders").push(order);
 
-            // clear buyNow marker
-            sessionStorage.removeItem('buyNowProduct');
-
-            try { localStorage.removeItem('cart'); } catch (_) {}
-
-            // stop spinner if any left
-            setTimeout(() => {
-              const sp = document.querySelector('.spinner');
-              if (sp) sp.style.display = 'none';
-            }, 200);
-
-            // wire continue/back behavior like you had
-            (function(){
-              const btn = document.getElementById('continueShopping');
-              if(!btn) return;
-              btn.addEventListener('click', function(e){
-                e.preventDefault();
-                try { sessionStorage.setItem('jumpToProducts', '1'); } catch(_){}
-                location.assign('index.html?ts=' + Date.now() + '#productList');
-              });
-            })();
-
-          } catch (err) {
-            console.error('Payment verify/send failed:', err);
-            const statusDiv = document.getElementById('backgroundStatus');
-            if (statusDiv) statusDiv.textContent = '⚠️ Payment succeeded but verification failed. Contact support.';
+      // email verification check
+      window.currentOrderId = orderId;
+      if (ssGet('emailVerified_' + orderId) !== '1') {
+        try {
+          await sendVerificationCode(email);
+          showVerifyPanel(email);
+          if (button) {
+            button.disabled = false;
+            button.textContent = "Confirm Order";
           }
-        },
-        modal: {
-          ondismiss: function(){
-            // user closed the modal, return to buy now page state
-            // restore simple UI so they can retry
-            document.querySelector(".container").innerHTML = `
-              <div class="confirmed-box">
-                <h3>Payment Cancelled</h3>
-                <p>Please try again or choose Cash On Delivery.</p>
-                <a href="buynow.html?id=${product.id}" class="btn-continue">Try again</a>
-              </div>
-            `;
+          return; // wait for verification
+        } catch (err) {
+          console.warn('sendVerificationCode failed', err);
+          const msgEl = document.getElementById('emailVerifyMsg');
+          msgEl.textContent = 'Unable to send code. Try again later.';
+          msgEl.style.display = 'inline';
+          if (button) {
+            button.disabled = false;
+            button.textContent = "Confirm Order";
           }
+          return;
         }
-      };
+      }
 
-      const rzp = new Razorpay(options);
-      rzp.open();
+      // Payment method
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
 
-      return; // stop the COD background flow after creating the Razorpay flow
-    } catch (err) {
-      console.error('Razorpay flow error:', err);
-      // show fallback error + let user retry (restore basic UI)
+      // ONLINE (Razorpay)
+      if (paymentMethod === 'online') {
+        try {
+          const amountPaise = Math.round(order.totalAmount * 100);
+          const createRes = await fetch('/.netlify/functions/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: amountPaise })
+          });
+          if (!createRes.ok) throw new Error('create-order failed');
+          const razorOrder = await createRes.json();
+
+          document.querySelector(".container").innerHTML = `
+            <div class="confirmed-box">
+              <h3>Processing Payment…</h3>
+              <div id="backgroundStatus" style="margin-top: 15px; font-size: 14px; color: #555; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <span class="spinner" style="width:16px;height:16px;border:3px solid #ccc;border-top:3px solid #4CAF50;border-radius:50%;display:inline-block;animation: tinySpin 1s linear infinite;"></span>
+                <span>Opening payment window...</span>
+              </div>
+            </div>
+          `;
+
+          const options = {
+            key: 'rzp_test_RfzszE7iee0S3d',
+            amount: razorOrder.amount,
+            currency: razorOrder.currency || 'INR',
+            name: 'Sublime Store',
+            description: 'Buy Now Payment',
+            order_id: razorOrder.id,
+            prefill: { name, contact: phone },
+            handler: async function (response) {
+              const statusDiv = document.getElementById('backgroundStatus');
+              if (statusDiv) {
+                statusDiv.innerHTML = `
+                  <span class="spinner" style="
+                    width: 16px;
+                    height: 16px;
+                    border: 3px solid #ccc;
+                    border-top: 3px solid #4CAF50;
+                    border-radius: 50%;
+                    display: inline-block;
+                    animation: spin 1s linear infinite;
+                  "></span>
+                  <span>Verifying payment…</span>
+                `;
+              }
+
+              try {
+                const verifyRes = await fetch('/.netlify/functions/verify-payment', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(response)
+                });
+                const verifyJson = await verifyRes.json();
+                if (!verifyRes.ok || !verifyJson.ok) {
+                  throw new Error(verifyJson.error || 'Verification failed');
+                }
+
+                const payload = {
+                  name,
+                  phone,
+                  email,
+                  orderId,
+                  cart: order.items,
+                  totalAmount: order.totalAmount,
+                  payment: {
+                    status: 'paid',
+                    provider: 'razorpay',
+                    razorpay_payment_id: response.razorpay_payment_id
+                  },
+                  amountPaid: order.totalAmount,
+                  ts: Date.now()
+                };
+
+                await fetch('/.netlify/functions/sendTelegramOrder', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+
+                // optional separate save-order
+                try {
+                  await fetch('/.netlify/functions/save-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      orderId,
+                      name,
+                      phone,
+                      cart: order.items,
+                      totalAmount: order.totalAmount,
+                      isPaid: true,
+                      razorpay_payment_id: response.razorpay_payment_id
+                    })
+                  });
+                } catch (err) {
+                  console.warn('save-order (paid) failed:', err);
+                }
+
+                document.querySelector(".container").innerHTML = `
+                  <div class="confirmed-box">
+                    <h3>✓ Payment & Order Confirmed</h3>
+                    <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
+                    <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
+                    <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
+                  </div>
+                `;
+
+                ssRemove('buyNowProduct');
+                try { window.safeStorage.setItem('cart', '{}'); } catch(_) {}
+
+                (function(){
+                  const btn = document.getElementById('continueShopping');
+                  if(!btn) return;
+                  btn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    try { ssSet('jumpToProducts', '1'); } catch(_){}
+                    location.assign('index.html?ts=' + Date.now() + '#productList');
+                  });
+                })();
+
+              } catch (err) {
+                console.error('Payment verify/send failed:', err);
+                const statusDiv = document.getElementById('backgroundStatus');
+                if (statusDiv) statusDiv.textContent = '⚠️ Payment succeeded but verification failed. Contact support.';
+              }
+            },
+            modal: {
+              ondismiss: function(){
+                document.querySelector(".container").innerHTML = `
+                  <div class="confirmed-box">
+                    <h3>Payment Cancelled</h3>
+                    <p>Please try again or choose Cash On Delivery.</p>
+                    <a href="buynow.html?id=${product.id}" class="btn-continue">Try again</a>
+                  </div>
+                `;
+              }
+            }
+          };
+
+          const rzp = new Razorpay(options);
+          rzp.open();
+          return; // stop COD flow
+        } catch (err) {
+          console.error('Razorpay flow error:', err);
+          document.querySelector(".container").innerHTML = `
+            <div class="confirmed-box">
+              <h3>⚠ Checkout error</h3>
+              <p>Unable to start online payment. Please try again or choose Cash on Delivery.</p>
+              <a href="buynow.html?id=${product.id}" class="btn-continue">Back</a>
+            </div>
+          `;
+          return;
+        }
+      }
+
+      // ---------- COD Flow ----------
       document.querySelector(".container").innerHTML = `
         <div class="confirmed-box">
-          <h3>⚠ Checkout error</h3>
-          <p>Unable to start online payment. Please try again or choose Cash on Delivery.</p>
-          <a href="buynow.html?id=${product.id}" class="btn-continue">Back</a>
+          <h3>✓ Order Confirmed</h3>
+          <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
+          <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
+          <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
+          <div id="backgroundStatus" style="
+            margin-top: 15px;
+            font-size: 14px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          ">
+            <span class="spinner" style="
+              width: 16px;
+              height: 16px;
+              border: 3px solid #ccc;
+              border-top: 3px solid #4CAF50;
+              border-radius: 50%;
+              display: inline-block;
+              animation: spin 1s linear infinite;
+            "></span>
+            <span>Sending order details...</span>
+          </div>
         </div>
       `;
-      return;
-    }
-    // --- END RAZORPAY FLOW ---
-  }
 
-  // COD flow (unchanged behaviour)
-  document.querySelector(".container").innerHTML = `
-  <div class="confirmed-box">
-    <h3>✓ Order Confirmed</h3>
-    <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
-    <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
+      ssRemove("buyNowProduct");
 
-    <!-- Continue shopping button -->
-    <a href="index.html#productList" class="btn-continue" id="continueShopping">
-      Continue shopping
-    </a>
+      (function(){
+        const btn = document.getElementById('continueShopping');
+        if(!btn) return;
+        btn.addEventListener('click', function(e){
+          e.preventDefault();
+          try { ssSet('jumpToProducts', '1'); } catch(_){}
+          const ts = Date.now();
+          window.location.assign('index.html?ts=' + ts + '#productList');
+        });
+      })();
 
-    <div id="backgroundStatus" style="
-        margin-top: 15px;
-        font-size: 14px;
-        color: #555;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    ">
-      <span class="spinner" style="
-          width: 16px;
-          height: 16px;
-          border: 3px solid #ccc;
-          border-top: 3px solid #4CAF50;
-          border-radius: 50%;
-          display: inline-block;
-          animation: spin 1s linear infinite;
-      "></span>
-      <span>Sending order details...</span>
-    </div>
-  </div>
-
-  <script>
-    (function(){
-      var btn = document.getElementById('continueShopping');
-      if(!btn) return;
-      btn.addEventListener('click', function(e){
-        e.preventDefault();
-        // Tell index to clear floating cart UI and jump to product list
-        try { sessionStorage.setItem('jumpToProducts', '1'); } catch(_){}
-        // Force a fresh load (helps with PWA/service worker caches)
-        var ts = Date.now();
-        window.location.assign('index.html?ts=' + ts + '#productList');
-      });
-    })();
-  <\/script>
-`;
-
-  sessionStorage.removeItem("buyNowProduct");
-
-  // Async background process for COD (keeps your original sendTelegramOrder call)
-  (async () => {
-    try {
-      const messageText = `🛒 *Buy Now Order*
+      // Background Telegram + optional save-order (COD)
+      (async () => {
+        try {
+          const messageText = `🛒 *Buy Now Order*
 🧾 *Order ID:* ${orderId}
 👤 *Name:* ${name}
 📞 *Phone:* ${phone}
@@ -777,98 +798,113 @@ try {
 💰 *Total:* ₹${order.totalAmount}
 📦 *Product:* ${product.name} x${quantity}`;
 
-      await fetch("/.netlify/functions/sendTelegramOrder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          phone,
-          orderId,
-          cart: order.items,
-          totalAmount: order.totalAmount,
-          messageText
-        })
-      });
-// after sendTelegramOrder finished successfully
-try {
-  await fetch('/.netlify/functions/save-order', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      orderId,
-      name,
-      phone,
-      cart: order.items,
-      totalAmount: order.totalAmount,
-      isPaid: true,
-      razorpay_payment_id: response.razorpay_payment_id
-    })
-  });
-  console.log('save-order called (paid)');
-} catch (err) {
-  console.warn('save-order (paid) failed:', err);
-}
+          await fetch("/.netlify/functions/sendTelegramOrder", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name,
+              phone,
+              orderId,
+              cart: order.items,
+              totalAmount: order.totalAmount,
+              messageText,
+              payment: { status: 'cod' }
+            })
+          });
 
-      // Update spinner text when done & hide spinner
-      const statusDiv = document.getElementById("backgroundStatus");
-      if (statusDiv) {
-        statusDiv.textContent = "Order details sent successfully!";
-        const sp = statusDiv.querySelector('.spinner');
-        if (sp) sp.style.display = 'none';
-      }
+          // COD save-order (not paid)
+          try {
+            await fetch('/.netlify/functions/save-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId,
+                name,
+                phone,
+                cart: order.items,
+                totalAmount: order.totalAmount,
+                isPaid: false
+              })
+            });
+          } catch (err) {
+            console.warn('save-order (COD) failed:', err);
+          }
+
+          const statusDiv = document.getElementById("backgroundStatus");
+          if (statusDiv) {
+            statusDiv.textContent = "Order details sent successfully!";
+            const sp = statusDiv.querySelector('.spinner');
+            if (sp) sp.style.display = 'none';
+          }
+        } catch (err) {
+          console.error("Background send failed:", err);
+          const statusDiv = document.getElementById("backgroundStatus");
+          if (statusDiv) statusDiv.textContent = "⚠️ Failed to send order details.";
+        }
+      })();
+
     } catch (err) {
-      console.error("Background send failed:", err);
-      const statusDiv = document.getElementById("backgroundStatus");
-      if (statusDiv) statusDiv.textContent = "⚠️ Failed to send order details.";
+      alert("Error saving order. Please try again.");
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Confirm Order";
+      }
+      console.error("Firebase push failed:", err);
     }
-  })();
+  }
 
-}).catch(err => {
-  alert("Error saving order. Please try again.");
-  button.disabled = false;
-  button.textContent = "Confirm Order";
-  console.error("Firebase push failed:", err);
-});
-
-    }
-      const toggleBtn = document.getElementById('themeToggle');
+  // ---------- Theme toggle using safeStorage ----------
+  const toggleBtn = document.getElementById('themeToggle');
 
   function applyTheme(mode) {
     if (mode === 'dark') {
       document.body.classList.add('dark-mode');
-      toggleBtn.textContent = '☀️';
+      if (toggleBtn) toggleBtn.textContent = '☀️';
     } else {
       document.body.classList.remove('dark-mode');
-      toggleBtn.textContent = '🌙';
+      if (toggleBtn) toggleBtn.textContent = '🌙';
     }
-    localStorage.setItem('theme', mode);
+    try { window.safeStorage.setItem('theme', mode); } catch(e) {}
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const savedMode = localStorage.getItem('theme') || 'light';
+    let savedMode = 'light';
+    try {
+      savedMode = window.safeStorage.getItem('theme') || 'light';
+    } catch(e) {}
     applyTheme(savedMode);
 
-    toggleBtn.addEventListener('click', () => {
-      const isDark = document.body.classList.contains('dark-mode');
-      applyTheme(isDark ? 'light' : 'dark');
-    });
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const isDark = document.body.classList.contains('dark-mode');
+        applyTheme(isDark ? 'light' : 'dark');
+      });
+    }
   });
-  </script>
+</script>
+
   <!-- START: Recent-inputs helper (paste before </body>) -->
 
 
 
-<script>(function () {
+<script>
+(function () {
   const KEYS = {
     name: 'recent_names',
     phone: 'recent_phones',
     email: 'recent_emails'
   };
-  const MAX_STORE = 6;   // number kept in storage
-  const SHOW_COUNT = 1;  // how many suggestions to show
+  const MAX_STORE = 6;
+  const SHOW_COUNT = 1;
 
-  function readList(key){ try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e){ return []; } }
-  function writeList(key, arr){ try { localStorage.setItem(key, JSON.stringify(arr.slice(0, MAX_STORE))); } catch(e){} }
+  function readList(key){
+    try { return JSON.parse(window.safeStorage.getItem(key) || '[]'); }
+    catch(e){ return []; }
+  }
+  function writeList(key, arr){
+    try { window.safeStorage.setItem(key, JSON.stringify(arr.slice(0, MAX_STORE))); }
+    catch(e){}
+  }
 
   function pushRecent(key, val){
     if (!val) return;
@@ -894,7 +930,6 @@ try {
 
   function attachToInput(inputEl, typeKey){
     if (!inputEl) return;
-    // ensure wrapper
     if (!inputEl.parentElement.classList.contains('input-wrapper')) {
       const wrapper = document.createElement('div');
       wrapper.className = 'input-wrapper';
@@ -928,7 +963,7 @@ try {
         return;
       }
       if (!dropdown) dropdown = makeDropdown(toShow);
-      // rebuild contents (keep it fresh)
+
       dropdown.innerHTML = '';
       toShow.forEach(s => {
         const item = document.createElement('div');
@@ -939,7 +974,6 @@ try {
         dropdown.appendChild(item);
       });
 
-      // click handler
       dropdown.onclick = (ev) => {
         const t = ev.target.closest && ev.target.closest('.suggestion');
         if (!t) return;
@@ -955,14 +989,15 @@ try {
       window.addEventListener('scroll', positionDropdown, true);
     }
 
-    // show suggestions on focus (if empty) or filtered by prefix
     inputEl.addEventListener('focus', () => {
       const val = (inputEl.value || '').trim();
       if (val.length === 0) {
         showDropdown();
       } else {
         const key = KEYS[typeKey];
-        const list = readList(key).filter(x => x.toLowerCase().indexOf(val.toLowerCase()) === 0).slice(0, SHOW_COUNT);
+        const list = readList(key)
+          .filter(x => x.toLowerCase().indexOf(val.toLowerCase()) === 0)
+          .slice(0, SHOW_COUNT);
         if (!list.length) hideDropdown();
         else {
           if (!dropdown) dropdown = makeDropdown(list);
@@ -993,11 +1028,12 @@ try {
       }
     });
 
-    // live filter while typing
     inputEl.addEventListener('input', () => {
       const val = (inputEl.value || '').trim();
       const key = KEYS[typeKey];
-      const list = readList(key).filter(x => x.toLowerCase().indexOf(val.toLowerCase()) === 0).slice(0, SHOW_COUNT);
+      const list = readList(key)
+        .filter(x => x.toLowerCase().indexOf(val.toLowerCase()) === 0)
+        .slice(0, SHOW_COUNT);
       if (!list.length) hideDropdown();
       else {
         if (!dropdown) dropdown = makeDropdown(list);
@@ -1016,7 +1052,6 @@ try {
     });
   }
 
-  // Save on blur (with simple validation for phone/email)
   function wireSaveOnEvents(){
     function trySaveForInput(id, typeKey){
       const el = document.getElementById(id);
@@ -1024,12 +1059,8 @@ try {
       el.addEventListener('blur', () => {
         const val = (el.value || '').trim();
         if (!val) return;
-        if (typeKey === 'phone') {
-          if (!/^[6-9]\d{9}$/.test(val)) return;
-        }
-        if (typeKey === 'email') {
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
-        }
+        if (typeKey === 'phone' && !/^[6-9]\d{9}$/.test(val)) return;
+        if (typeKey === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
         pushRecent(KEYS[typeKey], val);
       });
     }
@@ -1038,7 +1069,6 @@ try {
     trySaveForInput('customerEmail', 'email');
   }
 
-  // Public init: call after DOM inputs exist
   window.attachRecentInputs = function attachRecentInputs(){
     const nameEl = document.getElementById('customerName');
     const phoneEl = document.getElementById('customerPhone');
@@ -1051,7 +1081,6 @@ try {
     wireSaveOnEvents();
   };
 
-  // retry helper used in cart.js earlier — safe to call if inputs not present yet
   window.__attachRecentRetry = function(){
     setTimeout(() => {
       if (document.getElementById('customerName') && typeof window.attachRecentInputs === 'function') {
@@ -1060,19 +1089,14 @@ try {
     }, 120);
   };
 
-  // Auto-init on DOM ready (idempotent)
   document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('customerName')) {
-      window.attachRecentInputs();
-    } else {
-      window.__attachRecentRetry();
-    }
+    const nameEl = document.getElementById('customerName');
+    if (nameEl) window.attachRecentInputs();
+    else window.__attachRecentRetry();
 
-    // Observe container changing to success UI: when success appears, save recent inputs automatically
     const container = document.querySelector('.container');
     if (!container) return;
-    const mo = new MutationObserver((mutations) => {
-      // if container contains .confirmed-box (success UI), then save the current inputs into recents
+    const mo = new MutationObserver(() => {
       if (container.querySelector('.confirmed-box')) {
         const name = (document.getElementById('customerName')?.value || '').trim();
         const phone = (document.getElementById('customerPhone')?.value || '').trim();
@@ -1080,14 +1104,15 @@ try {
         if (name) pushRecent(KEYS.name, name);
         if (phone && /^[6-9]\d{9}$/.test(phone)) pushRecent(KEYS.phone, phone);
         if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) pushRecent(KEYS.email, email);
-        // once saved, disconnect observer (no longer needed)
-        try { mo.disconnect(); } catch(e){ /* ignore */ }
+        try { mo.disconnect(); } catch(e){}
       }
     });
     mo.observe(container, { childList: true, subtree: true });
   });
 
-})();</script>
+})();
+</script>
+
 <!-- END: Recent-inputs helper -->
 
 </body>

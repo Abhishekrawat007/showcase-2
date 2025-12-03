@@ -1,21 +1,6 @@
 // 🌩️ Cloudinary config
 // 🌩️ Cloudinary config (read from window.__CONFIG when available)
-let CLOUDINARY_URL = window.__CONFIG?.cloudinary?.url || "";
-let CLOUDINARY_PRESET = window.__CONFIG?.cloudinary?.preset || "";
 
-if (!CLOUDINARY_URL || !CLOUDINARY_PRESET) {
-  console.warn('Cloudinary config missing. window.__CONFIG.cloudinary:', window.__CONFIG?.cloudinary);
-}
-
-// defensive: if window.__CONFIG arrives slightly later
-try {
-  if (window.__CONFIG && window.__CONFIG.cloudinary) {
-    CLOUDINARY_URL = window.__CONFIG.cloudinary.url || CLOUDINARY_URL;
-    CLOUDINARY_PRESET = window.__CONFIG.cloudinary.preset || CLOUDINARY_PRESET;
-  }
-} catch (e) {
-  console.warn('Could not read cloudinary config from window.__CONFIG', e);
-}
 
 
 // at top of editor.js — auth check on script load
@@ -269,29 +254,46 @@ function undoProduct(index) {
   }
 }
 async function handleImageUpload(files, index) {
-  
   const uploadBtn = document.querySelector(`#upload-btn-${index}`);
   const spinner = document.querySelector(`#upload-spinner-${index}`);
   uploadBtn.disabled = true;
   spinner.style.display = "inline-block";
 
   for (const file of files) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_PRESET);
-
     try {
-      const res = await fetch(CLOUDINARY_URL, {
-        method: "POST",
-        body: formData,
+      // Convert file to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
+      
+      const imageData = await base64Promise;
+      
+      // Upload via Netlify function
+      const token = sessionStorage.getItem("adminToken");
+      const res = await fetch("/.netlify/functions/uploadImage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + (token || "")
+        },
+        body: JSON.stringify({ imageData })
+      });
+      
       const data = await res.json();
-
-      if (!products[index].images) products[index].images = [];
-      products[index].images.push(data.secure_url);
+      
+      if (res.ok && data.secure_url) {
+        if (!products[index].images) products[index].images = [];
+        products[index].images.push(data.secure_url);
+      } else {
+        throw new Error(data.error || "Upload failed");
+      }
+      
     } catch (err) {
       console.error("❌ Upload error:", err);
-      alert("Upload failed. Try again.");
+      alert("Upload failed: " + err.message);
     }
   }
 
@@ -299,7 +301,6 @@ async function handleImageUpload(files, index) {
   spinner.style.display = "none";
   renderProducts();
 }
-
 function deleteProduct(index) {
   showModal({
     title: "Delete Product?",

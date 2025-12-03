@@ -1,13 +1,15 @@
 // ----------------------------
-// script-detail.js  (PROFESSIONAL FINAL)
+// script-detail.js  (SAFE-STORAGE VERSION)
 // ----------------------------
-// ▸ Floating‑cart bar synced to localStorage
-// ▸ Main product cart + media
-// ▸ Related‑products keep original layout:  
-//    in‑stock ➜ Add + WhatsApp (+qty controls)  
-//    out‑of‑stock ➜ Call Now + WhatsApp (no qty controls)
-// -------------------------------------------------------------
+// ▸ Uses window.safeStorage for cart + wishlist
+// ▸ Floating-cart bar synced to cart
+// ▸ Main product cart + media + thumbnails
+// ▸ Related-products keep original layout:
+//    in-stock ➜ Add + Buy Now (+qty controls)
+//    out-of-stock ➜ Call Now + WhatsApp (no qty controls)
+// ----------------------------
 
+// Simple toast (used for wishlist messages)
 function showToast(msg, duration = 1500) {
   let toast = document.createElement("div");
   toast.textContent = msg;
@@ -30,16 +32,34 @@ function showToast(msg, duration = 1500) {
     setTimeout(() => document.body.removeChild(toast), 300);
   }, duration);
 }
-/*************  CART HELPERS  *************/
-/*************  CART HELPERS (UNIFIED WITH cart.js)  *************/
-function getCart() { 
-  try { return JSON.parse(localStorage.getItem("cart")) || {}; } 
-  catch (_) { return {}; } 
+
+/*************  CART HELPERS (safeStorage)  *************/
+function getCart() {
+  try {
+    const stored = window.safeStorage.getItem("cart");
+    return stored ? JSON.parse(stored) : {};
+  } catch (e) {
+    console.warn("⚠️ Cart parse failed:", e);
+    return {};
+  }
 }
-function saveCart(c) { 
-  localStorage.setItem("cart", JSON.stringify(c)); 
-  // lightweight local broadcast so other scripts/pages can react (matches cart.js behaviour)
+
+function saveCart(c) {
+  try {
+    window.safeStorage.setItem("cart", JSON.stringify(c));
+  } catch (e) {
+    console.warn("⚠️ Cart write failed:", e);
+  }
+  // Let other scripts/pages know
   document.dispatchEvent(new CustomEvent("cart:maybeUpdated"));
+}
+
+function setSS(key, value) {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch (e) {
+    console.warn("⚠️ sessionStorage blocked:", key);
+  }
 }
 
 function updateFloatingCartBar() {
@@ -49,15 +69,19 @@ function updateFloatingCartBar() {
   if (!bar || !count || !total) return;
 
   const cart = getCart();
-  let itemCount = 0, amount = 0;
+  let itemCount = 0;
+  let amount = 0;
 
-  Object.values(cart).forEach(line => {
-    // line is { id: "12", qty: N } — look up real product price from products[] (single source of truth)
-    if (!line || typeof line.qty !== "number") return;
-    const prod = products.find(p => String(p.id) === String(line.id));
+  Object.values(cart).forEach((line) => {
+    if (!line) return;
+    const qty = Number(line.qty) || 0;
+    if (!qty) return;
+
+    const prod = products.find((p) => String(p.id) === String(line.id));
     if (prod) {
-      itemCount += line.qty;
-      amount += line.qty * Number(prod.newPrice || 0);
+      const price = Number(prod.newPrice) || 0;
+      itemCount += qty;
+      amount += qty * price;
     }
   });
 
@@ -67,14 +91,17 @@ function updateFloatingCartBar() {
 }
 
 function bindCartUI(id, prod, addBtn, qtyWrap, qtySpan) {
-  // normalize id as string (consistent key shape)
-  const key = String(id);
+  const key = String(id); // normalize
 
   let cart = getCart();
-  if (cart[key]) { addBtn.style.display = "none"; qtyWrap.style.display = "flex"; qtySpan.textContent = cart[key].qty; }
+  if (cart[key]) {
+    addBtn.style.display = "none";
+    qtyWrap.style.display = "flex";
+    qtySpan.textContent = cart[key].qty;
+  }
 
   // Add
-  addBtn.addEventListener("click", e => {
+  addBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     cart = getCart();
     cart[key] = { id: key, qty: 1 };
@@ -86,22 +113,22 @@ function bindCartUI(id, prod, addBtn, qtyWrap, qtySpan) {
   });
 
   // +
-  qtyWrap.querySelector(".increase-btn").addEventListener("click", e => {
+  qtyWrap.querySelector(".increase-btn")?.addEventListener("click", (e) => {
     e.stopPropagation();
     cart = getCart();
     if (!cart[key]) cart[key] = { id: key, qty: 0 };
-    cart[key].qty++;
+    cart[key].qty = (Number(cart[key].qty) || 0) + 1;
     saveCart(cart);
     qtySpan.textContent = cart[key].qty;
     updateFloatingCartBar();
   });
 
   // –
-  qtyWrap.querySelector(".decrease-btn").addEventListener("click", e => {
+  qtyWrap.querySelector(".decrease-btn")?.addEventListener("click", (e) => {
     e.stopPropagation();
     cart = getCart();
     if (!cart[key]) return;
-    cart[key].qty--;
+    cart[key].qty = (Number(cart[key].qty) || 0) - 1;
     if (cart[key].qty <= 0) {
       delete cart[key];
       saveCart(cart);
@@ -115,18 +142,33 @@ function bindCartUI(id, prod, addBtn, qtyWrap, qtySpan) {
   });
 }
 
+/*************  WISHLIST HELPERS (safeStorage)  *************/
 function getWishlist() {
-  return JSON.parse(localStorage.getItem("wishlist")) || [];
+  try {
+    const raw = window.safeStorage.getItem("wishlist");
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.warn("⚠️ wishlist read blocked:", e);
+    return [];
+  }
 }
+
 function saveWishlist(wishlist) {
-  localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  try {
+    window.safeStorage.setItem("wishlist", JSON.stringify(wishlist));
+  } catch (e) {
+    console.warn("⚠️ wishlist write blocked:", e);
+  }
 }
+
 function toggleWishlist(productId) {
-  let wishlist = getWishlist();
-  const index = wishlist.indexOf(productId.toString());
+  const idStr = String(productId);
+  let wishlist = getWishlist().map(String);
+
+  const index = wishlist.indexOf(idStr);
   let action;
   if (index === -1) {
-    wishlist.push(productId.toString());
+    wishlist.push(idStr);
     action = "added";
     showToast("Added to wishlist ❤️");
   } else {
@@ -134,40 +176,71 @@ function toggleWishlist(productId) {
     action = "removed";
     showToast("Removed from wishlist 💔");
   }
+
   saveWishlist(wishlist);
   return action;
 }
 
-/*************  MAIN PRODUCT  *************/
-const productId = +new URLSearchParams(location.search).get("id");
-const product = products.find(p => p.id === productId);
-if (!product) { document.getElementById("productDetail").innerHTML = "<p>Product not found</p>"; throw new Error(); }
+/*************  MAIN PRODUCT FETCH  *************/
+const productId = Number(new URLSearchParams(location.search).get("id"));
+const product = products.find((p) => Number(p.id) === productId);
 
-let slideIndex = 0, player;
+if (!product) {
+  const detail = document.getElementById("productDetail");
+  if (detail) {
+    detail.innerHTML =
+      "<p style='text-align:center; padding:40px; color:red;'>Product not found</p>";
+  }
+  throw new Error("Product not found");
+}
+
+let slideIndex = 0,
+  player;
+
 function isMobile() {
   return window.innerWidth < 768;
 }
-const slides = [...product.images, ...(!isMobile() && product.video ? ["video"] : [])];
 
-renderProduct(); renderRelated(); updateFloatingCartBar();
+const slides = [
+  ...product.images,
+  ...(!isMobile() && product.video ? ["video"] : []),
+];
 
+// Initial renders
+renderProduct();
+renderRelated();
+updateFloatingCartBar();
+
+/*************  RENDER MAIN PRODUCT  *************/
 function renderProduct() {
   const detail = document.getElementById("productDetail");
-  const mediaHTML = slides.map(m => m === "video"
-    ? `<div class="slide video-thumb">
-        <div class="video-thumbnail" onclick="loadVideoOnClick(this,'${product.video}')">
-          <img src="https://img.youtube.com/vi/${vidId(product.video)}/hqdefault.jpg"/>
-          <div class="play-button">▶️</div>
-        </div>
-      </div>`
-    : `: <div class="slide"><img src="${m}" class="product-main-img zoomable" /></div>`
-  ).join("");
+  if (!detail) return;
 
-  const dots = slides.map((_, i) =>
-    `<span class="dot" onclick="setSlide(${i})"></span>`
-  ).join("");
+  const mediaHTML = slides
+    .map((m) =>
+      m === "video"
+        ? `<div class="slide video-thumb">
+            <div class="video-thumbnail" onclick="loadVideoOnClick(this,'${product.video}')">
+              <img src="https://img.youtube.com/vi/${vidId(
+                product.video
+              )}/hqdefault.jpg"/>
+              <div class="play-button">▶️</div>
+            </div>
+          </div>`
+        : `<div class="slide">
+             <img src="${m}" class="product-main-img zoomable" />
+           </div>`
+    )
+    .join("");
 
-  const inCart = getCart()[product.id];
+  const dots = slides
+    .map(
+      (_, i) => `<span class="dot" onclick="setSlide(${i})"></span>`
+    )
+    .join("");
+
+  const inCart = getCart()[String(product.id)];
+
   detail.innerHTML = `
     <div class="slideshow" id="slideshow">
       ${mediaHTML}
@@ -176,7 +249,7 @@ function renderProduct() {
       <div class="dots">${dots}</div>
     </div>
     <h2>${product.name}</h2>
-    ${product.descriptionHTML ? `<div class="product-description">${product.descriptionHTML}</div>` : ''}
+    ${product.descriptionHTML ? `<div class="product-description">${product.descriptionHTML}</div>` : ""}
     <p class="price">
       <span class="old">₹${product.oldPrice}</span>
       <span class="new">₹${product.newPrice}</span>
@@ -184,57 +257,107 @@ function renderProduct() {
     </p>
     ${product.inStock ? "" : `<div class="stock-badge">Out of Stock</div>`}
     <div class="button-group">
-  ${product.inStock
-    ? `
-      <button class="add-to-cart-btn" style="${inCart ? "display:none" : ""}">Add to Cart</button>
-      <div class="quantity-controls" style="${inCart ? "display:flex" : "display:none"}">
-        <button class="decrease-btn">-</button>
-        <span class="qty">${inCart ? inCart.qty : 1}</span>
-        <button class="increase-btn">+</button>
-      </div>
-      <button class="buy-now-btn" data-id="${product.id}">Buy Now</button>
-    `
-    : `
-      <a href="tel:+918868839446" class="call-btn">Call Now</a>
-      <a href="https://wa.me/918868839446" class="whatsapp-btn">WhatsApp</a>
-    `}
-</div>`;
+      ${
+        product.inStock
+          ? `
+        <button class="add-to-cart-btn" style="${
+          inCart ? "display:none" : ""
+        }">Add to Cart</button>
+        <div class="quantity-controls" style="${
+          inCart ? "display:flex" : "display:none"
+        }">
+          <button class="decrease-btn">-</button>
+          <span class="qty">${inCart ? inCart.qty : 1}</span>
+          <button class="increase-btn">+</button>
+        </div>
+        <button class="buy-now-btn" data-id="${product.id}">Buy Now</button>
+      `
+          : `
+        <a href="tel:+918868839446" class="call-btn">Call Now</a>
+        <a href="https://wa.me/918868839446" class="whatsapp-btn">WhatsApp</a>
+      `
+      }
+    </div>
+  `;
 
-  // ✅ Inject Watch Video button (only on mobile)
+  // Inject "Watch Video" button (only on mobile)
   const watchBtnHTML = renderWatchButton(product.video);
-  detail.querySelector(".button-group")?.insertAdjacentHTML("beforebegin", watchBtnHTML);
+  if (watchBtnHTML) {
+    detail
+      .querySelector(".button-group")
+      ?.insertAdjacentHTML("beforebegin", watchBtnHTML);
+  }
 
-  // cart bind
+  // Bind cart for main product
   const addBtn = detail.querySelector(".add-to-cart-btn");
-  if (addBtn) {
-    bindCartUI(
-      product.id,
-      product,
-      addBtn,
-      detail.querySelector(".quantity-controls"),
-      detail.querySelector(".qty")
-    );
+  const qtyWrap = detail.querySelector(".quantity-controls");
+  const qtySpan = detail.querySelector(".qty");
+
+  if (addBtn && qtyWrap && qtySpan) {
+    bindCartUI(product.id, product, addBtn, qtyWrap, qtySpan);
   }
 
   initSlides();
   if (product.video) loadYT();
 }
 
-
 /*************  SLIDES / MEDIA  *************/
 function initSlides() {
   updateSlides();
   addSwipe();
-  renderThumbnails(); // 🔥 Show thumbnails below main image
+  renderThumbnails();
 }
-function updateSlides() { document.querySelectorAll(".slide").forEach((s, i) => s.style.display = i === slideIndex ? "block" : "none"); document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === slideIndex)); }
-function nextSlide() { slideIndex = (slideIndex + 1) % slides.length; updateSlides(); }
-function prevSlide() { slideIndex = (slideIndex - 1 + slides.length) % slides.length; updateSlides(); }
-function setSlide(i) { slideIndex = i; updateSlides(); }
-function addSwipe() { const ss = document.getElementById("slideshow"); let x = 0; ss.addEventListener("touchstart", e => x = e.touches[0].clientX); ss.addEventListener("touchend", e => { const dx = e.changedTouches[0].clientX - x; if (dx > 50) prevSlide(); else if (dx < -50) nextSlide(); }); }
+
+function updateSlides() {
+  const slideEls = document.querySelectorAll(".slide");
+  const dotEls = document.querySelectorAll(".dot");
+
+  slideEls.forEach((s, i) => {
+    s.style.display = i === slideIndex ? "block" : "none";
+  });
+
+  dotEls.forEach((d, i) => {
+    d.classList.toggle("active", i === slideIndex);
+  });
+}
+
+function nextSlide() {
+  slideIndex = (slideIndex + 1) % slides.length;
+  updateSlides();
+}
+
+function prevSlide() {
+  slideIndex = (slideIndex - 1 + slides.length) % slides.length;
+  updateSlides();
+}
+
+function setSlide(i) {
+  slideIndex = i;
+  updateSlides();
+}
+
+function addSwipe() {
+  const ss = document.getElementById("slideshow");
+  if (!ss) return;
+
+  let xStart = 0;
+  ss.addEventListener("touchstart", (e) => {
+    xStart = e.touches[0].clientX;
+  });
+
+  ss.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - xStart;
+    if (dx > 50) prevSlide();
+    else if (dx < -50) nextSlide();
+  });
+}
+
 function renderThumbnails() {
   const slideWrap = document.getElementById("slideshow");
   if (!slideWrap || !product.images || product.images.length <= 1) return;
+
+  const existing = document.querySelector(".thumbnail-row");
+  if (existing) existing.remove();
 
   const thumbWrap = document.createElement("div");
   thumbWrap.className = "thumbnail-row";
@@ -243,95 +366,165 @@ function renderThumbnails() {
     const thumb = document.createElement("img");
     thumb.src = img;
     thumb.className = "thumbnail" + (idx === slideIndex ? " active" : "");
-thumb.onclick = () => {
-  setSlide(idx);
-  document.querySelectorAll(".thumbnail").forEach(t => t.classList.remove("active"));
-  thumb.classList.add("active");
-  document.querySelector('.slide').scrollIntoView({ behavior: 'smooth', block: 'center' });
-};
+    thumb.onclick = () => {
+      setSlide(idx);
+      document
+        .querySelectorAll(".thumbnail")
+        .forEach((t) => t.classList.remove("active"));
+      thumb.classList.add("active");
+      document
+        .querySelector(".slide")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    };
     thumbWrap.appendChild(thumb);
   });
 
   slideWrap.insertAdjacentElement("afterend", thumbWrap);
 }
 
-function vidId(u) { const m = u.match(/[\?&]v=([^&#]*)|youtu\.be\/([^&#]*)/); return m ? m[1] || m[2] : ""; }
-function loadVideoOnClick(el, url) { el.outerHTML = `<iframe src='https://www.youtube.com/embed/${vidId(url)}?autoplay=1&rel=0&modestbranding=1' width='100%' height='315' allowfullscreen frameborder='0'></iframe>`; }
-function loadYT() { const v = vidId(product.video); if (!v) return; if (window.YT?.Player) { player = new YT.Player("player", { videoId: v }); } else { window.onYouTubeIframeAPIReady = () => player = new YT.Player("player", { videoId: v }); const s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api"; document.body.appendChild(s); } }
+function vidId(u) {
+  const m = u.match(/[\?&]v=([^&#]*)|youtu\.be\/([^&#]*)/);
+  return m ? m[1] || m[2] : "";
+}
 
+function loadVideoOnClick(el, url) {
+  el.outerHTML = `<iframe src="https://www.youtube.com/embed/${vidId(
+    url
+  )}?autoplay=1&rel=0&modestbranding=1" width="100%" height="315" allowfullscreen frameborder="0"></iframe>`;
+}
 
-// 📍 Create "Watch Video" button (only on mobile)
+function loadYT() {
+  const v = vidId(product.video);
+  if (!v) return;
+
+  if (window.YT?.Player) {
+    player = new YT.Player("player", { videoId: v });
+  } else {
+    window.onYouTubeIframeAPIReady = () => {
+      player = new YT.Player("player", { videoId: v });
+    };
+    const s = document.createElement("script");
+    s.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(s);
+  }
+}
+
+// "Watch Video" button for mobile
 function renderWatchButton(videoUrl) {
   if (!videoUrl || window.innerWidth >= 768) return "";
   const vId = vidId(videoUrl);
   return `<a href="https://www.youtube.com/watch?v=${vId}" class="watch-video-btn" target="_blank" rel="noopener noreferrer">▶ Watch Video on YouTube</a>`;
 }
 
-
-// 📍 Inject Watch Button into renderProduct()
-// Inside renderProduct(), after detail.innerHTML = `...`, add:
-
-
-
-
-
 /*************  RELATED PRODUCTS  *************/
 function renderRelated() {
   const wrap = document.getElementById("relatedProducts");
+  if (!wrap) return;
+
   const currentCategories = product.categories || [product.category];
-let rel = products.filter(p => {
-  if (p.id === productId) return false;
-  const prodCats = p.categories || [p.category];
-  return prodCats.some(cat => currentCategories.includes(cat));
-});
-  if (rel.length < 25) rel = [...rel, ...products.filter(p => p.id !== productId && p.category !== product.category).slice(0, 25 - rel.length)]; else rel = rel.slice(0, 25);
+  let rel = products.filter((p) => {
+    if (Number(p.id) === productId) return false;
+    const prodCats = p.categories || [p.category];
+    return prodCats.some((cat) => currentCategories.includes(cat));
+  });
+
+  if (rel.length < 25) {
+    rel = [
+      ...rel,
+      ...products
+        .filter(
+          (p) =>
+            Number(p.id) !== productId && p.category !== product.category
+        )
+        .slice(0, 25 - rel.length),
+    ];
+  } else {
+    rel = rel.slice(0, 25);
+  }
+
   wrap.innerHTML = "";
-  rel.forEach(prod => {
-    const inCart = getCart()[prod.id];
-    const card = document.createElement("div"); card.className = "product-card";
-   const isInWishlist = getWishlist().includes(prod.id.toString());
-card.innerHTML = `
-  <div class='image-container' style="position:relative;">
-    <img src='${prod.images[0]}' class='product-img' loading="lazy"/>
-    <div class="wishlist-icon" data-id="${prod.id}" style="position:absolute; top:10px; right:10px; font-size:20px; cursor:pointer; color:${isInWishlist ? 'red' : '#aaa'};">
-      ${isInWishlist ? "❤️" : "🤍"}
-    </div>
-  </div>
-  <h3>${prod.name}</h3>
-  <p class='price'><span class='new'>₹${prod.newPrice}</span> <span class='old'>₹${prod.oldPrice}</span></p>
-  <div class='button-group'>
-    ${prod.inStock ? `
-      <button class='add-to-cart-btn' style='${inCart ? "display:none" : ""}'>Add to Cart</button>
-      <div class='quantity-controls' style='${inCart ? "display:flex" : "display:none"}'>
-        <button class='decrease-btn'>-</button>
-        <span class='qty'>${inCart ? inCart.qty : 1}</span>
-        <button class='increase-btn'>+</button>
+  const wishlistNow = getWishlist().map(String);
+
+  rel.forEach((prod) => {
+    const key = String(prod.id);
+    const inCart = getCart()[key];
+    const isInWishlist = wishlistNow.includes(key);
+
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    card.innerHTML = `
+      <div class='image-container' style="position:relative;">
+        <img src='${prod.images[0]}' class='product-img' loading="lazy"/>
+        <div class="wishlist-icon" data-id="${prod.id}" style="position:absolute; top:10px; right:10px; font-size:20px; cursor:pointer; color:${
+          isInWishlist ? "red" : "#aaa"
+        };">
+          ${isInWishlist ? "❤️" : "🤍"}
+        </div>
       </div>
-      <button class="buy-now-btn" data-id="${prod.id}">Buy Now</button>
-    ` : `
-      <a href='tel:+918868839446' class='call-btn'>Call Now</a>
-      <a href='https://wa.me/918868839446' class='whatsapp-btn'>WhatsApp</a>
-    `}
-  </div>`;
-;
-    card.querySelector(".image-container").onclick = () => location.href = `product-detail.html?id=${prod.id}`;
-    card.querySelector("h3").onclick = () => location.href = `product-detail.html?id=${prod.id}`;
-    if (prod.inStock) { bindCartUI(prod.id, prod, card.querySelector(".add-to-cart-btn"), card.querySelector(".quantity-controls"), card.querySelector(".qty")); }
+      <h3>${prod.name}</h3>
+      <p class='price'>
+        <span class='new'>₹${prod.newPrice}</span>
+        <span class='old'>₹${prod.oldPrice}</span>
+      </p>
+      <div class='button-group'>
+        ${
+          prod.inStock
+            ? `
+          <button class='add-to-cart-btn' style='${
+            inCart ? "display:none" : ""
+          }'>Add to Cart</button>
+          <div class='quantity-controls' style='${
+            inCart ? "display:flex" : "display:none"
+          }'>
+            <button class='decrease-btn'>-</button>
+            <span class='qty'>${inCart ? inCart.qty : 1}</span>
+            <button class='increase-btn'>+</button>
+          </div>
+          <button class="buy-now-btn" data-id="${prod.id}">Buy Now</button>
+        `
+            : `
+          <a href='tel:+918868839446' class='call-btn'>Call Now</a>
+          <a href='https://wa.me/918868839446' class='whatsapp-btn'>WhatsApp</a>
+        `
+        }
+      </div>
+    `;
+
+    card.querySelector(".image-container").onclick = () =>
+      (location.href = `product-detail.html?id=${prod.id}`);
+    card.querySelector("h3").onclick = () =>
+      (location.href = `product-detail.html?id=${prod.id}`);
+
+    if (prod.inStock) {
+      bindCartUI(
+        prod.id,
+        prod,
+        card.querySelector(".add-to-cart-btn"),
+        card.querySelector(".quantity-controls"),
+        card.querySelector(".qty")
+      );
+    }
+
     wrap.appendChild(card);
+
+    // Wishlist heart handler
     const heart = card.querySelector(".wishlist-icon");
-heart.addEventListener("click", (e) => {
-  e.stopPropagation();
-  const id = heart.getAttribute("data-id");
-  const action = toggleWishlist(id);
-  heart.textContent = action === "added" ? "❤️" : "🤍";
-  heart.style.color = action === "added" ? "red" : "#aaa";
-});
+    heart.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = heart.getAttribute("data-id");
+      const action = toggleWishlist(id);
+      heart.textContent = action === "added" ? "❤️" : "🤍";
+      heart.style.color = action === "added" ? "red" : "#aaa";
+    });
   });
 }
+
+/*************  BUY-NOW HANDLER (safe sessionStorage) *************/
 document.addEventListener("click", function (e) {
   if (e.target.classList.contains("buy-now-btn")) {
-    const productId = e.target.dataset.id;
-    sessionStorage.setItem("buyNowProduct", productId);
+    const pid = e.target.dataset.id;
+    setSS("buyNowProduct", pid);
     window.location.href = "buynow.html";
   }
 });
