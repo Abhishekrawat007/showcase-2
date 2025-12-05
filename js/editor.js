@@ -27,6 +27,10 @@ let filteredProducts = [...products];
 let currentPage = 1;
 const perPage = 30;
 const productList = document.getElementById("productList");
+// 🧾 Orders state
+let ordersListenerAttached = false;
+let initialOrdersLoaded = false;
+let lastOrderTimestamp = 0;
 
 function removeImage(productIndex, imageIndex) {
   showModal({
@@ -547,6 +551,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const successModal = document.getElementById("successModal");
   const successClose = document.getElementById("successClose");
   const successOk = document.getElementById("successOk");
+     // Orders refresh button
+  const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
+  if (refreshOrdersBtn) {
+    refreshOrdersBtn.addEventListener('click', loadOrders);
+  }
+
+  // Ask for notification permission once
+  ensureNotificationPermission();
 
   // Open confirm modal
   submitBtn.addEventListener("click", () => {
@@ -730,6 +742,201 @@ sendBtn?.addEventListener('click', async () => {
   });
 
 })();
+// =========================
+// 🧾 ORDERS: LOAD + REALTIME
+// =========================
+
+// Open Orders section and load data
+function openOrdersSection() {
+  const section = document.getElementById('ordersSection');
+  if (section) {
+    section.style.display = 'block';
+    loadOrders();
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Format timestamp from ISO / ts
+function getOrderTimestamp(order) {
+  try {
+    if (order.timestamp) return new Date(order.timestamp).getTime();
+    if (order.ts) return Number(order.ts) || Date.now();
+  } catch (_) {}
+  return Date.now();
+}
+
+// Nice datetime string
+function formatOrderDate(order) {
+  try {
+    if (order.timestamp) return new Date(order.timestamp).toLocaleString();
+    if (order.ts) return new Date(Number(order.ts)).toLocaleString();
+  } catch (_) {}
+  return '';
+}
+
+// Build one row for table
+function buildOrderRow(order, index) {
+  const tr = document.createElement('tr');
+
+  const itemsText = Array.isArray(order.cart)
+    ? order.cart.map(i => {
+        const parts = [];
+        if (i.title) parts.push(i.title);
+        if (i.size) parts.push(`Size: ${i.size}`);
+        if (i.flavor) parts.push(`Flavor: ${i.flavor}`);
+        if (i.qty || i.quantity) parts.push(`x${i.qty || i.quantity}`);
+        return parts.join(' • ');
+      }).join(' | ')
+    : '';
+
+  const total = order.totalAmount || order.amount || 0;
+  const status =
+    order.payment && order.payment.status
+      ? order.payment.status.toString().toUpperCase()
+      : (order.payment && order.payment.provider === 'COD'
+          ? 'COD / UNPAID'
+          : 'UNKNOWN');
+
+  tr.innerHTML = `
+    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${index}</td>
+    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${order.orderId || ''}</td>
+    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${order.name || ''}</td>
+    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${order.phone || ''}</td>
+    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${total}</td>
+    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${status}</td>
+    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${formatOrderDate(order)}</td>
+    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${itemsText}</td>
+  `;
+  return tr;
+}
+
+// Load all existing orders once
+function loadOrders() {
+  const tbody = document.getElementById('ordersTableBody');
+  const statusEl = document.getElementById('ordersStatusText');
+  if (!tbody) return;
+
+  if (statusEl) statusEl.textContent = 'Loading orders…';
+
+  firebase.database().ref('orders').once('value', snap => {
+    const val = snap.val() || {};
+    const arr = Object.values(val);
+
+    // Sort latest first
+    arr.sort((a, b) => getOrderTimestamp(b) - getOrderTimestamp(a));
+
+    tbody.innerHTML = '';
+    arr.forEach((order, idx) => {
+      const tr = buildOrderRow(order, idx + 1);
+      tbody.appendChild(tr);
+
+      const ts = getOrderTimestamp(order);
+      if (ts > lastOrderTimestamp) lastOrderTimestamp = ts;
+    });
+
+    if (statusEl) {
+      statusEl.textContent = arr.length
+        ? `Showing ${arr.length} orders`
+        : 'No orders yet';
+    }
+
+    initialOrdersLoaded = true;
+    attachOrdersListener();
+  }, err => {
+    console.error('Error loading orders:', err);
+    if (statusEl) statusEl.textContent = 'Error loading orders';
+  });
+}
+
+// Attach realtime listener for new orders
+function attachOrdersListener() {
+  if (ordersListenerAttached) return;
+  ordersListenerAttached = true;
+
+  const ref = firebase.database().ref('orders');
+  ref.on('child_added', snap => {
+    const order = snap.val() || {};
+    const ts = getOrderTimestamp(order);
+
+    // Skip initial ones until first load is done
+    if (!initialOrdersLoaded) return;
+
+    if (ts && ts <= lastOrderTimestamp) return;
+    lastOrderTimestamp = ts;
+
+    addOrderRowToTable(order);
+    showNewOrderNotification(order);
+  });
+}
+
+function addOrderRowToTable(order) {
+  const tbody = document.getElementById('ordersTableBody');
+  if (!tbody) return;
+
+  const currentRows = Array.from(tbody.querySelectorAll('tr'));
+  const tr = buildOrderRow(order, currentRows.length + 1);
+
+  // Insert at top so newest is first
+  if (currentRows.length) {
+    tbody.insertBefore(tr, currentRows[0]);
+  } else {
+    tbody.appendChild(tr);
+  }
+}
+
+// =========================
+// 🔔 SIMPLE TOAST + BROWSER NOTIFS
+// =========================
+
+function showToast(message) {
+  let toast = document.getElementById('editorToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'editorToast';
+    toast.style.position = 'fixed';
+    toast.style.right = '16px';
+    toast.style.bottom = '16px';
+    toast.style.background = '#16a34a';
+    toast.style.color = '#fff';
+    toast.style.padding = '10px 14px';
+    toast.style.borderRadius = '8px';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)';
+    toast.style.zIndex = '9999';
+    toast.style.fontSize = '0.9rem';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.opacity = '1';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+  }, 4000);
+}
+
+function ensureNotificationPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().catch(() => {});
+  }
+}
+
+function showNewOrderNotification(order) {
+  const name = order.name || 'Customer';
+  const total = order.totalAmount || order.amount || 0;
+  const orderId = order.orderId || '';
+
+  showToast(`New order from ${name} (₹${total})`);
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification('New order received', {
+        body: `${name} · ₹${total} · ${orderId}`
+      });
+    } catch (e) {
+      console.warn('Notification error:', e);
+    }
+  }
+}
+
 /* ---------- 🆕 New Arrival Management UI & Logic ---------- */
 (function () {
   const btn = document.getElementById('btn-newarrival');
@@ -949,3 +1156,15 @@ sendBtn?.addEventListener('click', async () => {
   // small helper escapeHtml used earlier
   function escapeHtml(s=''){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 })();
+window.addProduct = addProduct;
+window.exportProducts = exportProducts;
+window.undoChanges = undoChanges;
+window.logout = logout;
+window.exitEditor = exitEditor;
+window.updateField = updateField;
+window.updateImages = updateImages;
+window.updateTags = updateTags;
+window.handleImageUpload = handleImageUpload;
+window.deleteProduct = deleteProduct;
+window.debouncedSearch = debouncedSearch;
+window.openOrdersSection = openOrdersSection;

@@ -607,14 +607,7 @@ body.dark-mode .btn-cancel {
 })();
 </script>
 
-<!-- Provide convenient local aliases for other scripts -->
-<script>
-  // Make sure init-firebase ran and exposed window.database
-  window.db = window.database || null;            // use window.db or window.database in other scripts
-  window.CLOUDINARY_URL = window.__CONFIG?.cloudinary?.url || '';
-  window.CLOUDINARY_PRESET = window.__CONFIG?.cloudinary?.preset || '';
-  console.log('CONFIG loaded:', !!window.__CONFIG, 'Firebase DB:', !!window.db, 'Cloudinary:', !!window.CLOUDINARY_URL);
-</script>
+
 </head>
 <body>
 <script>
@@ -715,6 +708,7 @@ if (token) {
     <button class="exit" onclick="exitEditor()">🚪 Exit Editor</button>
     <button class="dark-toggle" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
     <button class="logout" onclick="logout()">🔐 Logout</button>
+        <button class="export" onclick="openOrdersSection()">📦 Orders</button>
     <button id="btn-broadcast" class="broadcast" style="background:#6f42c1;">🔔 Broadcast</button>
     <button id="btn-newarrival" class="newarrival" style="background:#17a2b8;">🆕 New Arrival</button>
     <button id="btn-stylish" style="background:#ff7b00;">🎨 Stylish Pages</button>
@@ -729,7 +723,41 @@ if (token) {
  
   </div>
 
- 
+ <!-- 🧾 Orders Section (hidden by default) -->
+<section id="ordersSection" style="display:none; margin-top:2rem;">
+  <h2 style="margin-bottom:0.5rem;">Orders</h2>
+  <p style="margin-bottom:1rem; color:#6b7280; font-size:0.9rem;">
+    All customer orders from your website (live from Firebase).
+  </p>
+
+  <div style="margin-bottom:1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+    <button id="refreshOrdersBtn" class="export">🔁 Refresh Orders</button>
+    <span id="ordersStatusText" style="font-size:0.8rem; color:#6b7280;">
+      Orders not loaded yet.
+    </span>
+  </div>
+
+  <div style="overflow:auto; max-height:70vh; border-radius:8px; border:1px solid #e5e7eb;">
+    <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+      <thead style="background:#f9fafb;">
+        <tr>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">#</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Order ID</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Customer</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Phone</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Total (₹)</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Payment</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Time</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Items</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTableBody">
+        <!-- Filled by JS -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <h2 id="modal-title">Title</h2>
@@ -768,6 +796,7 @@ if (token) {
     🚀 Submit & Publish
   </button>
 </div>
+
 
 
 <div id="successModal" class="modal hidden">
