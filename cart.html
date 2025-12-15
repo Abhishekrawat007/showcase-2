@@ -1035,6 +1035,7 @@ const payload = {
       </div>
     `;// 🔥 Hide all inputs & payment UI after success
 const orderForm = document.getElementById("orderForm");
+document.getElementById("orderForm").innerHTML = successHTML;
 
 // remove all form controls if any remain
 orderForm.querySelectorAll(
