@@ -27,57 +27,18 @@
 <link rel="icon" type="image/png" sizes="192x192" href="web-app-manifest-192x192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="web-app-manifest-512x512.png">
 <link rel="stylesheet" href="css/buynow.css">
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
  <script src="js/config.js"></script>
-<script src="js/init-firebase.js"></script>
+
 
 <!-- Razorpay -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="js/safe-storage.js"></script>
 
-<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
-<script>
-(function(){
-  // alias for new code
-  window.db = window.database || null;
 
-  // expose window.database getter so other code can read window.database even if they read it later
-  try {
-    Object.defineProperty(window, 'database', {
-      get: function() { return window.db; },
-      configurable: true
-    });
-  } catch (e) {
-    // fallback if defineProperty blocked
-    if (!window.database) window.database = window.db;
-  }
-
-  // Monkey-patch firebase.database() so old code keeps working.
-  // Ensure firebase SDK is loaded and only patch once.
-  if (window.firebase && !firebase.__dbPatched) {
-    firebase.__dbPatched = true;
-    // Preserve original if present (for safety)
-    firebase.__originalDatabaseFn = firebase.database || null;
-    firebase.database = function() {
-      // return underlying db reference created by init-firebase.js
-      if (window.db) return window.db;
-      // fallback: if original exists, call it
-      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
-      // otherwise return null to avoid throwing in caller
-      return null;
-    };
-    // Helpful console info for debugging
-    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
-  } else {
-    // still log so you can diagnose missing init
-    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
-  }
-})();
-</script>
  <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DBDC7X6FJR"></script>
 <script>
@@ -558,8 +519,13 @@
       timestamp: new Date().toISOString()
     };
 
-    try {
-      await firebase.database().ref("orders").push(order);
+   try {
+  // Save order via Netlify Function (shared backend)
+  await fetch("/.netlify/functions/saveOrder", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(order)
+  });
 
       // email verification check
       window.currentOrderId = orderId;

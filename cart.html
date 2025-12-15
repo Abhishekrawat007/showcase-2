@@ -40,49 +40,8 @@
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script> 
 
 <script src="js/config.js"></script>
-<script src="js/init-firebase.js"></script>
+
 <script src="js/safe-storage.js"></script>
-
-
-<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
-<script>
-(function(){
-  // alias for new code
-  window.db = window.database || null;
-
-  // expose window.database getter so other code can read window.database even if they read it later
-  try {
-    Object.defineProperty(window, 'database', {
-      get: function() { return window.db; },
-      configurable: true
-    });
-  } catch (e) {
-    // fallback if defineProperty blocked
-    if (!window.database) window.database = window.db;
-  }
-
-  // Monkey-patch firebase.database() so old code keeps working.
-  // Ensure firebase SDK is loaded and only patch once.
-  if (window.firebase && !firebase.__dbPatched) {
-    firebase.__dbPatched = true;
-    // Preserve original if present (for safety)
-    firebase.__originalDatabaseFn = firebase.database || null;
-    firebase.database = function() {
-      // return underlying db reference created by init-firebase.js
-      if (window.db) return window.db;
-      // fallback: if original exists, call it
-      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
-      // otherwise return null to avoid throwing in caller
-      return null;
-    };
-    // Helpful console info for debugging
-    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
-  } else {
-    // still log so you can diagnose missing init
-    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
-  }
-})();
-</script>
 
   <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DBDC7X6FJR"></script>
@@ -889,7 +848,12 @@ const orderObj = {
 
 // push to firebase (non-blocking for user but we await to ensure saved)
 try {
-  await firebase.database().ref("orders").push(orderObj);
+  await fetch("/.netlify/functions/saveOrder", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(orderObj)
+});
+
   console.log('Firebase order saved (before online payment):', orderId);
 } catch (err) {
   console.warn('Firebase push before payment failed:', err);
@@ -1349,24 +1313,18 @@ const payload = {
   messageText,
   ts: Date.now()
 };
-// Save order to Firebase (COD)
+// Save order via Netlify Function (COD)
 try {
-  const orderToSave = {
-    orderId,
-    name,
-    phone,
-    email: (document.getElementById('customerEmail')?.value || '').trim().toLowerCase(),
-    cart: payload.cart,
-    totalAmount: payload.totalAmount,
-    isPaid: false,
-    payment: payload.payment,
-    timestamp: new Date().toISOString()
-  };
-  await firebase.database().ref("orders").push(orderToSave);
-  console.log('Firebase COD order saved:', orderId);
+  await fetch("/.netlify/functions/saveOrder", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  console.log("COD order saved via saveOrder:", orderId);
 } catch (err) {
-  console.warn('Firebase save for COD failed:', err);
+  console.error("saveOrder COD failed:", err);
 }
+
 
 
   
@@ -1497,6 +1455,9 @@ setTimeout(() => {
 }, 300);
  // slight delay for UX smoothness
 }
+
+
+
 async function generateAndSendPDF(orderData) {
   try {
     // If caller marked __noNotify, just generate the PDF locally (or upload to a different endpoint).

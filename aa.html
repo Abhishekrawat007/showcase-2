@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Editor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      padding-top: 60px;
+    }
+    
+    /* Fixed Header */
+    .admin-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #fff;
+      border-bottom: 1px solid #e5e5e7;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .hamburger {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 24px;
+    }
+    
+    .admin-title {
+      flex: 1;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: #f5f5f7;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+    
+    .icon-btn:hover { background: #e5e5e7; }
+    
+    /* Desktop Controls */
+    .controls {
+      background: #fff;
+      padding: 16px 20px;
+      margin: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .control-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    
+    .control-group:last-child { margin-bottom: 0; }
+    
+    .group-label {
+      width: 100%;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #86868b;
+      margin-bottom: 6px;
+    }
+    
+    .controls button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
+    
+    .controls button:hover {
+      background: #e5e5e7;
+      transform: translateY(-1px);
+    }
+    
+    .add { background: #0071e3 !important; color: #fff !important; }
+    .add:hover { background: #0077ed !important; }
+    
+    .export { background: #34c759 !important; color: #fff !important; }
+    .export:hover { background: #30d158 !important; }
+    
+    .logout { background: #ff3b30 !important; color: #fff !important; }
+    .logout:hover { background: #ff453a !important; }
+    
+    /* Mobile Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 60px;
+      left: -280px;
+      width: 280px;
+      height: calc(100vh - 60px);
+      background: #fff;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 999;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    .sidebar.open { left: 0; }
+    
+    .overlay {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 998;
+    }
+    
+    .overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    /* Search Box */
+    .search-box {
+      padding: 0 20px;
+      margin-bottom: 20px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e5e5e7;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #fff;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: #0071e3;
+    }
+    
+    /* Product List */
+    .product-list {
+      padding: 0 20px 20px;
+    }
+    
+    /* Dark Mode */
+    body.dark-mode {
+      background: #000;
+      color: #f5f5f7;
+    }
+    
+    body.dark-mode .admin-header {
+      background: #1d1d1f;
+      border-bottom-color: #2d2d2f;
+    }
+    
+    body.dark-mode .controls,
+    body.dark-mode .sidebar {
+      background: #1d1d1f;
+    }
+    
+    body.dark-mode .icon-btn,
+    body.dark-mode .controls button {
+      background: #2d2d2f;
+      color: #f5f5f7;
+    }
+    
+    body.dark-mode .icon-btn:hover,
+    body.dark-mode .controls button:hover {
+      background: #3d3d3f;
+    }
+    
+    body.dark-mode .search-box input {
+      background: #1d1d1f;
+      border-color: #2d2d2f;
+      color: #f5f5f7;
+    }
+    
+    body.dark-mode .group-label {
+      color: #86868b;
+    }
+    
+    /* Mobile */
+    @media (max-width: 768px) {
+      .hamburger { display: block; }
+      .admin-title { text-align: left; margin-left: 12px; }
+      .controls { display: none; }
+      
+      .sidebar .control-group {
+        flex-direction: column;
+      }
+      
+      .sidebar button {
+        width: 100%;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed Header -->
+  <header class="admin-header">
+    <button class="hamburger" id="hamburger">☰</button>
+    <h1 class="admin-title">Sublime Admin</h1>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleDarkMode()" title="Dark Mode">🌙</button>
+      <button class="icon-btn" onclick="logout()" title="Logout">🔐</button>
+    </div>
+  </header>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Mobile Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="control-group">
+      <div class="group-label">Core Editing</div>
+      <button class="add" onclick="addProduct()">➕ Add Product</button>
+      <button class="undo" onclick="undoChanges()">↩️ Undo Changes</button>
+    </div>
+    
+    <div class="control-group">
+      <div class="group-label">Publishing</div>
+      <button class="export" onclick="exportProducts()">💾 Export product.js</button>
+    </div>
+    
+    <div class="control-group">
+      <div class="group-label">Admin Tools</div>
+      <button class="export" onclick="openOrdersSection()">📦 Orders</button>
+      <button onclick="openBroadcast()">🔔 Broadcast</button>
+      <button onclick="openNewArrival()">🆕 New Arrival</button>
+      <button onclick="openStylish()">🎨 Stylish Pages</button>
+    </div>
+    
+    <div class="control-group">
+      <div class="group-label">Account</div>
+      <button class="exit" onclick="exitEditor()">🚪 Exit Editor</button>
+      <button class="logout" onclick="logout()">🔐 Logout</button>
+    </div>
+  </aside>
+
+  <!-- Desktop Controls -->
+  <div class="controls">
+    <div class="control-group">
+      <div class="group-label">Core Editing</div>
+      <button class="add" onclick="addProduct()">➕ Add Product</button>
+      <button class="undo" onclick="undoChanges()">↩️ Undo</button>
+    </div>
+    
+    <div class="control-group">
+      <div class="group-label">Publishing</div>
+      <button class="export" onclick="exportProducts()">💾 Export product.js</button>
+    </div>
+    
+    <div class="control-group">
+      <div class="group-label">Admin Tools</div>
+      <button class="export" onclick="openOrdersSection()">📦 Orders</button>
+      <button onclick="openBroadcast()">🔔 Broadcast</button>
+      <button onclick="openNewArrival()">🆕 New Arrival</button>
+      <button onclick="openStylish()">🎨 Stylish Pages</button>
+    </div>
+    
+    <div class="control-group">
+      <div class="group-label">Account</div>
+      <button class="exit" onclick="exitEditor()">🚪 Exit Editor</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="🔍 Search products..." oninput="debouncedSearch()">
+  </div>
+
+  <!-- Products -->
+  <div class="product-list" id="productList">
+    <!-- Your existing product cards go here -->
+  </div>
+
+  <script>
+    // Hamburger Toggle
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    });
+    
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+    
+    // Dark Mode
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+    
+    // Load saved theme
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+    
+    // Placeholder functions (replace with your actual functions)
+    function addProduct() { console.log('Add product'); }
+    function undoChanges() { console.log('Undo'); }
+    function exportProducts() { console.log('Export'); }
+    function openOrdersSection() { console.log('Orders'); }
+    function openBroadcast() { console.log('Broadcast'); }
+    function openNewArrival() { console.log('New Arrival'); }
+    function openStylish() { console.log('Stylish'); }
+    function exitEditor() { console.log('Exit'); }
+    function logout() { console.log('Logout'); }
+    function debouncedSearch() { console.log('Search'); }
+  </script>
+
+</body>
+</html>

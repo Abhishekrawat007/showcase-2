@@ -251,6 +251,8 @@ function undoProduct(index) {
     alert("No recent changes to undo for this product.");
   }
 }
+
+
 async function handleImageUpload(files, index) {
   const uploadBtn = document.querySelector(`#upload-btn-${index}`);
   const spinner = document.querySelector(`#upload-spinner-${index}`);
@@ -259,17 +261,10 @@ async function handleImageUpload(files, index) {
 
   for (const file of files) {
     try {
-      // Convert file to base64
-      const reader = new FileReader();
-      const base64Promise = new Promise((resolve, reject) => {
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      // Compress to 800x800 WebP
+      const compressed = await compressImage(file, 600, 600);
       
-      const imageData = await base64Promise;
-      
-      // Upload via Netlify function
+      // Upload to Cloudinary
       const token = sessionStorage.getItem("adminToken");
       const res = await fetch("/.netlify/functions/uploadImage", {
         method: "POST",
@@ -277,7 +272,7 @@ async function handleImageUpload(files, index) {
           "Content-Type": "application/json",
           "Authorization": "Bearer " + (token || "")
         },
-        body: JSON.stringify({ imageData: imageData }) // Send full data URL
+        body: JSON.stringify({ imageData: compressed })
       });
       
       const data = await res.json();
@@ -298,6 +293,55 @@ async function handleImageUpload(files, index) {
   uploadBtn.disabled = false;
   spinner.style.display = "none";
   renderProducts();
+}
+
+// Compression helper
+function compressImage(file, maxWidth, maxHeight) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions (maintain aspect ratio)
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to WebP
+        canvas.toBlob(
+          (blob) => {
+            const reader2 = new FileReader();
+            reader2.onload = () => resolve(reader2.result);
+            reader2.onerror = reject;
+            reader2.readAsDataURL(blob);
+          },
+          'image/webp',
+          0.75 // 75% quality
+        );
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 function deleteProduct(index) {
   showModal({
@@ -749,11 +793,17 @@ sendBtn?.addEventListener('click', async () => {
 // Open Orders section and load data
 function openOrdersSection() {
   const section = document.getElementById('ordersSection');
+  document.getElementById('productList').style.display = 'none';
+
   if (section) {
     section.style.display = 'block';
     loadOrders();
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+}
+
+function showProductsSection() {
+  document.getElementById('ordersSection').style.display = 'none';
+  document.getElementById('productList').style.display = 'block';
 }
 
 // Format timestamp from ISO / ts
@@ -774,47 +824,13 @@ function formatOrderDate(order) {
   return '';
 }
 
-// Build one row for table
-function buildOrderRow(order, index) {
-  const tr = document.createElement('tr');
 
-  const itemsText = Array.isArray(order.cart)
-    ? order.cart.map(i => {
-        const parts = [];
-        if (i.title) parts.push(i.title);
-        if (i.size) parts.push(`Size: ${i.size}`);
-        if (i.flavor) parts.push(`Flavor: ${i.flavor}`);
-        if (i.qty || i.quantity) parts.push(`x${i.qty || i.quantity}`);
-        return parts.join(' • ');
-      }).join(' | ')
-    : '';
-
-  const total = order.totalAmount || order.amount || 0;
-  const status =
-    order.payment && order.payment.status
-      ? order.payment.status.toString().toUpperCase()
-      : (order.payment && order.payment.provider === 'COD'
-          ? 'COD / UNPAID'
-          : 'UNKNOWN');
-
-  tr.innerHTML = `
-    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${index}</td>
-    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${order.orderId || ''}</td>
-    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${order.name || ''}</td>
-    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${order.phone || ''}</td>
-    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${total}</td>
-    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${status}</td>
-    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${formatOrderDate(order)}</td>
-    <td style="padding:6px 8px; border-bottom:1px solid #e5e7eb;">${itemsText}</td>
-  `;
-  return tr;
-}
 
 // Load all existing orders once
 function loadOrders() {
-  const tbody = document.getElementById('ordersTableBody');
+  
   const statusEl = document.getElementById('ordersStatusText');
-  if (!tbody) return;
+ 
 
   if (statusEl) statusEl.textContent = 'Loading orders…';
 
@@ -825,14 +841,9 @@ function loadOrders() {
     // Sort latest first
     arr.sort((a, b) => getOrderTimestamp(b) - getOrderTimestamp(a));
 
-    tbody.innerHTML = '';
-    arr.forEach((order, idx) => {
-      const tr = buildOrderRow(order, idx + 1);
-      tbody.appendChild(tr);
+   
+   renderOrdersList(arr);
 
-      const ts = getOrderTimestamp(order);
-      if (ts > lastOrderTimestamp) lastOrderTimestamp = ts;
-    });
 
     if (statusEl) {
       statusEl.textContent = arr.length
@@ -847,42 +858,87 @@ function loadOrders() {
     if (statusEl) statusEl.textContent = 'Error loading orders';
   });
 }
+function renderOrdersList(arr) {
+  const list = document.getElementById('ordersList');
+  list.innerHTML = '';
 
-// Attach realtime listener for new orders
+  arr.forEach((order, idx) => {
+    const orderNo = arr.length - idx;
+
+    const btn = document.createElement('button');
+    btn.className = 'order-btn';
+    btn.textContent = `Order #${orderNo}`;
+    btn.onclick = () => openOrderDetail(order, orderNo);
+
+    list.appendChild(btn);
+  });
+}
+
 function attachOrdersListener() {
   if (ordersListenerAttached) return;
   ordersListenerAttached = true;
 
-  const ref = firebase.database().ref('orders');
-  ref.on('child_added', snap => {
-    const order = snap.val() || {};
-    const ts = getOrderTimestamp(order);
-
-    // Skip initial ones until first load is done
-    if (!initialOrdersLoaded) return;
-
-    if (ts && ts <= lastOrderTimestamp) return;
-    lastOrderTimestamp = ts;
-
-    addOrderRowToTable(order);
-    showNewOrderNotification(order);
+  firebase.database().ref('orders').on('value', snap => {
+    const val = snap.val() || {};
+    const arr = Object.values(val);
+    arr.sort((a, b) => getOrderTimestamp(b) - getOrderTimestamp(a));
+    renderOrdersList(arr);
   });
 }
 
-function addOrderRowToTable(order) {
-  const tbody = document.getElementById('ordersTableBody');
-  if (!tbody) return;
 
-  const currentRows = Array.from(tbody.querySelectorAll('tr'));
-  const tr = buildOrderRow(order, currentRows.length + 1);
+function openOrderDetail(order, no) {
+  const itemsHtml = Array.isArray(order.cart)
+    ? order.cart.map(i => `
+        <li>
+          ${i.title || 'Item'}
+          ${i.size ? ` • Size: ${i.size}` : ''}
+          ${i.flavor ? ` • Flavor: ${i.flavor}` : ''}
+          × ${i.qty || i.quantity || 1}
+        </li>
+      `).join('')
+    : '<li>No items</li>';
 
-  // Insert at top so newest is first
-  if (currentRows.length) {
-    tbody.insertBefore(tr, currentRows[0]);
-  } else {
-    tbody.appendChild(tr);
-  }
+  document.getElementById('orderDetailBody').innerHTML = `
+    <h3>Order #${no}</h3>
+
+    <p><b>Order ID:</b> ${order.orderId}</p>
+    <p><b>Time:</b> ${formatOrderDate(order)}</p>
+
+    <hr>
+
+    <p><b>Name:</b> ${order.name}</p>
+    <p><b>Phone:</b> ${order.phone}</p>
+
+    <hr>
+
+    <p><b>Total:</b> ₹${order.totalAmount}</p>
+    <p><b>Payment:</b> ${order.payment?.status || 'N/A'}</p>
+
+    <hr>
+
+    <h4>Items Ordered</h4>
+    <ul>${itemsHtml}</ul>
+
+    <div class="order-actions">
+      <a href="https://wa.me/91${order.phone}" target="_blank">💬 WhatsApp Customer</a>
+      <a href="tel:${order.phone}">📞 Call Customer</a>
+    </div>
+  `;
+
+  document.getElementById('orderDetailModal').classList.remove('hidden');
 }
+
+
+function closeOrderDetail() {
+  document.getElementById('orderDetailModal').classList.add('hidden');
+}
+// Close order detail when clicking outside modal content
+document.getElementById('orderDetailModal').addEventListener('click', (e) => {
+  if (e.target.id === 'orderDetailModal') {
+    closeOrderDetail();
+  }
+});
 
 // =========================
 // 🔔 SIMPLE TOAST + BROWSER NOTIFS
@@ -1168,3 +1224,39 @@ window.handleImageUpload = handleImageUpload;
 window.deleteProduct = deleteProduct;
 window.debouncedSearch = debouncedSearch;
 window.openOrdersSection = openOrdersSection;
+
+
+// Mobile Menu Toggle
+document.addEventListener('DOMContentLoaded', () => {
+  const menuToggle = document.querySelector('.mobile-menu-toggle');
+  const controls = document.querySelector('.controls');
+  
+  if (menuToggle && controls) {
+    menuToggle.addEventListener('click', () => {
+      menuToggle.classList.toggle('active');
+      controls.classList.toggle('active');
+      document.body.style.overflow = controls.classList.contains('active') ? 'hidden' : '';
+    });
+
+    controls.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          menuToggle.classList.remove('active');
+          controls.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && 
+          !controls.contains(e.target) && 
+          !menuToggle.contains(e.target) &&
+          controls.classList.contains('active')) {
+        menuToggle.classList.remove('active');
+        controls.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+});
