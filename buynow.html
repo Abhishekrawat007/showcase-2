@@ -201,6 +201,39 @@
     try { sessionStorage.removeItem(key); }
     catch (e) { console.warn('⚠️ sessionStorage remove blocked:', key); }
   }
+// ===== BuyNow checkout draft (prevents OTP loop) =====
+function persistBuyNowDraft() {
+  const draft = {
+    name: document.getElementById('customerName')?.value || '',
+    phone: document.getElementById('customerPhone')?.value || '',
+    email: document.getElementById('customerEmail')?.value || '',
+    orderId: window.currentOrderId || null,
+    ts: Date.now()
+  };
+  try {
+    sessionStorage.setItem('buyNowDraft', JSON.stringify(draft));
+  } catch (_) {}
+}
+
+function restoreBuyNowDraft() {
+  let raw = null;
+  try { raw = sessionStorage.getItem('buyNowDraft'); } catch (_) {}
+  if (!raw) return;
+
+  let d;
+  try { d = JSON.parse(raw); } catch (_) { return; }
+
+  if (d.name && document.getElementById('customerName'))
+    document.getElementById('customerName').value = d.name;
+
+  if (d.phone && document.getElementById('customerPhone'))
+    document.getElementById('customerPhone').value = d.phone;
+
+  if (d.email && document.getElementById('customerEmail'))
+    document.getElementById('customerEmail').value = d.email;
+
+  if (d.orderId) window.currentOrderId = d.orderId;
+}
 
   // ---------- Product selection (Buy Now) ----------
   const urlParams = new URLSearchParams(window.location.search);
@@ -273,6 +306,13 @@
       deliveryNote.style.display = "none";
     }
   }
+['customerName','customerPhone','customerEmail'].forEach(id => {
+  document.addEventListener('input', e => {
+    if (e.target && e.target.id === id) {
+      persistBuyNowDraft();
+    }
+  });
+});
 
   // ---------- Add to cart & go back (uses safeStorage, id+qty only) ----------
   function addToCartAndGoBack() {
@@ -452,7 +492,9 @@
     });
   })();
 
-  let orderId = "ORD" + Date.now();
+let orderId = ssGet('buyNowOrderId') || ("ORD" + Date.now());
+ssSet('buyNowOrderId', orderId);
+window.currentOrderId = orderId;
 
   function completeOrderAfterEmailVerification() {
     const submitBtn = document.querySelector("#orderForm button[type='submit']");
@@ -461,6 +503,25 @@
       submitBtn.textContent = "Confirm Order";
     }
   }
+function restoreBuyNowOtpState() {
+  const orderId = window.currentOrderId;
+  if (!orderId) return;
+
+  if (
+    ssGet('codeSent_' + orderId) === '1' &&
+    ssGet('emailVerified_' + orderId) !== '1'
+  ) {
+    const email = document.getElementById('customerEmail')?.value;
+    if (email && isValidEmail(email)) {
+      showVerifyPanel(email);
+      setTimeout(() => {
+        document.getElementById('emailCode')?.focus();
+      }, 80);
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', restoreBuyNowOtpState);
 
   // ---------- MAIN submitOrder (COD + Razorpay) ----------
   async function submitOrder(e) {
@@ -661,6 +722,13 @@
                     <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
                   </div>
                 `;
+                   // 🧹 Clear BuyNow OTP + draft state after PAID success
+try {
+  sessionStorage.removeItem('buyNowDraft');
+  sessionStorage.removeItem('buyNowOrderId');
+  sessionStorage.removeItem('emailVerified_' + orderId);
+  sessionStorage.removeItem('codeSent_' + orderId);
+} catch (_) {}
 
                 ssRemove('buyNowProduct');
                 try { window.safeStorage.setItem('cart', '{}'); } catch(_) {}
@@ -739,7 +807,12 @@
           </div>
         </div>
       `;
-
+try {
+  sessionStorage.removeItem('buyNowDraft');
+  sessionStorage.removeItem('buyNowOrderId');
+  sessionStorage.removeItem('emailVerified_' + orderId);
+  sessionStorage.removeItem('codeSent_' + orderId);
+} catch (_) {}
       ssRemove("buyNowProduct");
 
       (function(){
@@ -1077,6 +1150,10 @@
   });
 
 })();
+document.addEventListener('DOMContentLoaded', () => {
+  restoreBuyNowDraft();
+});
+
 </script>
 
 <!-- END: Recent-inputs helper -->
