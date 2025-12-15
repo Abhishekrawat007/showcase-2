@@ -846,19 +846,6 @@ const orderObj = {
   timestamp: new Date().toISOString()
 };
 
-// push to firebase (non-blocking for user but we await to ensure saved)
-try {
-  await fetch("/.netlify/functions/saveOrder", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(orderObj)
-});
-
-  console.log('Firebase order saved (before online payment):', orderId);
-} catch (err) {
-  console.warn('Firebase push before payment failed:', err);
-  // we don't abort payment — we still attempt create-order so merchant doesn't lose sale
-}
 
 // Email verification: validate email & require verification if needed
 const emailVal = orderObj.email || '';
@@ -872,6 +859,7 @@ if (!isValidEmail(emailVal)) {
 
 if (sessionStorage.getItem('emailVerified_' + orderId) !== '1') {
   try {
+    persistCheckoutDraft();
     await sendVerificationCode(emailVal);
     showVerifyPanel(emailVal);
 
@@ -1032,8 +1020,10 @@ const payload = {
 
     // 6) Generate PDF (do NOT set __noNotify here so server receives notification already above)
     setTimeout(() => {
-      try { generateAndSendPDF(Object.assign({}, payload, { __noNotify: true })); } catch (e) { console.warn('generate PDF failed', e); }
-    }, 300);
+  try { generateAndSendPDF(payload); }
+  catch (e) { console.warn('generate PDF failed', e); }
+}, 300);
+
 
     // 7) Success UI + clear cart (same user experience as COD)
     const successHTML = `
@@ -1146,7 +1136,27 @@ document.body.addEventListener('click', (e) => {
 });
 
 
+function persistCheckoutDraft() {
+  const draft = {
+    name: document.getElementById('customerName')?.value || '',
+    phone: document.getElementById('customerPhone')?.value || '',
+    email: document.getElementById('customerEmail')?.value || '',
+    orderId: window.currentOrderId || null,
+    ts: Date.now()
+  };
 
+  try {
+    sessionStorage.setItem('checkoutDraft', JSON.stringify(draft));
+  } catch (_) {}
+}
+
+['customerName','customerPhone','customerEmail'].forEach(id => {
+  document.addEventListener('input', e => {
+    if (e.target && e.target.id === id) {
+      persistCheckoutDraft();
+    }
+  });
+});
 
 
 function updateQty(id, delta) {
@@ -1244,6 +1254,7 @@ const guardOrderId = window.currentOrderId || ('ORD' + Date.now());
 if (sessionStorage.getItem('emailVerified_' + guardOrderId) !== '1') {
   // trigger send and show verification UI (same UX as elsewhere)
   try {
+    persistCheckoutDraft();
     await sendVerificationCode(guardEmail);
     showVerifyPanel(guardEmail);
     setCodeSent(guardOrderId);
@@ -1274,7 +1285,8 @@ if (sessionStorage.getItem('emailVerified_' + guardOrderId) !== '1') {
   errorEl.style.display = "none";
   const cart = getCartFromLocalStorage();
   const totalAmount = calculateTotal(cart);
-  const orderId = "ORD" + Date.now();
+   const orderId = window.currentOrderId || ("ORD" + Date.now());
+window.currentOrderId = orderId;
 
   // 🔔 Telegram message first
 
@@ -1461,15 +1473,11 @@ setTimeout(() => {
 async function generateAndSendPDF(orderData) {
   try {
     // If caller marked __noNotify, just generate the PDF locally (or upload to a different endpoint).
-    if (orderData && orderData.__noNotify) {
-      console.log('generateAndSendPDF: skipping notify because __noNotify true', orderData.orderId);
-      // TODO: do PDF generation or upload separate endpoint if you want the PDF saved.
-      return;
-    }
+ if (orderData && orderData.__noNotify) return;
 
     // Otherwise, perform the notification send (COD flow will hit this).
     // Keep using sendOrderOnce so it dedupes by orderId.
-    const r = await sendOrderOnce(orderData);
+   
     if (r && r.ok) {
       console.log('generateAndSendPDF -> sendTelegramOrder OK', r.status);
     } else {
@@ -1632,6 +1640,56 @@ const panelEl = document.getElementById('emailVerifyPanel');
 if (panelEl) otpObserver.observe(panelEl, { childList: true, subtree: true, attributes: true });
 setTimeout(ensureOtpFit, 80);
 
+function restoreCheckoutDraft() {
+  let raw = null;
+  try {
+    raw = sessionStorage.getItem('checkoutDraft');
+  } catch (_) {}
+
+  if (!raw) return;
+
+  let draft;
+  try {
+    draft = JSON.parse(raw);
+  } catch (_) {
+    return;
+  }
+
+  if (!draft) return;
+
+  if (draft.name && document.getElementById('customerName')) {
+    document.getElementById('customerName').value = draft.name;
+  }
+  if (draft.phone && document.getElementById('customerPhone')) {
+    document.getElementById('customerPhone').value = draft.phone;
+  }
+  if (draft.email && document.getElementById('customerEmail')) {
+    document.getElementById('customerEmail').value = draft.email;
+  }
+
+  if (draft.orderId) {
+    window.currentOrderId = draft.orderId;
+  }
+}
+document.addEventListener('DOMContentLoaded', restoreCheckoutDraft);
+function restoreOtpState() {
+  const orderId = window.currentOrderId;
+  if (!orderId) return;
+
+  if (sessionStorage.getItem('codeSent_' + orderId) === '1' &&
+      sessionStorage.getItem('emailVerified_' + orderId) !== '1') {
+
+    const email = document.getElementById('customerEmail')?.value;
+    if (email && isValidEmail(email)) {
+      showVerifyPanel(email);
+      setTimeout(() => {
+        document.getElementById('otp-1')?.focus();
+      }, 80);
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', restoreOtpState);
 
 </script>
 <script src="js/recent-input.js"></script>
