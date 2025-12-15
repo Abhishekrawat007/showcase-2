@@ -1338,7 +1338,7 @@ const payload = {
   orderId,
   name,
   phone,
-   email: (document.getElementById('customerEmail')?.value || '').trim().toLowerCase(),
+  email: (document.getElementById('customerEmail')?.value || '').trim().toLowerCase(),
   cart: (cart || []).map(i => ({
     id: i.id,
     title: i.title,
@@ -1347,12 +1347,17 @@ const payload = {
     image: i.image || i.img || i.thumbnail || ""
   })),
   totalAmount: totalAmount,
-  amountPaid: totalAmount,
+  amountPaid: 0, // ✅ COD is NOT paid
   currency: 'INR',
-  payment: { provider: 'COD', method: 'cod', status: 'pending' },
+  payment: {
+    provider: 'COD',
+    method: 'cod',
+    status: 'pending'
+  },
   messageText,
   ts: Date.now()
 };
+
 // Save order via Netlify Function (COD)
 try {
   await fetch("/.netlify/functions/saveOrder", {
