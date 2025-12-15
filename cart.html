@@ -1033,18 +1033,7 @@ const payload = {
         <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
         <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
       </div>
-    `;// 🔥 Hide all inputs & payment UI after success
-const orderForm = document.getElementById("orderForm");
-document.getElementById("orderForm").innerHTML = successHTML;
-
-// remove all form controls if any remain
-orderForm.querySelectorAll(
-  'input, label, button:not(#continueShopping), select, textarea'
-).forEach(el => el.remove());
-
-// safety: ensure only success message remains
-orderForm.style.display = 'block';
-
+    `;
     try {
       if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
         window.safeStorage.removeItem('cart');
@@ -1122,6 +1111,19 @@ function simpleSuccessUI({ name, phone, orderId }) {
     </div>
   `;
   document.getElementById("orderForm").innerHTML = successHTML;
+  clearCheckoutState();
+
+  // 🔥 Hide all inputs & payment UI after success
+const orderForm = document.getElementById("orderForm");
+
+// remove all form controls if any remain
+orderForm.querySelectorAll(
+  'input, label, button:not(#continueShopping), select, textarea'
+).forEach(el => el.remove());
+
+// safety: ensure only success message remains
+orderForm.style.display = 'block';
+
   try {
     if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
       window.safeStorage.removeItem('cart');
@@ -1252,6 +1254,22 @@ function loadImageAsBase64(url) {
     img.src = url;
   });
 }
+function clearCheckoutState() {
+  try {
+    // remove saved form data
+    sessionStorage.removeItem('checkoutDraft');
+
+    // remove email verification flags
+    if (window.currentOrderId) {
+      sessionStorage.removeItem('emailVerified_' + window.currentOrderId);
+      sessionStorage.removeItem('codeSent_' + window.currentOrderId);
+    }
+  } catch (_) {}
+
+  // reset runtime order id
+  window.currentOrderId = null;
+}
+
 async function submitOrderFast() {
   // guard: require email verification before allowing submitOrderFast to proceed
 const guardEmail = (document.getElementById('customerEmail')?.value || '').trim().toLowerCase();
@@ -1367,6 +1385,19 @@ function setSS(key, val) {
 }
 
 document.getElementById("orderForm").innerHTML = successHTML;
+clearCheckoutState();
+
+// 🔥 Hide all inputs & payment UI after success
+const orderForm = document.getElementById("orderForm");
+
+// remove all form controls if any remain
+orderForm.querySelectorAll(
+  'input, label, button:not(#continueShopping), select, textarea'
+).forEach(el => el.remove());
+
+// safety: ensure only success message remains
+orderForm.style.display = 'block';
+
 // Make the top Back button behave like "Continue shopping" on success
 // Make the top "Back" button behave like Continue Shopping on success
 (function () {
