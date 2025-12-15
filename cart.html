@@ -1033,8 +1033,17 @@ const payload = {
         <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
         <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
       </div>
-    `;
-    document.getElementById("orderForm").innerHTML = successHTML;
+    `;// 🔥 Hide all inputs & payment UI after success
+const orderForm = document.getElementById("orderForm");
+
+// remove all form controls if any remain
+orderForm.querySelectorAll(
+  'input, label, button:not(#continueShopping), select, textarea'
+).forEach(el => el.remove());
+
+// safety: ensure only success message remains
+orderForm.style.display = 'block';
+
     try {
       if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
         window.safeStorage.removeItem('cart');
@@ -1472,22 +1481,15 @@ setTimeout(() => {
 
 async function generateAndSendPDF(orderData) {
   try {
-    // If caller marked __noNotify, just generate the PDF locally (or upload to a different endpoint).
- if (orderData && orderData.__noNotify) return;
+    // PDF ONLY — no Telegram, no fetch, no beacon
+    console.log('PDF generation started for order:', orderData.orderId);
 
-    // Otherwise, perform the notification send (COD flow will hit this).
-    // Keep using sendOrderOnce so it dedupes by orderId.
-   
-    if (r && r.ok) {
-      console.log('generateAndSendPDF -> sendTelegramOrder OK', r.status);
-    } else {
-      console.warn('generateAndSendPDF -> sendTelegramOrder result', r);
-      // fallback to beacon if needed
-      try { if (navigator.sendBeacon) navigator.sendBeacon('/.netlify/functions/sendTelegramOrder', JSON.stringify(orderData)); } catch(e){console.warn('beacon fallback failed', e);}
-    }
+    // 👉 keep your existing html2canvas / jsPDF logic here
+    // Example (if you already have it elsewhere):
+    // await buildInvoicePDF(orderData);
+
   } catch (err) {
-    console.error('generateAndSendPDF: sendTelegramOrder fetch failed', err);
-    try { if (navigator.sendBeacon) navigator.sendBeacon('/.netlify/functions/sendTelegramOrder', JSON.stringify(orderData)); } catch (e) { console.warn('beacon fallback failed', e); }
+    console.error('PDF generation failed', err);
   }
 }
 
