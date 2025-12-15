@@ -1364,6 +1364,13 @@ try {
 } catch (err) {
   console.error("saveOrder COD failed:", err);
 }
+// 🔔 Send Telegram for COD (deduped)
+try {
+  await sendOrderOnce(payload);
+  console.log('COD Telegram sent');
+} catch (e) {
+  console.warn('COD Telegram failed', e);
+}
 
 
 
