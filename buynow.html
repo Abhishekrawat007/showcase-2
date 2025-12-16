@@ -582,17 +582,13 @@ let quantity = 1;
 
         try {
           verifyBtn.disabled = true;
-      await verifyCodeOnServer(email, code);
+   await verifyCodeOnServer(email, code);
 sessionStorage.setItem('emailVerified_' + orderId, '1');
 hideVerifyPanel();
 
-// Re-submit will see verified flag, no need for skip
-const formBtn = document.querySelector("#orderForm button[type='submit']");
-if (formBtn) {
-  formBtn.disabled = false;
-  formBtn.textContent = "Confirm Order";
-
-}
+// Directly process order (skip re-checking email)
+window.__justVerified = true;  // Flag to skip email check
+submitOrder(new Event("submit"));
         } catch (err) {
           msgEl.textContent = 'Invalid or expired code. Try resend.';
           msgEl.style.display = 'inline';
@@ -694,8 +690,9 @@ if (formBtn) {
       try {
       
       // Check email verification
+// Check email verification (skip if just verified)
 window.currentOrderId = orderId;
-if (!isEmailVerified(orderId)) {
+if (!isEmailVerified(orderId) && !window.__justVerified) {
           try {
             persistBuyNowDraft();
             await sendVerificationCode(email);
@@ -718,7 +715,7 @@ if (!isEmailVerified(orderId)) {
             return;
           }
         }
-
+         window.__justVerified = false;
         // Save order via saveOrder function
         try {
           await fetch("/.netlify/functions/saveOrder", {
