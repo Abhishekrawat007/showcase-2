@@ -1981,7 +1981,12 @@ function debugCheckoutState() {
 setTimeout(() => {
   debugCheckoutState();
 }, 500);
-
+// Hide recent inputs on cart page completely
+document.addEventListener('DOMContentLoaded', () => {
+  const style = document.createElement('style');
+  style.textContent = '.recent-dropdown { display: none !important; }';
+  document.head.appendChild(style);
+});
 </script>
 <script src="js/recent-input.js"></script>
 
