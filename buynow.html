@@ -171,15 +171,17 @@
   <script>
     // ==================== PERSISTENCE FUNCTIONS ====================
     
-    function persistBuyNowDraft() {
-      const draft = {
-        name: document.getElementById('customerName')?.value || '',
-        phone: document.getElementById('customerPhone')?.value || '',
-        email: document.getElementById('customerEmail')?.value || '',
-        orderId: window.currentOrderId || null,
-        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod',
-        timestamp: Date.now()
-      };
+  function persistBuyNowDraft() {
+  const draft = {
+    name: document.getElementById('customerName')?.value || '',
+    phone: document.getElementById('customerPhone')?.value || '',
+    email: document.getElementById('customerEmail')?.value || '',
+    orderId: window.currentOrderId || null,
+    productId: productId || null,  // ← ADD THIS LINE
+    quantity: quantity || 1,        // ← ADD THIS LINE
+    paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod',
+    timestamp: Date.now()
+  };
 
       if (draft.name || draft.phone || draft.email) {
         try {
@@ -255,6 +257,25 @@
         if (draft.orderId) {
           window.currentOrderId = draft.orderId;
         }
+      if (draft.orderId) {
+          window.currentOrderId = draft.orderId;
+        }
+
+        // Restore product and quantity
+        if (draft.productId && !productId) {
+          productId = draft.productId;
+          try {
+            localStorage.setItem("buyNowProduct", productId);
+            sessionStorage.setItem("buyNowProduct", productId);
+          } catch (_) {}
+          
+          // Re-render product
+          const prod = products.find(p => String(p.id) === String(productId));
+          if (prod) {
+            if (draft.quantity) quantity = draft.quantity;
+            renderProduct(prod);
+          }
+        }
 
         // Check if code was sent before reload
         if (draft.orderId && isCodeSent(draft.orderId)) {
@@ -268,23 +289,24 @@
       }, 100);
     }
 
-    function clearBuyNowState() {
-      try {
-        sessionStorage.removeItem('buyNowDraft');
-        localStorage.removeItem('buyNowDraft');
+  function clearBuyNowState() {
+  try {
+    sessionStorage.removeItem('buyNowDraft');
+    localStorage.removeItem('buyNowDraft');
+    localStorage.removeItem('buyNowProduct');  
+    sessionStorage.removeItem('buyNowProduct'); 
 
-        if (window.currentOrderId) {
-          sessionStorage.removeItem('emailVerified_' + window.currentOrderId);
-          sessionStorage.removeItem('codeSent_' + window.currentOrderId);
-          localStorage.removeItem('codeSent_' + window.currentOrderId);
-        }
-        
-        console.log('✅ BuyNow state cleared');
-      } catch (_) {}
-
-      window.currentOrderId = null;
+    if (window.currentOrderId) {
+      sessionStorage.removeItem('emailVerified_' + window.currentOrderId);
+      sessionStorage.removeItem('codeSent_' + window.currentOrderId);
+      localStorage.removeItem('codeSent_' + window.currentOrderId);
     }
+    
+    console.log('✅ BuyNow state cleared');
+  } catch (_) {}
 
+  window.currentOrderId = null;
+}
     function setCodeSent(orderId) {
       try { 
         sessionStorage.setItem('codeSent_' + orderId, '1');
@@ -359,10 +381,30 @@
 
     // ==================== PRODUCT SELECTION ====================
     
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get("id") || sessionStorage.getItem("buyNowProduct");
-    const product = products.find(p => String(p.id) === String(productId));
-    let quantity = 1;
+   // ==================== PRODUCT SELECTION ====================
+
+const urlParams = new URLSearchParams(window.location.search);
+let productId = urlParams.get("id");
+
+// If no ID in URL, try localStorage then sessionStorage
+if (!productId) {
+  try {
+    productId = localStorage.getItem("buyNowProduct") || sessionStorage.getItem("buyNowProduct");
+  } catch (_) {
+    productId = sessionStorage.getItem("buyNowProduct");
+  }
+}
+
+// Save to both storages for persistence
+if (productId) {
+  try {
+    localStorage.setItem("buyNowProduct", productId);
+    sessionStorage.setItem("buyNowProduct", productId);
+  } catch (_) {}
+}
+
+const product = products.find(p => String(p.id) === String(productId));
+let quantity = 1;
 
     if (!product) {
       const section = document.getElementById("productSection");
