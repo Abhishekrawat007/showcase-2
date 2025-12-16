@@ -524,10 +524,7 @@ async function verifyCodeOnServer(email, code) {
 
 // UI show/hide helpers
 function showVerifyPanel(email) {
-    const recentDropdown = document.querySelector('.recent-dropdown');
-  if (recentDropdown) {
-    recentDropdown.style.display = 'none';
-  }
+  
   document.getElementById('verifyEmailAddr').textContent = email;
   document.getElementById('emailVerifyPanel').style.display = 'block';
   document.getElementById('emailVerifyMsg').style.display = 'none';
@@ -1981,14 +1978,9 @@ function debugCheckoutState() {
 setTimeout(() => {
   debugCheckoutState();
 }, 500);
-// Hide recent inputs on cart page completely
-document.addEventListener('DOMContentLoaded', () => {
-  const style = document.createElement('style');
-  style.textContent = '.recent-dropdown { display: none !important; }';
-  document.head.appendChild(style);
-});
+
 </script>
-<script src="js/recent-input.js"></script>
+
 
 </body>
 </html>
