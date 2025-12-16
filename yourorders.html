@@ -4,12 +4,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Your Orders – Sublime Store</title>
   <meta name="description" content="Track and view your past orders from Sublime Store.">
-  <meta name="theme-color" content="#1e88e5"/>
+  <meta name="theme-color" content="#1e88e5"/><!-- Disable Chrome's new progress overlay -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="transparent">
+<meta name="browsermode" content="application">
+<meta name="display" content="standalone">
+
+  <!-- Favicon for most browsers -->
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Android Chrome Icons -->
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="72x72" href="web-app-manifest-72x72.png">
+<link rel="icon" type="image/png" sizes="144x144" href="web-app-manifest-144x144.png">
+<link rel="icon" type="image/png" sizes="192x192" href="web-app-manifest-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="web-app-manifest-512x512.png">
   <link
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 />
     <link rel="stylesheet" href="css/style.css">
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DBDC7X6FJR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DBDC7X6FJR');
+</script>
   <style>
     body {
       margin: 0;
@@ -18,7 +47,7 @@
       padding: 20px;
     }.container {
   max-width: 500px;
-  margin: 120px auto;
+  margin: auto;
   background: white;
   border-radius: 12px;
   padding: 24px;
@@ -224,14 +253,42 @@ body.dark-mode .order-info p {
 body.dark-mode .order-info h4 {
   color: #fff;
 }
-@media (max-width:768px){
-  body{
-    margin-top: 50px;
-  }
+
+/* Ultra-modern Spinner */
+.loader {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: conic-gradient(#1e88e5, #00c6ff, #1e88e5);
+  animation: spin 1s linear infinite;
+  margin: auto;
+  transition: background 0.3s ease;
+}
+
+/* Dark Mode Spinner */
+body.dark-mode .loader {
+  background: conic-gradient(#00c6ff, #22c55e, #00c6ff);
+}
+
+/* Spin Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.no-orders {
+  text-align: center;
+  font-size: 16px;
+  margin-top: 30px;
+  font-weight: 500;
+  color: #333; /* default for light mode */
+}
+
+body.dark-mode .no-orders {
+  color: #eee; /* better for dark mode */
 }
 
 
-  </style>  <!-- Firebase -->  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script></head>
+  </style>  <!-- Firebase -->  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script src="js/config.js"></script>
 <script src="js/init-firebase.js"></script>
 
@@ -274,6 +331,17 @@ body.dark-mode .order-info h4 {
   }
 })();
 </script>
+  <script>
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  function updateThemeColor() {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    metaTheme.setAttribute('content', dark ? '#000000' : '#ffffff');
+  }
+  updateThemeColor();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeColor); 
+</script>
+<script src="js/safe-storage.js"></script>
+</head>
 <body>
    <!-- 🔼 Top Banner -->
       <div class="top-banner" id="topBanner">
@@ -312,6 +380,9 @@ body.dark-mode .order-info h4 {
 <button class="button-primary" onclick="searchOrders()">Show Orders</button>
       <small>We'll never share your number.</small>
     </div>
+<div id="spinner" style="display:none; text-align:center; margin: 20px 0;">
+  <div class="loader"></div>
+</div>
 
     <div id="orderList"></div>
   </div>
@@ -321,6 +392,7 @@ body.dark-mode .order-info h4 {
 function searchOrders() {
   const phone = document.getElementById("phone").value.trim();
   const errorMsg = document.getElementById("phoneError");
+  const spinner = document.getElementById("spinner");
 
   if (!/^[6-9]\d{9}$/.test(phone)) {
     errorMsg.style.display = "block";
@@ -330,7 +402,9 @@ function searchOrders() {
   errorMsg.style.display = "none"; // hide if input is valid
   document.getElementById("phoneSection").style.display = "none";
 
- fetch("/.netlify/functions/getOrders", {
+  spinner.style.display = "block"; // Show spinner
+
+fetch("/.netlify/functions/getOrders", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ phone })
@@ -373,8 +447,20 @@ function searchOrders() {
     `<div class="no-orders">Error loading orders. Please try again.</div>`;
   console.error(err);
 });
+      
 }
 const toggleBtn = document.getElementById('themeToggle');
+
+// New function for spinner theme update
+function updateSpinnerColor() {
+  const loader = document.querySelector('.loader');
+  if (!loader) return;
+  if (document.body.classList.contains('dark-mode')) {
+    loader.style.background = 'conic-gradient(#00c6ff, #22c55e, #00c6ff)';
+  } else {
+    loader.style.background = 'conic-gradient(#1e88e5, #00c6ff, #1e88e5)';
+  }
+}
 
 function applyTheme(mode) {
   if (mode === 'dark') {
@@ -384,11 +470,12 @@ function applyTheme(mode) {
     document.body.classList.remove('dark-mode');
     toggleBtn.textContent = '🌙';
   }
-  localStorage.setItem('theme', mode);
+  window.safeStorage.setItem('theme', mode);  // ✅ FIXED
+  updateSpinnerColor(); // apply immediately on theme change
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const savedMode = localStorage.getItem('theme') || 'light';
+  const savedMode = window.safeStorage.getItem('theme') || 'light';  // ✅ FIXED
   applyTheme(savedMode);
 
   toggleBtn.addEventListener('click', () => {
@@ -396,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme(isDark ? 'light' : 'dark');
   });
 });
+
 function goBack() {
     if (document.referrer && document.referrer.includes(location.hostname)) {
       history.back();
@@ -407,5 +495,8 @@ function goBack() {
 <script src="js/product.js"></script>
  <script src="js/navbar.js"></script>
  <script src="js/search.js" defer></script>
+ <script src="js/pwa-standalone.js"></script>
+  
+ 
 </body>
 </html>
