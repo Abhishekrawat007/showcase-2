@@ -591,8 +591,7 @@ const formBtn = document.querySelector("#orderForm button[type='submit']");
 if (formBtn) {
   formBtn.disabled = false;
   formBtn.textContent = "Confirm Order";
-  // Add small delay to ensure sessionStorage is set
-  setTimeout(() => submitOrder(new Event("submit")), 50);
+
 }
         } catch (err) {
           msgEl.textContent = 'Invalid or expired code. Try resend.';
