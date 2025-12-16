@@ -583,17 +583,18 @@ let quantity = 1;
         try {
           verifyBtn.disabled = true;
           msgEl.style.display = 'none';
-          await verifyCodeOnServer(email, code);
-          sessionStorage.setItem('emailVerified_' + orderId, '1');
-          hideVerifyPanel();
+        await verifyCodeOnServer(email, code);
+sessionStorage.setItem('emailVerified_' + orderId, '1');
+hideVerifyPanel();
 
-          // Re-run submit flow
-          const formBtn = document.querySelector("#orderForm button[type='submit']");
-          if (formBtn) {
-            formBtn.disabled = false;
-            formBtn.textContent = "Confirm Order";
-            submitOrder(new Event("submit"));
-          }
+// Mark as verified and re-submit
+window.__skipEmailCheck = true;  // ← ADD THIS
+const formBtn = document.querySelector("#orderForm button[type='submit']");
+if (formBtn) {
+  formBtn.disabled = false;
+  formBtn.textContent = "Confirm Order";
+  submitOrder(new Event("submit"));
+}
         } catch (err) {
           msgEl.textContent = 'Invalid or expired code. Try resend.';
           msgEl.style.display = 'inline';
@@ -693,9 +694,10 @@ let quantity = 1;
       };
 
       try {
-        // Check email verification
-        window.currentOrderId = orderId;
-        if (!isEmailVerified(orderId)) {
+      
+      // Check email verification
+window.currentOrderId = orderId;
+if (!isEmailVerified(orderId) && !window.__skipEmailCheck) {  
           try {
             persistBuyNowDraft();
             await sendVerificationCode(email);
@@ -718,7 +720,7 @@ let quantity = 1;
             return;
           }
         }
-
+window.__skipEmailCheck = false;
         // Save order via saveOrder function
         try {
           await fetch("/.netlify/functions/saveOrder", {
