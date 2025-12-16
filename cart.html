@@ -62,6 +62,43 @@
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeColor);
 </script>
 
+<style>
+/* Additional CSS for restored inputs */
+@keyframes restored-flash {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: #c8e6c9; }
+}
+
+input.was-restored {
+  animation: restored-flash 1s ease-in-out;
+}
+
+.draft-restored-message {
+  background: #e8f5e9;
+  border: 1px solid #4caf50;
+  color: #2e7d32;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
+
 </head>
 <body class="cart-page" id="cartBody">
    <!-- 🔼 Top Banner -->
@@ -162,7 +199,7 @@
 
   <div style="margin-top: 20px; text-align: center; font-size: 13px; color: #555;">
     ✅ Thank you for shopping at <strong>Sublime Store</strong><br>
-    We’ll call or WhatsApp you to confirm your order.
+    We'll call or WhatsApp you to confirm your order.
   </div>
 </div>
 
@@ -449,12 +486,12 @@ form.innerHTML = `
     </button>
   </div>
 `;
+
   // Restore saved data after creating form
   setTimeout(() => {
     restoreCheckoutDraft();
   }, 50);
 }
-
 
 // Run once (safe to call multiple times)
 replacePaymentFormHTML();
@@ -521,15 +558,21 @@ function hideVerifyPanel() {
 }
 
 function setCodeSent(orderId) {
-  try { sessionStorage.setItem('codeSent_' + orderId, '1'); } catch(_) {}
+  try { 
+    sessionStorage.setItem('codeSent_' + orderId, '1');
+    localStorage.setItem('codeSent_' + orderId, '1');
+  } catch(_) {}
   const hint = document.getElementById('verifyHint');
   if (hint) hint.style.display = 'inline-flex';
 }
 function isCodeSent(orderId) {
-  return !!sessionStorage.getItem('codeSent_' + orderId);
+  return !!(sessionStorage.getItem('codeSent_' + orderId) || localStorage.getItem('codeSent_' + orderId));
 }
 function clearCodeSent(orderId) {
-  try { sessionStorage.removeItem('codeSent_' + orderId); } catch(_) {}
+  try { 
+    sessionStorage.removeItem('codeSent_' + orderId);
+    localStorage.removeItem('codeSent_' + orderId);
+  } catch(_) {}
   const hint = document.getElementById('verifyHint');
   if (hint) hint.style.display = 'none';
 }
@@ -757,8 +800,7 @@ async function handlePayment() {
 
   const method = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
 
-  // COD: use your existing submitOrderFast if available
- // COD: require email + verification before submitting
+  // COD: require email + verification before submitting
 if (method === 'cod') {
   // read email & ensure valid
   const emailVal = (document.getElementById('customerEmail')?.value || '').trim().toLowerCase();
@@ -777,6 +819,7 @@ const orderId = window.currentOrderId; // <-- IMPORTANT: use this instead of und
 // If the user hasn't verified this email for this order in this session, send code & show UI
 if (sessionStorage.getItem('emailVerified_' + orderId) !== '1') {
   try {
+    persistCheckoutDraft(); // Save before sending code
     await sendVerificationCode(emailVal);
     showVerifyPanel(emailVal);
 
@@ -1153,40 +1196,247 @@ document.body.addEventListener('click', (e) => {
 });
 
 
+// ==================== UPDATED PERSISTENCE FUNCTIONS ====================
+
 function persistCheckoutDraft() {
   const draft = {
     name: document.getElementById('customerName')?.value || '',
     phone: document.getElementById('customerPhone')?.value || '',
     email: document.getElementById('customerEmail')?.value || '',
     orderId: window.currentOrderId || null,
-    ts: Date.now()
+    paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod',
+    timestamp: Date.now()
   };
 
   // Only save if at least one field has data
   if (draft.name || draft.phone || draft.email) {
     try {
-      sessionStorage.setItem('checkoutDraft', JSON.stringify(draft));
-      console.log('✅ Checkout draft saved:', draft);
+      // Save to BOTH sessionStorage AND localStorage for redundancy
+      const data = JSON.stringify(draft);
+      sessionStorage.setItem('checkoutDraft', data);
+      localStorage.setItem('checkoutDraft', data);
+      console.log('✅ Draft saved to both storages:', draft);
     } catch (e) {
       console.warn('⚠️ Failed to save checkout draft:', e);
     }
   }
 }
-// Auto-save form data on input (with delegation for dynamically created elements)
+
+function restoreCheckoutDraft() {
+  let raw = null;
+  
+  // Try sessionStorage first, then localStorage
+  try {
+    raw = sessionStorage.getItem('checkoutDraft') || localStorage.getItem('checkoutDraft');
+  } catch (_) {
+    try {
+      raw = localStorage.getItem('checkoutDraft');
+    } catch (_) {}
+  }
+
+  if (!raw) {
+    console.log('ℹ️ No checkout draft to restore');
+    return;
+  }
+
+  let draft;
+  try {
+    draft = JSON.parse(raw);
+  } catch (_) {
+    console.warn('⚠️ Invalid checkout draft data');
+    return;
+  }
+
+  if (!draft) return;
+
+  // Check if draft is too old (more than 30 minutes)
+  const age = Date.now() - (draft.timestamp || 0);
+  if (age > 30 * 60 * 1000) {
+    console.log('ℹ️ Draft too old, clearing');
+    try {
+      sessionStorage.removeItem('checkoutDraft');
+      localStorage.removeItem('checkoutDraft');
+    } catch (_) {}
+    return;
+  }
+
+  console.log('🔄 Restoring checkout draft:', draft);
+
+  // Wait a bit for form to be ready
+  setTimeout(() => {
+    // Restore name
+    const nameInput = document.getElementById('customerName');
+    if (nameInput && draft.name) {
+      nameInput.value = draft.name;
+      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      nameInput.classList.add('was-restored');
+      console.log('✅ Restored name:', draft.name);
+    }
+
+    // Restore phone
+    const phoneInput = document.getElementById('customerPhone');
+    if (phoneInput && draft.phone) {
+      phoneInput.value = draft.phone;
+      phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+      phoneInput.classList.add('was-restored');
+      console.log('✅ Restored phone:', draft.phone);
+    }
+
+    // Restore email
+    const emailInput = document.getElementById('customerEmail');
+    if (emailInput && draft.email) {
+      emailInput.value = draft.email;
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      emailInput.classList.add('was-restored');
+      console.log('✅ Restored email:', draft.email);
+    }
+
+    // Restore payment method
+    if (draft.paymentMethod) {
+      const pmRadio = document.querySelector(`input[name="paymentMethod"][value="${draft.paymentMethod}"]`);
+      if (pmRadio) {
+        pmRadio.checked = true;
+        console.log('✅ Restored payment method:', draft.paymentMethod);
+      }
+    }
+
+    // Restore orderId
+    if (draft.orderId) {
+      window.currentOrderId = draft.orderId;
+      console.log('✅ Restored orderId:', draft.orderId);
+    }
+
+    // Check if code was already sent for this order
+    if (draft.orderId && isCodeSent(draft.orderId)) {
+      // Check if not yet verified
+      if (sessionStorage.getItem('emailVerified_' + draft.orderId) !== '1' && draft.email) {
+        console.log('🔄 Code was sent before reload, showing verify panel');
+        setTimeout(() => {
+          showVerifyPanel(draft.email);
+          const firstBox = document.getElementById('otp-1');
+          if (firstBox) {
+            firstBox.focus();
+            firstBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 200);
+      }
+    }
+
+    // Add visual indicator
+    const form = document.getElementById('orderForm');
+    if (form && (draft.name || draft.phone || draft.email)) {
+      const existingMsg = form.querySelector('.draft-restored-message');
+      if (!existingMsg) {
+        const msg = document.createElement('div');
+        msg.className = 'draft-restored-message';
+        msg.innerHTML = '<span style="font-size:18px;">✓</span> <span>Your information was restored</span>';
+        form.insertBefore(msg, form.firstChild);
+        
+        // Remove flash after animation
+        setTimeout(() => {
+          nameInput?.classList.remove('was-restored');
+          phoneInput?.classList.remove('was-restored');
+          emailInput?.classList.remove('was-restored');
+        }, 1000);
+        
+        // Remove message after 4 seconds
+        setTimeout(() => {
+          msg.style.transition = 'opacity 0.3s';
+          msg.style.opacity = '0';
+          setTimeout(() => msg.remove(), 300);
+        }, 4000);
+      }
+    }
+  }, 100);
+}
+
+function clearCheckoutState() {
+  try {
+    // Remove all checkout-related data
+    sessionStorage.removeItem('checkoutDraft');
+    localStorage.removeItem('checkoutDraft');
+
+    // Remove email verification flags
+    if (window.currentOrderId) {
+      sessionStorage.removeItem('emailVerified_' + window.currentOrderId);
+      sessionStorage.removeItem('codeSent_' + window.currentOrderId);
+      localStorage.removeItem('codeSent_' + window.currentOrderId);
+    }
+    
+    console.log('✅ Checkout state cleared');
+  } catch (_) {}
+
+  // Reset runtime order id
+  window.currentOrderId = null;
+}
+
+// ==================== EVENT LISTENERS FOR AUTO-SAVE ====================
+
+// Auto-save on input with debouncing
+let saveTimeout;
 document.body.addEventListener('input', e => {
   const id = e.target?.id;
   if (id === 'customerName' || id === 'customerPhone' || id === 'customerEmail') {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      persistCheckoutDraft();
+    }, 300); // Save 300ms after user stops typing
+  }
+});
+
+// Also save immediately on blur
+document.body.addEventListener('blur', e => {
+  const id = e.target?.id;
+  if (id === 'customerName' || id === 'customerPhone' || id === 'customerEmail') {
+    clearTimeout(saveTimeout);
+    persistCheckoutDraft();
+  }
+}, true);
+
+// Save on payment method change
+document.body.addEventListener('change', e => {
+  if (e.target?.name === 'paymentMethod') {
     persistCheckoutDraft();
   }
 });
 
-// Also save on blur (when user leaves the field)
-document.body.addEventListener('blur', e => {
-  const id = e.target?.id;
-  if (id === 'customerName' || id === 'customerPhone' || id === 'customerEmail') {
+// Save before page unload (when user navigates away)
+window.addEventListener('beforeunload', () => {
+  persistCheckoutDraft();
+});
+
+// Save when page loses visibility (mobile app switching)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
     persistCheckoutDraft();
   }
-}, true);
+});
+
+// Restore when page becomes visible again
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    setTimeout(() => {
+      restoreCheckoutDraft();
+    }, 100);
+  }
+});
+
+// iOS Safari specific: Use pageshow event
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    // Page was restored from bfcache (back-forward cache)
+    console.log('📄 Page restored from cache');
+    restoreCheckoutDraft();
+  }
+});
+
+// Also restore on focus
+window.addEventListener('focus', () => {
+  console.log('🔍 Window focused');
+  setTimeout(() => {
+    restoreCheckoutDraft();
+  }, 100);
+});
 
 
 function updateQty(id, delta) {
@@ -1271,21 +1521,6 @@ function loadImageAsBase64(url) {
     img.onerror = reject;
     img.src = url;
   });
-}
-function clearCheckoutState() {
-  try {
-    // remove saved form data
-    sessionStorage.removeItem('checkoutDraft');
-
-    // remove email verification flags
-    if (window.currentOrderId) {
-      sessionStorage.removeItem('emailVerified_' + window.currentOrderId);
-      sessionStorage.removeItem('codeSent_' + window.currentOrderId);
-    }
-  } catch (_) {}
-
-  // reset runtime order id
-  window.currentOrderId = null;
 }
 
 async function submitOrderFast() {
@@ -1561,10 +1796,11 @@ async function generateAndSendPDF(orderData) {
 renderCart();
 replacePaymentFormHTML();
 attachEmailHandlers();
-// Restore any saved form data
-setTimeout(() => {
-  restoreCheckoutDraft();
-}, 100);
+
+// Restore checkout draft multiple times to catch form creation
+restoreCheckoutDraft(); // Immediate
+setTimeout(() => restoreCheckoutDraft(), 150); // After 150ms
+setTimeout(() => restoreCheckoutDraft(), 500); // After 500ms
 
 // Safe attempt to attach recent-inputs. If functions are not ready yet,
 // we try available handlers and fall back to a timed retry.
@@ -1708,69 +1944,11 @@ const panelEl = document.getElementById('emailVerifyPanel');
 if (panelEl) otpObserver.observe(panelEl, { childList: true, subtree: true, attributes: true });
 setTimeout(ensureOtpFit, 80);
 
-function restoreCheckoutDraft() {
-  let raw = null;
-  try {
-    raw = sessionStorage.getItem('checkoutDraft');
-  } catch (_) {}
-
-  if (!raw) {
-    console.log('ℹ️ No checkout draft to restore');
-    return;
-  }
-
-  let draft;
-  try {
-    draft = JSON.parse(raw);
-  } catch (_) {
-    console.warn('⚠️ Invalid checkout draft data');
-    return;
-  }
-
-  if (!draft) return;
-
-  console.log('🔄 Restoring checkout draft:', draft);
-
-  // Restore name
-  const nameInput = document.getElementById('customerName');
-  if (nameInput && draft.name) {
-    nameInput.value = draft.name;
-    console.log('✅ Restored name:', draft.name);
-  }
-
-  // Restore phone
-  const phoneInput = document.getElementById('customerPhone');
-  if (phoneInput && draft.phone) {
-    phoneInput.value = draft.phone;
-    console.log('✅ Restored phone:', draft.phone);
-  }
-
-  // Restore email
-  const emailInput = document.getElementById('customerEmail');
-  if (emailInput && draft.email) {
-    emailInput.value = draft.email;
-    console.log('✅ Restored email:', draft.email);
-  }
-  
-  // Restore orderId
-  if (draft.orderId) {
-    window.currentOrderId = draft.orderId;
-    console.log('✅ Restored orderId:', draft.orderId);
-  }
-  // In restoreCheckoutDraft(), after setting each input value, add:
-if (nameInput && draft.name) {
-  nameInput.value = draft.name;
-  nameInput.classList.add('input-restored');
-  setTimeout(() => nameInput.classList.remove('input-restored'), 800);
-  console.log('✅ Restored name:', draft.name);
-}
-}
-document.addEventListener('DOMContentLoaded', restoreCheckoutDraft);
 function restoreOtpState() {
   const orderId = window.currentOrderId;
   if (!orderId) return;
 
-  if (sessionStorage.getItem('codeSent_' + orderId) === '1' &&
+  if (isCodeSent(orderId) &&
       sessionStorage.getItem('emailVerified_' + orderId) !== '1') {
 
     const email = document.getElementById('customerEmail')?.value;
@@ -1784,6 +1962,21 @@ function restoreOtpState() {
 }
 
 document.addEventListener('DOMContentLoaded', restoreOtpState);
+
+// Debug function (optional - remove in production)
+function debugCheckoutState() {
+  console.log('=== CHECKOUT DEBUG ===');
+  console.log('sessionStorage draft:', sessionStorage.getItem('checkoutDraft'));
+  console.log('localStorage draft:', localStorage.getItem('checkoutDraft'));
+  console.log('currentOrderId:', window.currentOrderId);
+  console.log('Form exists:', !!document.getElementById('customerName'));
+  console.log('====================');
+}
+
+// Call debug on page load
+setTimeout(() => {
+  debugCheckoutState();
+}, 500);
 
 </script>
 <script src="js/recent-input.js"></script>
