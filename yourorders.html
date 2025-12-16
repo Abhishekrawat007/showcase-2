@@ -330,40 +330,49 @@ function searchOrders() {
   errorMsg.style.display = "none"; // hide if input is valid
   document.getElementById("phoneSection").style.display = "none";
 
-  database
-    .ref("orders")
-    .orderByChild("phone")
-    .equalTo(phone)
-    .once("value", snapshot => {
-      const orders = snapshot.val();
-      if (!orders) {
-        document.getElementById("orderList").innerHTML = "<p>No orders found.</p>";
-        return;
-      }
+ fetch("/.netlify/functions/getOrders", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ phone })
+})
+.then(res => res.json())
+.then(data => {
+  spinner.style.display = "none";
+  
+  if (!data.orders || data.orders.length === 0) {
+    document.getElementById("orderList").innerHTML =
+      `<div class="no-orders">No orders found for this number.</div>`;
+    return;
+  }
 
-      const ordersArray = Object.values(orders);
-      document.getElementById("orderList").innerHTML = 
-  `<h2 style="margin-bottom: 20px; color: #1e88e5; text-align: center;">Your Orders</h2>` +
-  ordersArray.map(order => {
-
-const dateTime = new Date(order.timestamp).toLocaleString("en-IN", {
-          dateStyle: "medium",
-          timeStyle: "short"
-        });
-        return order.items.map(item => 
-          `<div class="order-card">
-            <img src="${item.image}" alt="${item.title}">
-            <div class="order-info">
-              <h4>${item.title}</h4>
-              <p>Qty: ${item.qty}</p>
-              <p>Total: ₹${item.price * item.qty}</p>
-              <p style="font-size: 13px; color: gray;">Ordered on: ${dateTime}</p>
-              <button class="button-primary" onclick="location.href='buynow.html?id=${item.id}'">Buy Again</button>
-            </div>
-          </div>`
-        ).join("");
-      }).join("");
-    });
+  const ordersArray = data.orders;
+  document.getElementById("orderList").innerHTML =
+    `<h2 style="margin-bottom: 20px; color: #1e88e5; text-align: center;">Your Orders</h2>` +
+    ordersArray.map(order => {
+      const dateTime = new Date(order.timestamp).toLocaleString("en-IN", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+      return order.items.map(item =>
+        `<div class="order-card">
+          <img src="${item.image}" alt="${item.title}">
+          <div class="order-info">
+            <h4>${item.title}</h4>
+            <p>Qty: ${item.qty}</p>
+            <p>Total: ₹${item.price * item.qty}</p>
+            <p style="font-size: 13px; color: gray;">Ordered on: ${dateTime}</p>
+            <button class="button-primary" onclick="location.href='buynow.html?id=${item.id}'">Buy Again</button>
+          </div>
+        </div>`
+      ).join("");
+    }).join("");
+})
+.catch(err => {
+  spinner.style.display = "none";
+  document.getElementById("orderList").innerHTML =
+    `<div class="no-orders">Error loading orders. Please try again.</div>`;
+  console.error(err);
+});
 }
 const toggleBtn = document.getElementById('themeToggle');
 
