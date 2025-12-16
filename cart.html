@@ -449,7 +449,12 @@ form.innerHTML = `
     </button>
   </div>
 `;
+  // Restore saved data after creating form
+  setTimeout(() => {
+    restoreCheckoutDraft();
+  }, 50);
 }
+
 
 // Run once (safe to call multiple times)
 replacePaymentFormHTML();
@@ -1157,18 +1162,31 @@ function persistCheckoutDraft() {
     ts: Date.now()
   };
 
-  try {
-    sessionStorage.setItem('checkoutDraft', JSON.stringify(draft));
-  } catch (_) {}
-}
-
-['customerName','customerPhone','customerEmail'].forEach(id => {
-  document.addEventListener('input', e => {
-    if (e.target && e.target.id === id) {
-      persistCheckoutDraft();
+  // Only save if at least one field has data
+  if (draft.name || draft.phone || draft.email) {
+    try {
+      sessionStorage.setItem('checkoutDraft', JSON.stringify(draft));
+      console.log('✅ Checkout draft saved:', draft);
+    } catch (e) {
+      console.warn('⚠️ Failed to save checkout draft:', e);
     }
-  });
+  }
+}
+// Auto-save form data on input (with delegation for dynamically created elements)
+document.body.addEventListener('input', e => {
+  const id = e.target?.id;
+  if (id === 'customerName' || id === 'customerPhone' || id === 'customerEmail') {
+    persistCheckoutDraft();
+  }
 });
+
+// Also save on blur (when user leaves the field)
+document.body.addEventListener('blur', e => {
+  const id = e.target?.id;
+  if (id === 'customerName' || id === 'customerPhone' || id === 'customerEmail') {
+    persistCheckoutDraft();
+  }
+}, true);
 
 
 function updateQty(id, delta) {
@@ -1543,6 +1561,10 @@ async function generateAndSendPDF(orderData) {
 renderCart();
 replacePaymentFormHTML();
 attachEmailHandlers();
+// Restore any saved form data
+setTimeout(() => {
+  restoreCheckoutDraft();
+}, 100);
 
 // Safe attempt to attach recent-inputs. If functions are not ready yet,
 // we try available handlers and fall back to a timed retry.
@@ -1692,30 +1714,56 @@ function restoreCheckoutDraft() {
     raw = sessionStorage.getItem('checkoutDraft');
   } catch (_) {}
 
-  if (!raw) return;
+  if (!raw) {
+    console.log('ℹ️ No checkout draft to restore');
+    return;
+  }
 
   let draft;
   try {
     draft = JSON.parse(raw);
   } catch (_) {
+    console.warn('⚠️ Invalid checkout draft data');
     return;
   }
 
   if (!draft) return;
 
-  if (draft.name && document.getElementById('customerName')) {
-    document.getElementById('customerName').value = draft.name;
-  }
-  if (draft.phone && document.getElementById('customerPhone')) {
-    document.getElementById('customerPhone').value = draft.phone;
-  }
-  if (draft.email && document.getElementById('customerEmail')) {
-    document.getElementById('customerEmail').value = draft.email;
+  console.log('🔄 Restoring checkout draft:', draft);
+
+  // Restore name
+  const nameInput = document.getElementById('customerName');
+  if (nameInput && draft.name) {
+    nameInput.value = draft.name;
+    console.log('✅ Restored name:', draft.name);
   }
 
+  // Restore phone
+  const phoneInput = document.getElementById('customerPhone');
+  if (phoneInput && draft.phone) {
+    phoneInput.value = draft.phone;
+    console.log('✅ Restored phone:', draft.phone);
+  }
+
+  // Restore email
+  const emailInput = document.getElementById('customerEmail');
+  if (emailInput && draft.email) {
+    emailInput.value = draft.email;
+    console.log('✅ Restored email:', draft.email);
+  }
+  
+  // Restore orderId
   if (draft.orderId) {
     window.currentOrderId = draft.orderId;
+    console.log('✅ Restored orderId:', draft.orderId);
   }
+  // In restoreCheckoutDraft(), after setting each input value, add:
+if (nameInput && draft.name) {
+  nameInput.value = draft.name;
+  nameInput.classList.add('input-restored');
+  setTimeout(() => nameInput.classList.remove('input-restored'), 800);
+  console.log('✅ Restored name:', draft.name);
+}
 }
 document.addEventListener('DOMContentLoaded', restoreCheckoutDraft);
 function restoreOtpState() {

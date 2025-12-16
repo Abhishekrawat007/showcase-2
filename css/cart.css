@@ -771,3 +771,12 @@ body.pwa-standalone .container{
 }
 .recent-suggestions.hidden { display:none; }
 .input-wrapper { position: relative; } /* ensure wrapper around inputs */
+/* Input flash animation when restored */
+@keyframes input-restored {
+  0% { background-color: #e8f5e9; }
+  100% { background-color: white; }
+}
+
+.input-restored {
+  animation: input-restored 0.8s ease-out;
+}
