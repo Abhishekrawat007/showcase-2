@@ -409,11 +409,14 @@
             });
             
             // Safety check - use cart instead of items
-            if (!order.cart || !Array.isArray(order.cart)) {
-              return `<div class="order-card"><p>Order data incomplete</p></div>`;
-            }
-            
-            return order.cart.map(item =>
+           // Check both cart and items (for old orders)
+const orderItems = order.cart || order.items;
+
+if (!orderItems || !Array.isArray(orderItems)) {
+  return `<div class="order-card"><p>Order data incomplete</p></div>`;
+}
+
+return orderItems.map(item =>
               `<div class="order-card">
                 <img src="${item.image}" alt="${item.title}">
                 <div class="order-info">
