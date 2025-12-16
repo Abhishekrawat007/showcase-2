@@ -4,354 +4,335 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Your Orders – Sublime Store</title>
   <meta name="description" content="Track and view your past orders from Sublime Store.">
-  <meta name="theme-color" content="#1e88e5"/><!-- Disable Chrome's new progress overlay -->
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="transparent">
-<meta name="browsermode" content="application">
-<meta name="display" content="standalone">
+  <meta name="theme-color" content="#1e88e5"/>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="transparent">
+  <meta name="browsermode" content="application">
+  <meta name="display" content="standalone">
 
-  <!-- Favicon for most browsers -->
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-
-<!-- Apple Touch Icon -->
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-
-<!-- Android Chrome Icons -->
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" sizes="72x72" href="web-app-manifest-72x72.png">
-<link rel="icon" type="image/png" sizes="144x144" href="web-app-manifest-144x144.png">
-<link rel="icon" type="image/png" sizes="192x192" href="web-app-manifest-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="web-app-manifest-512x512.png">
-  <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-/>
-    <link rel="stylesheet" href="css/style.css">
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DBDC7X6FJR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-DBDC7X6FJR');
-</script>
+  <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="72x72" href="web-app-manifest-72x72.png">
+  <link rel="icon" type="image/png" sizes="144x144" href="web-app-manifest-144x144.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="web-app-manifest-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="web-app-manifest-512x512.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css">
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DBDC7X6FJR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DBDC7X6FJR');
+  </script>
+  
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #f5f5f5;
       padding: 20px;
-    }.container {
-  max-width: 500px;
-  margin: auto;
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
 
-h2 {
-  text-align: center;
-  color: #1e88e5;
-}
+    h2 {
+      text-align: center;
+      color: #1e88e5;
+    }
 
-.otp-box {
-  text-align: center;
-}
+    .otp-box {
+      text-align: center;
+    }
 
-.form-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
 
-.form-group label {
-  font-size: 14px;
-  color: #666;
-  display: block;
-  margin-bottom: 6px;
-}
+    .form-group label {
+      font-size: 14px;
+      color: #666;
+      display: block;
+      margin-bottom: 6px;
+    }
 
-input[type="tel"],
-input[type="text"] {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-sizing: border-box;
-}
-.search-bar input {
-  border-radius: 2px !important;
-}
-.button-primary {
-  width: 100%;
-  background: linear-gradient(to right, #007bff, #00c6ff);
-  color: white;
-  padding: 14px;
-  border: none;
-  font-size: 16px;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
+    input[type="tel"],
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    
+    .search-bar input {
+      border-radius: 2px !important;
+    }
+    
+    .button-primary {
+      width: 100%;
+      background: linear-gradient(to right, #007bff, #00c6ff);
+      color: white;
+      padding: 14px;
+      border: none;
+      font-size: 16px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
 
-.button-primary:hover {
-  background: linear-gradient(to right, #0056b3, #00aaff);
-}
+    .button-primary:hover {
+      background: linear-gradient(to right, #0056b3, #00aaff);
+    }
 
-small {
-  display: block;
-  margin-top: 10px;
-  font-size: 12px;
-  color: gray;
-}
+    small {
+      display: block;
+      margin-top: 10px;
+      font-size: 12px;
+      color: gray;
+    }
 
-#orderList {
-  margin-top: 30px;
-}
+    #orderList {
+      margin-top: 30px;
+    }
 
-.order-card {
-  background: #fff;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
+    .order-card {
+      background: #fff;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
 
-.order-card img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 8px;
-}
+    .order-card img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
 
-.order-info {
-  flex: 1;
-}
+    .order-info {
+      flex: 1;
+    }
 
-.order-info h4 {
-  margin: 0;
-  font-size: 16px;
-  color: #333;
-}
+    .order-info h4 {
+      margin: 0;
+      font-size: 16px;
+      color: #333;
+    }
 
-.order-info p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #666;
-}
+    .order-info p {
+      margin: 4px 0;
+      font-size: 14px;
+      color: #666;
+    }
 
-.order-info button {
-  background-color: #28a745;
-  color: white;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  margin-top: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-.top-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
+    .order-info button {
+      background-color: #28a745;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      margin-top: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
 
-.top-controls button {
-  background-color: #dedede;
-  color: #222;
-  border: none;
-  padding: 6px 10px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  min-width: auto;
-  flex-shrink: 0;
-  white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s ease;
-  width: auto;            /* 👈 important to override 100% */
-  display: inline-block;  /* 👈 prevent full width */
-}
+    .top-controls button {
+      background-color: #dedede;
+      color: #222;
+      border: none;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      min-width: auto;
+      flex-shrink: 0;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.2s ease;
+      width: auto;
+      display: inline-block;
+    }
 
-.top-controls button:hover {
-  background-color: #d5d5d5;
-}
+    .top-controls button:hover {
+      background-color: #d5d5d5;
+    }
 
-body.dark-mode .top-controls button {
-  background-color: #2f2f2f;
-  color: #eee;
-}
+    body.dark-mode .top-controls button {
+      background-color: #2f2f2f;
+      color: #eee;
+    }
 
-body.dark-mode .top-controls button:hover {
-  background-color: #3a3a3a;
-}
-.back-btn, .theme-toggle-btn {
-  background-color: #e0e0e0; /* soft grey to contrast */
-  color: #333;
-  border: none;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transition: background-color 0.2s;
-}
+    body.dark-mode .top-controls button:hover {
+      background-color: #3a3a3a;
+    }
+    
+    .back-btn, .theme-toggle-btn {
+      background-color: #e0e0e0;
+      color: #333;
+      border: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: background-color 0.2s;
+    }
 
-.back-btn:hover, .theme-toggle-btn:hover {
-  background-color: #d5d5d5;
-}
+    .back-btn:hover, .theme-toggle-btn:hover {
+      background-color: #d5d5d5;
+    }
 
-body.dark-mode .back-btn,
-body.dark-mode .theme-toggle-btn {
-  background-color: #2c2c2c;
-  color: #eee;
-}
+    body.dark-mode .back-btn,
+    body.dark-mode .theme-toggle-btn {
+      background-color: #2c2c2c;
+      color: #eee;
+    }
 
-body.dark-mode .back-btn:hover,
-body.dark-mode .theme-toggle-btn:hover {
-  background-color: #3a3a3a;
-}
+    body.dark-mode .back-btn:hover,
+    body.dark-mode .theme-toggle-btn:hover {
+      background-color: #3a3a3a;
+    }
 
-/* Dark Mode */
-body.dark-mode {
-  background-color: #121212;
-  color: #fff;
-}
+    /* Dark Mode */
+    body.dark-mode {
+      background-color: #121212;
+      color: #fff;
+    }
 
-body.dark-mode .container {
-  background-color: #1e1e1e;
-  color: #fff;
-}
+    body.dark-mode .container {
+      background-color: #1e1e1e;
+      color: #fff;
+    }
 
-body.dark-mode input,
-body.dark-mode button {
-  background-color: #333;
-  color: #fff;
-  border: 1px solid #555;
-}
+    body.dark-mode input,
+    body.dark-mode button {
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #555;
+    }
 
-body.dark-mode .order-card {
-  background-color: #2a2a2a;
-}
+    body.dark-mode .order-card {
+      background-color: #2a2a2a;
+    }
 
-body.dark-mode .order-info p {
-  color: #ccc;
-}
+    body.dark-mode .order-info p {
+      color: #ccc;
+    }
 
-body.dark-mode .order-info h4 {
-  color: #fff;
-}
+    body.dark-mode .order-info h4 {
+      color: #fff;
+    }
 
-/* Ultra-modern Spinner */
-.loader {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: conic-gradient(#1e88e5, #00c6ff, #1e88e5);
-  animation: spin 1s linear infinite;
-  margin: auto;
-  transition: background 0.3s ease;
-}
+    /* Ultra-modern Spinner */
+    .loader {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(#1e88e5, #00c6ff, #1e88e5);
+      animation: spin 1s linear infinite;
+      margin: auto;
+      transition: background 0.3s ease;
+    }
 
-/* Dark Mode Spinner */
-body.dark-mode .loader {
-  background: conic-gradient(#00c6ff, #22c55e, #00c6ff);
-}
+    body.dark-mode .loader {
+      background: conic-gradient(#00c6ff, #22c55e, #00c6ff);
+    }
 
-/* Spin Animation */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.no-orders {
-  text-align: center;
-  font-size: 16px;
-  margin-top: 30px;
-  font-weight: 500;
-  color: #333; /* default for light mode */
-}
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .no-orders {
+      text-align: center;
+      font-size: 16px;
+      margin-top: 30px;
+      font-weight: 500;
+      color: #333;
+    }
 
-body.dark-mode .no-orders {
-  color: #eee; /* better for dark mode */
-}
-
-
-  </style>  <!-- Firebase -->  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    body.dark-mode .no-orders {
+      color: #eee;
+    }
+  </style>
+  
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script src="js/config.js"></script>
-<script src="js/init-firebase.js"></script>
+  <script src="js/init-firebase.js"></script>
 
-<!-- Compatibility shim — keep this EXACTLY here, before other scripts -->
-<script>
-(function(){
-  // alias for new code
-  window.db = window.database || null;
-
-  // expose window.database getter so other code can read window.database even if they read it later
-  try {
-    Object.defineProperty(window, 'database', {
-      get: function() { return window.db; },
-      configurable: true
-    });
-  } catch (e) {
-    // fallback if defineProperty blocked
-    if (!window.database) window.database = window.db;
-  }
-
-  // Monkey-patch firebase.database() so old code keeps working.
-  // Ensure firebase SDK is loaded and only patch once.
-  if (window.firebase && !firebase.__dbPatched) {
-    firebase.__dbPatched = true;
-    // Preserve original if present (for safety)
-    firebase.__originalDatabaseFn = firebase.database || null;
-    firebase.database = function() {
-      // return underlying db reference created by init-firebase.js
-      if (window.db) return window.db;
-      // fallback: if original exists, call it
-      if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
-      // otherwise return null to avoid throwing in caller
-      return null;
-    };
-    // Helpful console info for debugging
-    console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
-  } else {
-    // still log so you can diagnose missing init
-    console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
-  }
-})();
-</script>
   <script>
-  const metaTheme = document.querySelector('meta[name="theme-color"]');
-  function updateThemeColor() {
-    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    metaTheme.setAttribute('content', dark ? '#000000' : '#ffffff');
-  }
-  updateThemeColor();
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeColor); 
-</script>
-<script src="js/safe-storage.js"></script>
+  (function(){
+    window.db = window.database || null;
+    try {
+      Object.defineProperty(window, 'database', {
+        get: function() { return window.db; },
+        configurable: true
+      });
+    } catch (e) {
+      if (!window.database) window.database = window.db;
+    }
+    if (window.firebase && !firebase.__dbPatched) {
+      firebase.__dbPatched = true;
+      firebase.__originalDatabaseFn = firebase.database || null;
+      firebase.database = function() {
+        if (window.db) return window.db;
+        if (typeof firebase.__originalDatabaseFn === 'function') return firebase.__originalDatabaseFn.apply(firebase, arguments);
+        return null;
+      };
+      console.log('✅ Firebase compatibility shim installed. window.db:', !!window.db);
+    } else {
+      console.warn('⚠️ Firebase SDK not found yet or already patched. window.db:', !!window.db);
+    }
+  })();
+  </script>
+  
+  <script>
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    function updateThemeColor() {
+      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      metaTheme.setAttribute('content', dark ? '#000000' : '#ffffff');
+    }
+    updateThemeColor();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeColor); 
+  </script>
+  <script src="js/safe-storage.js"></script>
 </head>
 <body>
-   <!-- 🔼 Top Banner -->
-      <div class="top-banner" id="topBanner">
-        <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
-        <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
-      </div>
-    <!-- ✅ Navbar loads here -->
-    <!-- ✅ Navbar loads here -->
+  <div class="top-banner" id="topBanner">
+    <span>🚚 Free Home Delivery on Orders Above ₹199 (Local Only)</span>
+    <button class="banner-close" onclick="document.getElementById('topBanner').style.display='none'">×</button>
+  </div>
+  
   <div id="navbar"></div>
-     <!-- ✅ Your script to load navbar -->
   <script>
     fetch('navbar.html')
       .then(res => res.text())
@@ -359,144 +340,147 @@ body.dark-mode .no-orders {
         document.getElementById('navbar').innerHTML = data;
       });
   </script>
+  
   <main>
-  <div class="container">
-    <!-- Back Button + Theme Toggle -->
-    <div class="top-controls">
- <button onclick="goBack()">← Back</button>
-  <button id="themeToggle" aria-label="Toggle Dark Mode">🌙</button>
-</div>
+    <div class="container">
+      <div class="top-controls">
+        <button onclick="goBack()">← Back</button>
+        <button id="themeToggle" aria-label="Toggle Dark Mode">🌙</button>
+      </div>
 
-    <div class="otp-box" id="phoneSection">
-      <h2>Your Orders</h2>
-      <div class="form-group">
-  <label for="phone">Mobile Number</label>
-  <input type="tel" id="phone" placeholder="Enter your 10-digit number">
-  <div id="phoneError" style="color: red; font-size: 13px; margin-top: 6px; display: none;">
-    Please enter a valid 10-digit Indian phone number.
-  </div>
-</div>
-      <!-- Show Orders -->
-<button class="button-primary" onclick="searchOrders()">Show Orders</button>
-      <small>We'll never share your number.</small>
-    </div>
-<div id="spinner" style="display:none; text-align:center; margin: 20px 0;">
-  <div class="loader"></div>
-</div>
-
-    <div id="orderList"></div>
-  </div>
-  </main>
-  <script>
-
-function searchOrders() {
-  const phone = document.getElementById("phone").value.trim();
-  const errorMsg = document.getElementById("phoneError");
-  const spinner = document.getElementById("spinner");
-
-  if (!/^[6-9]\d{9}$/.test(phone)) {
-    errorMsg.style.display = "block";
-    return;
-  }
-
-  errorMsg.style.display = "none"; // hide if input is valid
-  document.getElementById("phoneSection").style.display = "none";
-
-  spinner.style.display = "block"; // Show spinner
-
-fetch("/.netlify/functions/getOrders", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ phone })
-})
-.then(res => res.json())
-.then(data => {
-  spinner.style.display = "none";
-  
-  if (!data.orders || data.orders.length === 0) {
-    document.getElementById("orderList").innerHTML =
-      `<div class="no-orders">No orders found for this number.</div>`;
-    return;
-  }
-
-  const ordersArray = data.orders;
-  document.getElementById("orderList").innerHTML =
-    `<h2 style="margin-bottom: 20px; color: #1e88e5; text-align: center;">Your Orders</h2>` +
-    ordersArray.map(order => {
-      const dateTime = new Date(order.timestamp).toLocaleString("en-IN", {
-        dateStyle: "medium",
-        timeStyle: "short"
-      });
-      return order.items.map(item =>
-        `<div class="order-card">
-          <img src="${item.image}" alt="${item.title}">
-          <div class="order-info">
-            <h4>${item.title}</h4>
-            <p>Qty: ${item.qty}</p>
-            <p>Total: ₹${item.price * item.qty}</p>
-            <p style="font-size: 13px; color: gray;">Ordered on: ${dateTime}</p>
-            <button class="button-primary" onclick="location.href='buynow.html?id=${item.id}'">Buy Again</button>
+      <div class="otp-box" id="phoneSection">
+        <h2>Your Orders</h2>
+        <div class="form-group">
+          <label for="phone">Mobile Number</label>
+          <input type="tel" id="phone" placeholder="Enter your 10-digit number">
+          <div id="phoneError" style="color: red; font-size: 13px; margin-top: 6px; display: none;">
+            Please enter a valid 10-digit Indian phone number.
           </div>
-        </div>`
-      ).join("");
-    }).join("");
-})
-.catch(err => {
-  spinner.style.display = "none";
-  document.getElementById("orderList").innerHTML =
-    `<div class="no-orders">Error loading orders. Please try again.</div>`;
-  console.error(err);
-});
+        </div>
+        <button class="button-primary" onclick="searchOrders()">Show Orders</button>
+        <small>We'll never share your number.</small>
+      </div>
       
-}
-const toggleBtn = document.getElementById('themeToggle');
+      <div id="spinner" style="display:none; text-align:center; margin: 20px 0;">
+        <div class="loader"></div>
+      </div>
 
-// New function for spinner theme update
-function updateSpinnerColor() {
-  const loader = document.querySelector('.loader');
-  if (!loader) return;
-  if (document.body.classList.contains('dark-mode')) {
-    loader.style.background = 'conic-gradient(#00c6ff, #22c55e, #00c6ff)';
-  } else {
-    loader.style.background = 'conic-gradient(#1e88e5, #00c6ff, #1e88e5)';
-  }
-}
-
-function applyTheme(mode) {
-  if (mode === 'dark') {
-    document.body.classList.add('dark-mode');
-    toggleBtn.textContent = '☀️';
-  } else {
-    document.body.classList.remove('dark-mode');
-    toggleBtn.textContent = '🌙';
-  }
-  window.safeStorage.setItem('theme', mode);  // ✅ FIXED
-  updateSpinnerColor(); // apply immediately on theme change
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const savedMode = window.safeStorage.getItem('theme') || 'light';  // ✅ FIXED
-  applyTheme(savedMode);
-
-  toggleBtn.addEventListener('click', () => {
-    const isDark = document.body.classList.contains('dark-mode');
-    applyTheme(isDark ? 'light' : 'dark');
-  });
-});
-
-function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) {
-      history.back();
-    } else {
-      location.href = "index.html"; // Fallback
-    }
-  }
-</script>
-<script src="js/product.js"></script>
- <script src="js/navbar.js"></script>
- <script src="js/search.js" defer></script>
- <script src="js/pwa-standalone.js"></script>
+      <div id="orderList"></div>
+    </div>
+  </main>
   
- 
+  <script>
+    function searchOrders() {
+      const phone = document.getElementById("phone").value.trim();
+      const errorMsg = document.getElementById("phoneError");
+      const spinner = document.getElementById("spinner");
+
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      errorMsg.style.display = "none";
+      document.getElementById("phoneSection").style.display = "none";
+      spinner.style.display = "block";
+
+      fetch("/.netlify/functions/getOrders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone })
+      })
+      .then(res => res.json())
+      .then(data => {
+        spinner.style.display = "none";
+        
+        if (!data.orders || data.orders.length === 0) {
+          document.getElementById("orderList").innerHTML =
+            `<div class="no-orders">No orders found for this number.</div>`;
+          return;
+        }
+
+        const ordersArray = data.orders;
+        document.getElementById("orderList").innerHTML =
+          `<h2 style="margin-bottom: 20px; color: #1e88e5; text-align: center;">Your Orders</h2>` +
+          ordersArray.map(order => {
+            const dateTime = new Date(order.timestamp).toLocaleString("en-IN", {
+              dateStyle: "medium",
+              timeStyle: "short"
+            });
+            
+            // Safety check - use cart instead of items
+            if (!order.cart || !Array.isArray(order.cart)) {
+              return `<div class="order-card"><p>Order data incomplete</p></div>`;
+            }
+            
+            return order.cart.map(item =>
+              `<div class="order-card">
+                <img src="${item.image}" alt="${item.title}">
+                <div class="order-info">
+                  <h4>${item.title}</h4>
+                  <p>Qty: ${item.qty}</p>
+                  <p>Total: ₹${item.price * item.qty}</p>
+                  <p style="font-size: 13px; color: gray;">Ordered on: ${dateTime}</p>
+                  <button class="button-primary" onclick="location.href='buynow.html?id=${item.id}'">Buy Again</button>
+                </div>
+              </div>`
+            ).join("");
+          }).join("");
+      })
+      .catch(err => {
+        spinner.style.display = "none";
+        document.getElementById("orderList").innerHTML =
+          `<div class="no-orders">Error loading orders. Please try again.</div>`;
+        console.error(err);
+      });
+    }
+    
+    const toggleBtn = document.getElementById('themeToggle');
+
+    function updateSpinnerColor() {
+      const loader = document.querySelector('.loader');
+      if (!loader) return;
+      if (document.body.classList.contains('dark-mode')) {
+        loader.style.background = 'conic-gradient(#00c6ff, #22c55e, #00c6ff)';
+      } else {
+        loader.style.background = 'conic-gradient(#1e88e5, #00c6ff, #1e88e5)';
+      }
+    }
+
+    function applyTheme(mode) {
+      if (mode === 'dark') {
+        document.body.classList.add('dark-mode');
+        toggleBtn.textContent = '☀️';
+      } else {
+        document.body.classList.remove('dark-mode');
+        toggleBtn.textContent = '🌙';
+      }
+      window.safeStorage.setItem('theme', mode);
+      updateSpinnerColor();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedMode = window.safeStorage.getItem('theme') || 'light';
+      applyTheme(savedMode);
+
+      toggleBtn.addEventListener('click', () => {
+        const isDark = document.body.classList.contains('dark-mode');
+        applyTheme(isDark ? 'light' : 'dark');
+      });
+    });
+
+    function goBack() {
+      if (document.referrer && document.referrer.includes(location.hostname)) {
+        history.back();
+      } else {
+        location.href = "index.html";
+      }
+    }
+  </script>
+  
+  <script src="js/product.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/search.js" defer></script>
+  <script src="js/pwa-standalone.js"></script>
 </body>
 </html>
