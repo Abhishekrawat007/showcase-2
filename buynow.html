@@ -582,18 +582,17 @@ let quantity = 1;
 
         try {
           verifyBtn.disabled = true;
-          msgEl.style.display = 'none';
-        await verifyCodeOnServer(email, code);
+      await verifyCodeOnServer(email, code);
 sessionStorage.setItem('emailVerified_' + orderId, '1');
 hideVerifyPanel();
 
-// Mark as verified and re-submit
-window.__skipEmailCheck = true;  // ← ADD THIS
+// Re-submit will see verified flag, no need for skip
 const formBtn = document.querySelector("#orderForm button[type='submit']");
 if (formBtn) {
   formBtn.disabled = false;
   formBtn.textContent = "Confirm Order";
-  submitOrder(new Event("submit"));
+  // Add small delay to ensure sessionStorage is set
+  setTimeout(() => submitOrder(new Event("submit")), 50);
 }
         } catch (err) {
           msgEl.textContent = 'Invalid or expired code. Try resend.';
@@ -697,7 +696,7 @@ if (formBtn) {
       
       // Check email verification
 window.currentOrderId = orderId;
-if (!isEmailVerified(orderId) && !window.__skipEmailCheck) {  
+if (!isEmailVerified(orderId)) {
           try {
             persistBuyNowDraft();
             await sendVerificationCode(email);
@@ -720,7 +719,7 @@ if (!isEmailVerified(orderId) && !window.__skipEmailCheck) {
             return;
           }
         }
-window.__skipEmailCheck = false;
+
         // Save order via saveOrder function
         try {
           await fetch("/.netlify/functions/saveOrder", {
