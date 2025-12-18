@@ -1,4 +1,4 @@
-import admin from "firebase-admin";
+const admin = require("firebase-admin");
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -9,7 +9,7 @@ if (!admin.apps.length) {
   });
 }
 
-export async function handler(event) {
+exports.handler = async () => {
   try {
     const snap = await admin.database().ref("orders").once("value");
     const val = snap.val() || {};
@@ -20,9 +20,10 @@ export async function handler(event) {
       body: JSON.stringify({ orders })
     };
   } catch (err) {
+    console.error("getAllOrders error:", err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message })
     };
   }
-}
+};
