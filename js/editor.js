@@ -827,37 +827,40 @@ function formatOrderDate(order) {
 
 
 // Load all existing orders once
-function loadOrders() {
-  
+async function loadOrders() {
   const statusEl = document.getElementById('ordersStatusText');
- 
-
   if (statusEl) statusEl.textContent = 'Loading orders…';
 
-  firebase.database().ref('orders').once('value', snap => {
-    const val = snap.val() || {};
-    const arr = Object.values(val);
+  try {
+    const token = sessionStorage.getItem("adminToken") || "";
 
-    // Sort latest first
+    const res = await fetch("/.netlify/functions/getAllOrders", {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch orders");
+
+    const data = await res.json();
+    const arr = data.orders || [];
+
+    // latest first
     arr.sort((a, b) => getOrderTimestamp(b) - getOrderTimestamp(a));
 
-   
-   renderOrdersList(arr);
-
+    renderOrdersList(arr);
 
     if (statusEl) {
       statusEl.textContent = arr.length
         ? `Showing ${arr.length} orders`
         : 'No orders yet';
     }
-
-    initialOrdersLoaded = true;
-    attachOrdersListener();
-  }, err => {
-    console.error('Error loading orders:', err);
+  } catch (err) {
+    console.error("Order load failed:", err);
     if (statusEl) statusEl.textContent = 'Error loading orders';
-  });
+  }
 }
+
 function renderOrdersList(arr) {
   const list = document.getElementById('ordersList');
   list.innerHTML = '';
@@ -874,17 +877,6 @@ function renderOrdersList(arr) {
   });
 }
 
-function attachOrdersListener() {
-  if (ordersListenerAttached) return;
-  ordersListenerAttached = true;
-
-  firebase.database().ref('orders').on('value', snap => {
-    const val = snap.val() || {};
-    const arr = Object.values(val);
-    arr.sort((a, b) => getOrderTimestamp(b) - getOrderTimestamp(a));
-    renderOrdersList(arr);
-  });
-}
 
 
 function openOrderDetail(order, no) {
