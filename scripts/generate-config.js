@@ -34,10 +34,7 @@ const config = {
     messagingSenderId: getEnv("FIREBASE_MESSAGING_SENDER_ID"),
     appId: getEnv("FIREBASE_APP_ID"),
   },
-  cloudinary: {
-    url: getEnv("CLOUDINARY_URL"),
-    preset: getEnv("CLOUDINARY_PRESET"),
-  },
+ 
 };
 
 // Output file path
