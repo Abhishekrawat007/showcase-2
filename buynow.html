@@ -177,8 +177,8 @@
     phone: document.getElementById('customerPhone')?.value || '',
     email: document.getElementById('customerEmail')?.value || '',
     orderId: window.currentOrderId || null,
-    productId: productId || null,  // ← ADD THIS LINE
-    quantity: quantity || 1,        // ← ADD THIS LINE
+    productId: productId || null,
+    quantity: quantity || 1,
     paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod',
     timestamp: Date.now()
   };
@@ -255,9 +255,6 @@
         }
 
         if (draft.orderId) {
-          window.currentOrderId = draft.orderId;
-        }
-      if (draft.orderId) {
           window.currentOrderId = draft.orderId;
         }
 
@@ -381,8 +378,6 @@
 
     // ==================== PRODUCT SELECTION ====================
     
-   // ==================== PRODUCT SELECTION ====================
-
 const urlParams = new URLSearchParams(window.location.search);
 let productId = urlParams.get("id");
 
@@ -582,13 +577,13 @@ let quantity = 1;
 
         try {
           verifyBtn.disabled = true;
-   await verifyCodeOnServer(email, code);
-sessionStorage.setItem('emailVerified_' + orderId, '1');
-hideVerifyPanel();
+          await verifyCodeOnServer(email, code);
+          sessionStorage.setItem('emailVerified_' + orderId, '1');
+          hideVerifyPanel();
 
-// Directly process order (skip re-checking email)
-window.__justVerified = true;  // Flag to skip email check
-submitOrder(new Event("submit"));
+          // Directly process order (skip re-checking email)
+          window.__justVerified = true;
+          submitOrder(new Event("submit"));
         } catch (err) {
           msgEl.textContent = 'Invalid or expired code. Try resend.';
           msgEl.style.display = 'inline';
@@ -671,28 +666,31 @@ submitOrder(new Event("submit"));
         button.textContent = "Processing...";
       }
 
+      // ✅ FIX 1: Changed items → cart, title → name, added payment object
       const order = {
         orderId,
         name,
         phone,
         email,
-        items: [{
+        cart: [{
           id: product.id,
-          title: product.name,
+          name: product.name,
           qty: quantity,
           price: product.newPrice,
           image: product.images[0]
         }],
         totalAmount: Number(product.newPrice) * quantity,
-        timestamp: new Date().toISOString()
+        timestamp: Date.now(),
+        payment: {
+          method: "COD",
+          status: "pending"
+        }
       };
 
       try {
-      
-      // Check email verification
-// Check email verification (skip if just verified)
-window.currentOrderId = orderId;
-if (!isEmailVerified(orderId) && !window.__justVerified) {
+        // Check email verification (skip if just verified)
+        window.currentOrderId = orderId;
+        if (!isEmailVerified(orderId) && !window.__justVerified) {
           try {
             persistBuyNowDraft();
             await sendVerificationCode(email);
@@ -702,7 +700,7 @@ if (!isEmailVerified(orderId) && !window.__justVerified) {
               button.disabled = false;
               button.textContent = "Confirm Order";
             }
-            return; // wait for verification
+            return;
           } catch (err) {
             console.warn('sendVerificationCode failed', err);
             const msgEl = document.getElementById('emailVerifyMsg');
@@ -715,18 +713,7 @@ if (!isEmailVerified(orderId) && !window.__justVerified) {
             return;
           }
         }
-         window.__justVerified = false;
-        // Save order via saveOrder function
-        try {
-          await fetch("/.netlify/functions/saveOrder", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(order)
-          });
-          console.log("BuyNow order saved via saveOrder:", orderId);
-        } catch (err) {
-          console.error("saveOrder failed:", err);
-        }
+        window.__justVerified = false;
 
         // Payment method
         const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
@@ -786,7 +773,7 @@ if (!isEmailVerified(orderId) && !window.__justVerified) {
                     phone,
                     email,
                     orderId,
-                    cart: order.items,
+                    cart: order.cart,
                     totalAmount: order.totalAmount,
                     payment: {
                       status: 'paid',
@@ -847,7 +834,7 @@ if (!isEmailVerified(orderId) && !window.__justVerified) {
 
             const rzp = new Razorpay(options);
             rzp.open();
-            return; // stop COD flow
+            return;
           } catch (err) {
             console.error('Razorpay flow error:', err);
             document.querySelector(".container").innerHTML = `
@@ -862,6 +849,15 @@ if (!isEmailVerified(orderId) && !window.__justVerified) {
         }
 
         // ---------- COD Flow ----------
+        
+        // ✅ FIX 2: Save to Firebase ONLY in COD flow
+        await fetch("/.netlify/functions/saveOrder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(order)
+        });
+        console.log("BuyNow COD order saved to Firebase:", orderId);
+
         document.querySelector(".container").innerHTML = `
           <div class="confirmed-box">
             <h3>✓ Order Confirmed</h3>
@@ -899,6 +895,7 @@ if (!isEmailVerified(orderId) && !window.__justVerified) {
 💰 *Total:* ₹${order.totalAmount}
 📦 *Product:* ${product.name} x${quantity}`;
 
+            // ✅ FIX 3: Use order.cart instead of order.items
             await fetch("/.netlify/functions/sendTelegramOrder", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
