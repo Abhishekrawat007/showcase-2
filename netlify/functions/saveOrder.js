@@ -48,11 +48,11 @@ export async function handler(event) {
       return { statusCode: 400, body: "Invalid order payload" };
     }
 
-    // 🔥 SINGLE SOURCE OF TRUTH
+    // ✅ FIX: PUSH, DON'T SET
     await admin
       .database()
-      .ref("sites/showcase-2/orders/" + order.orderId)
-      .set({
+      .ref("sites/showcase-2/orders")
+      .push({
         ...order,
         createdAt: Date.now(),
       });
