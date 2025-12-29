@@ -13,7 +13,10 @@ const products = [
       "images/moonlamp1.jpg",
       "images/moonlamp2.jpg",
       "images/moonlamp3.jpg",
-      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766042725/aaoundo462gcog1tbwcd.webp"
+      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766042725/aaoundo462gcog1tbwcd.webp",
+      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766219042/l0hv68c5k0qhgvqxkkfo.webp",
+      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766219044/hk5opnsjtw3xpealu6cf.webp",
+      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766219045/oywxrebuuriwnagmbbtg.webp"
     ],
     "video": "https://youtube.com/watch?v=TcAZwTE0dDI",
     "oldPrice": 450,
