@@ -1507,6 +1507,15 @@ function removeFromCart(id) {
   renderCart();
 }
 
+async function saveOrderToFirebase(order) {
+  const res = await fetch('/.netlify/functions/save-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(order)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
 
 function loadImageAsBase64(url) {
   return new Promise((resolve, reject) => {
@@ -1609,7 +1618,7 @@ const payload = {
     status: 'pending'
   },
   messageText,
-  ts: Date.now()
+  timestamp: Date.now()
 };
 
 // Save order via Netlify Function (COD)
