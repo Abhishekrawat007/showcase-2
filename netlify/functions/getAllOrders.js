@@ -38,7 +38,7 @@ export async function handler() {
   try {
     await ensureFirebaseInit();
 
-    const snap = await admin.database().ref("orders").once("value");
+    const snap = await admin.database().ref("sites/showcase-2/orders").once("value");
     const val = snap.val() || {};
     const orders = Object.values(val);
 

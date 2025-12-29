@@ -342,6 +342,27 @@ body.dark-mode input, body.dark-mode textarea { background:#2b2b2b; color:#eee; 
     <div id="orderDetailBody"></div>
   </div>
 </div>
+<!-- 🔽 ADD THIS MODAL BEFORE </body> -->
+<div id="autoImageModal"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;
+            align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;max-width:900px;width:95%;
+              padding:16px;max-height:90vh;overflow:auto;">
+    <h3>Smart Auto Images</h3>
+    <p>Select <b>3 images</b> (recommended). Max 7.</p>
+
+    <div id="autoImageGrid"
+         style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+                gap:10px;margin-top:10px;"></div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:15px;">
+      <button onclick="closeAutoImageModal()">Cancel</button>
+      <button onclick="confirmAutoImages()" style="background:#28a745;color:#fff;">
+        Use Selected Images
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
     const typingPlaceholder = [

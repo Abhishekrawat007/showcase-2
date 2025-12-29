@@ -8,4 +8,4 @@
 
 # optional: explicit Node version for Netlify build image
 [build.environment]
-  NODE_VERSION = "22"
+  NODE_VERSION = "20"

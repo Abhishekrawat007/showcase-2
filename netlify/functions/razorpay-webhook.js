@@ -62,7 +62,7 @@ export async function handler(event) {
   }
 
   const db = admin.database();
-  await db.ref("secureOrders/" + firebaseOrderKey).update({
+  await db.ref("sites/showcase-2/secureOrders/" + firebaseOrderKey).update({
     isPaid: true,
     razorpay_payment_id: payment.id
   });

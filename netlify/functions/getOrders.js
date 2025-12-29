@@ -42,7 +42,7 @@ export async function handler(event) {
     const { phone } = JSON.parse(event.body);
     
     const snapshot = await admin.database()
-      .ref("orders")
+      .ref("sites/showcase-2/orders")
       .orderByChild("phone")
       .equalTo(phone)
       .once("value");

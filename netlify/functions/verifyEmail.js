@@ -64,7 +64,7 @@ export async function handler(event) {
 
     // Firebase key
     const key = Buffer.from(email).toString("base64").replace(/\//g, "_");
-    const ref = admin.database().ref(`emailVerifications/${key}`);
+    const ref = admin.database().ref(`sites/showcase-2/emailVerifications/${key}`);
     const snap = await ref.once("value");
     const rec = snap.val();
 
@@ -108,7 +108,7 @@ export async function handler(event) {
 
     // SUCCESS
     await ref.remove();
-    await admin.database().ref(`emailVerified/${key}`).set({
+    await admin.database().ref(`sites/showcase-2/emailVerified/${key}`).set({
       email,
       verifiedAt: now
     });

@@ -12,7 +12,7 @@ exports.handler = async (event) => {
 
   try {
     const order = JSON.parse(event.body);
-    await admin.database().ref("orders").push(order);
+    await admin.database().ref("sites/showcase-2/orders").push(order);
     return { statusCode: 200, body: JSON.stringify({ success: true }) };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };

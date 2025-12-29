@@ -60,7 +60,7 @@ export async function handler(event) {
     }
 
     const db = admin.database();
-    await db.ref("secureOrders/" + orderId).set({
+    await db.ref("sites/showcase-2/secureOrders/" + orderId).set({
       orderId,
       name,
       phone,

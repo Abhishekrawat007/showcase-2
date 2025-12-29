@@ -63,7 +63,7 @@ export async function handler(event) {
           time: Date.now(),
           resp
         };
-        await admin.database().ref('/pushSubscribers/' + token + '/topics/' + topic).set(meta);
+        await admin.database().ref('sites/showcase-2/pushSubscribers/' + token + '/topics/' + topic).set(meta);
       } catch (e) {
         console.warn('Could not write topic metadata to DB', e && e.message);
       }
@@ -72,7 +72,7 @@ export async function handler(event) {
       console.error("subscribe-topic error", err);
       // Write failure detail to DB for inspection
       try {
-        await admin.database().ref('/pushSubscribers/' + token + '/topics/' + topic).set({
+        await admin.database().ref('sites/showcase-2/pushSubscribers/' + token + '/topics/' + topic).set({
           subscribed: false,
           error: err.message || String(err),
           time: Date.now()

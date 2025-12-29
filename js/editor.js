@@ -149,6 +149,21 @@ ${String(product.id).startsWith('temp-')
         <input type="file" accept="image/*" multiple id="upload-btn-${actualIndex}" onchange="handleImageUpload(this.files, ${actualIndex})" style="display:none;" />
         <span id="upload-spinner-${actualIndex}" class="spinner" style="display:none;">⏳</span>
       </div>
+            <!-- 🔽 ADD THIS NEXT TO "📤 Upload Images" (SAME ROW) -->
+<label for="auto-img-btn-${actualIndex}"
+  style="display:inline-block;
+         background:linear-gradient(135deg,#6f42c1,#4b2fb8);
+         color:#fff;
+         padding:8px 16px;
+         border-radius:6px;
+         cursor:pointer;
+         font-weight:500;
+         margin-left:8px;">
+  🤖 Smart Auto Images
+</label>
+<button id="auto-img-btn-${actualIndex}"
+        style="display:none"
+        onclick="openAutoImageModal(${actualIndex})"></button>
 
       <label>Video URL:</label><input type="text" value="${product.video || ''}" onchange="updateField(${actualIndex}, 'video', this.value); renderProducts();" />
       ${getYouTubeEmbedURL(product.video)
@@ -1252,3 +1267,119 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+// 🔽 ADD THIS AT BOTTOM OF editor.js
+
+let autoImageIndex = null;
+let autoSelected = [];
+
+async function openAutoImageModal(index){
+  autoImageIndex = index;
+  autoSelected = [];
+
+  const grid = document.getElementById('autoImageGrid');
+  grid.innerHTML = 'Loading images…';
+
+  document.getElementById('autoImageModal').style.display = 'flex';
+
+  // ✅ CLIENT-SIDE GOOGLE IMAGE FETCH
+  const images = await fetchGoogleImagesClientSide(
+    products[index].name,
+    10
+  );
+
+  grid.innerHTML = '';
+
+  if (!images.length) {
+    grid.innerHTML = '<p>No images found. Try manual upload.</p>';
+    return;
+  }
+
+  images.forEach(url => {
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.width = '100%';
+    img.style.cursor = 'pointer';
+    img.style.borderRadius = '8px';
+    img.onclick = () => toggleAutoSelect(img, url);
+    grid.appendChild(img);
+  });
+}
+
+function toggleAutoSelect(img, url){
+  const i = autoSelected.indexOf(url);
+  if(i >= 0){
+    autoSelected.splice(i,1);
+    img.style.outline = '';
+  } else {
+    if(autoSelected.length >= 7) return alert('Max 7 images allowed');
+    autoSelected.push(url);
+    img.style.outline = '3px solid #28a745';
+  }
+}
+
+async function confirmAutoImages(){
+  if(autoSelected.length < 1){
+    alert('Select at least 1 image');
+    return;
+  }
+
+  for(const url of autoSelected){
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const file = new File([blob], 'auto.jpg', {type: blob.type});
+    await handleImageUpload([file], autoImageIndex);
+  }
+
+  closeAutoImageModal();
+}
+
+function closeAutoImageModal(){
+  document.getElementById('autoImageModal').style.display = 'none';
+}
+async function fetchGoogleImagesClientSide(query, limit = 10) {
+  const results = [];
+  const seen = new Set();
+
+  let page = 0;
+
+  while (results.length < limit && page < 3) {
+    const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(
+      query
+    )}&ijn=${page}`;
+
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = url;
+    document.body.appendChild(iframe);
+
+    await new Promise(resolve => {
+      iframe.onload = () => {
+        try {
+          const imgs = iframe.contentDocument.querySelectorAll("img");
+          imgs.forEach(img => {
+            const src = img.src;
+            if (
+              src &&
+              src.startsWith("http") &&
+              !seen.has(src) &&
+              !src.includes("logo") &&
+              !src.includes("icon")
+            ) {
+              seen.add(src);
+              results.push(src);
+            }
+          });
+        } catch (e) {
+          // cross-origin protection (expected)
+        }
+        document.body.removeChild(iframe);
+        resolve();
+      };
+    });
+
+    page++;
+  }
+
+  return results.slice(0, limit);
+}
+
