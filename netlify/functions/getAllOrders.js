@@ -40,7 +40,11 @@ export async function handler() {
 
     const snap = await admin.database().ref("sites/showcase-2/orders").once("value");
     const val = snap.val() || {};
-    const orders = Object.values(val);
+const orders = Object.entries(val).map(([key, order]) => ({
+  _key: key,
+  ...order
+}));
+
 
     return {
       statusCode: 200,
