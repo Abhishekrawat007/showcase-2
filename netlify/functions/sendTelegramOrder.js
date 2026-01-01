@@ -12,7 +12,6 @@ function getChatIdsFromEnv() {
   return raw.split(",").map(s => s.trim()).filter(Boolean);
 }
 
-
 // --- Helper: Escape Markdown special chars ---
 function escapeMarkdown(text) {
   return text.replace(/([_*[\]()~`>#+\-=|{}.!])/g, "\\$1");
@@ -104,6 +103,18 @@ export async function handler(event) {
       return { statusCode: 400, body: "Missing order details" };
     }
 
+    // ========== Get site/shop branding ==========
+    // Dynamic per site (from env)
+    const shopName = process.env.SHOP_NAME || "Sublime Store";
+    const siteUrl = process.env.SITE_URL || process.env.URL || "sublimestore.netlify.app";
+    const siteName = siteUrl.replace(/^https?:\/\//, '').replace(/\.netlify\.app$/, '').toUpperCase();
+    
+    // Fixed for all sites (hardcoded)
+    const shopAddress = "Near Variety Store, Link Road, Takana Road";
+    const shopCity = "Pithoragarh, Uttarakhand, India";
+    const shopPhone = "+91 8937973753";
+    // ============================================
+
     // Build items list for message if needed
     const itemLines = Array.isArray(cart) ? cart.map((it) => {
       const title = it.title || it.name || it.product || "Item";
@@ -131,75 +142,192 @@ export async function handler(event) {
     // WhatsApp link
     const waLink = phone ? `https://wa.me/91${String(phone).replace(/\D/g, "")}` : "";
 
-    // ---------- NEW: Preserve "Buy Now" if the request is a buy-now ----------
+    // ---------- Preserve "Buy Now" if the request is a buy-now ----------
     const lowerMsg = (messageText || "").toString().toLowerCase();
     const isBuyNowIndicator = /buy now/.test(lowerMsg) || (body.orderType && body.orderType.toString().toLowerCase() === 'buy_now') || (body.source && body.source.toString().toLowerCase() === 'buynow');
 
     if (messageText && typeof messageText === "string" && messageText.trim().length > 0) {
       if (isBuyNowIndicator) {
-        // If it's already a buy-now style message, ensure badge is present and prefix appropriately
         if (!/^(🟢|🔴)/.test(messageText.trim())) {
-          messageText = `🛒 *Buy Now Order* ${statusBadge}\n` + messageText;
+          messageText = `🛒 *Buy Now Order from ${siteName}* ${statusBadge}\n` + messageText;
         } else {
-          // already has a badge - still ensure header text present
           if (!/Buy Now Order/i.test(messageText)) {
-            messageText = messageText.replace(/^(🧾?\s*\*?New Order Received\*?\s*)/i, `🛒 *Buy Now Order* ${statusBadge}\n`);
+            messageText = messageText.replace(/^(🧾?\s*\*?New Order Received\*?\s*)/i, `🛒 *Buy Now Order from ${siteName}* ${statusBadge}\n`);
           }
         }
       } else {
-        // default behaviour: keep "New Order Received" header as before
         if (!/^(🟢|🔴)/.test(messageText.trim()) && !/New Order Received/i.test(messageText)) {
-          messageText = `🧾 *New Order Received* ${statusBadge}\n` + messageText;
+          messageText = `🧾 *New Order from ${siteName}* ${statusBadge}\n` + messageText;
         } else if (!/New Order Received/i.test(messageText)) {
-          messageText = `🧾 *New Order Received* ${statusBadge}\n` + messageText;
+          messageText = `🧾 *New Order from ${siteName}* ${statusBadge}\n` + messageText;
         } else {
           if (!/^(🟢|🔴)/.test(messageText.trim())) {
-            messageText = messageText.replace(/^(🧾\s*\*New Order Received\*\s*)/i, `$1${statusBadge}\n`);
+            messageText = messageText.replace(/^(🧾\s*\*New Order Received\*\s*)/i, `$1from ${siteName} ${statusBadge}\n`);
           }
         }
       }
     } else {
       // No custom messageText provided — build one.
       if (isBuyNowIndicator) {
-        messageText = `🛒 *Buy Now Order* ${statusBadge}\n` +
+        messageText = `🛒 *Buy Now Order from ${siteName}* ${statusBadge}\n` +
           `*Order ID:* ${orderId}\n` +
           `${name ? `👤 *Name:* ${name}\n` : ""}` +
           `${phone ? `📞 *Phone:* ${phone}\n` : ""}` +
           `${waLink ? `💬 *WhatsApp:* [Chat](${waLink})\n` : ""}` +
           `💰 *Total:* Rs. ${computedTotal}\n` +
-          `📦 *Items:*\n${itemLines}`;
+          `📦 *Items:*\n${itemLines}\n` +
+          `\n━━━━━━━━━━━━━━━━━━━━━━\n` +
+          `📍 *Site:* ${siteUrl}`;
       } else {
-        messageText = `🧾 *New Order Received* ${statusBadge}\n` +
+        messageText = `🧾 *New Order from ${siteName}* ${statusBadge}\n` +
           `*Order ID:* ${orderId}\n` +
           `${name ? `👤 *Name:* ${name}\n` : ""}` +
           `${phone ? `📞 *Phone:* ${phone}\n` : ""}` +
           `${waLink ? `💬 *WhatsApp:* [Chat](${waLink})\n` : ""}` +
           `💰 *Total:* Rs. ${computedTotal}\n` +
-          `📦 *Items:*\n${itemLines}`;
+          `📦 *Items:*\n${itemLines}\n` +
+          `\n━━━━━━━━━━━━━━━━━━━━━━\n` +
+          `📍 *Site:* ${siteUrl}`;
       }
     }
 
-    // --- Create PDF ---
+    // ═══════════════════════════════════════════════════════════════
+    // 🔥 ULTRA-PREMIUM PDF DESIGN STARTS HERE 🔥
+    // ═══════════════════════════════════════════════════════════════
+
     const pdf = new jsPDF("p", "pt", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-    // Header
+    // ========== COLOR PALETTE (Orange to Gold Premium) ==========
+    const colors = {
+      primary: [255, 140, 0],      // Orange #FF8C00
+      gold: [255, 215, 0],          // Gold #FFD700
+      darkGold: [218, 165, 32],     // Dark Goldenrod
+      cream: [255, 248, 240],       // Floral White
+      lightCream: [255, 250, 245],  // Very light cream
+      darkText: [51, 51, 51],       // Almost black
+      mediumText: [102, 102, 102],  // Medium gray
+      accent: [139, 69, 19],        // Saddle brown (elegant)
+      white: [255, 255, 255]
+    };
+
+    // ========== PREMIUM BACKGROUND ==========
+    // Subtle gradient effect using rectangles
+    pdf.setFillColor(...colors.cream);
+    pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+
+    // Top accent bar with gradient simulation (3 layers)
+    pdf.setFillColor(255, 140, 0); // Orange
+    pdf.rect(0, 0, pageWidth, 80, 'F');
+    
+    pdf.setFillColor(255, 165, 0, 0.7); // Lighter orange (simulate gradient)
+    pdf.rect(0, 0, pageWidth, 60, 'F');
+    
+    pdf.setFillColor(255, 200, 50, 0.4); // Even lighter
+    pdf.rect(0, 0, pageWidth, 40, 'F');
+
+    // Decorative line below header
+    pdf.setDrawColor(...colors.gold);
+    pdf.setLineWidth(3);
+    pdf.line(40, 85, pageWidth - 40, 85);
+
+    // ========== SHOP NAME (HEADER) ==========
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(18);
-    pdf.text("Sublime Store", pageWidth / 2, 40, { align: "center" });
-    pdf.setFontSize(10);
+    pdf.setFontSize(32);
+    pdf.setTextColor(255, 255, 255); // White text on colored background
+    pdf.text(shopName.toUpperCase(), pageWidth / 2, 50, { align: "center" });
+
+    // ========== CONTACT INFO BELOW HEADER (White on orange) ==========
     pdf.setFont("helvetica", "normal");
-    pdf.text("Near Variety Store, Link Road, Takana Road, Pithoragarh", pageWidth / 2, 55, { align: "center" });
-    pdf.text("Phone: +91 8868839446 | Website: sublimestore.in", pageWidth / 2, 70, { align: "center" });
+    pdf.setFontSize(9);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(`${shopAddress}, ${shopCity}`, pageWidth / 2, 68, { align: "center" });
 
-    let y = 100;
-    pdf.setFontSize(12);
-    pdf.text(`Customer: ${name}`, 40, y);
-    pdf.text(`Phone: ${phone}`, 40, y + 18);
-    pdf.text(`Order ID: ${orderId}`, 40, y + 36);
-    pdf.text(`Date: ${new Date().toLocaleString()}`, 40, y + 54);
-    y += 80;
+    // Phone and Website on same line
+    const contactLine = `Phone: ${shopPhone}  •  Website: ${siteUrl.replace(/^https?:\/\//, '')}`;
+    pdf.setFontSize(8.5);
+    pdf.text(contactLine, pageWidth / 2, 80, { align: "center" });
 
+    // ========== INVOICE BADGE ==========
+    let y = 115;
+    
+    // Premium "INVOICE" badge with border
+    pdf.setFillColor(...colors.darkGold);
+    pdf.roundedRect(40, y - 5, 120, 25, 3, 3, 'F');
+    
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(14);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text("INVOICE", 100, y + 10, { align: "center" });
+
+    // Order date on right side
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(9);
+    pdf.setTextColor(...colors.darkText);
+    const orderDate = new Date().toLocaleDateString('en-IN', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    pdf.text(`Date: ${orderDate}`, pageWidth - 40, y + 10, { align: "right" });
+
+    y += 45;
+
+    // ========== CUSTOMER & ORDER DETAILS SECTION ==========
+    // Left side - Customer info box
+    pdf.setFillColor(...colors.lightCream);
+    pdf.roundedRect(40, y, 250, 85, 5, 5, 'F');
+    pdf.setDrawColor(...colors.gold);
+    pdf.setLineWidth(1.5);
+    pdf.roundedRect(40, y, 250, 85, 5, 5, 'S');
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(10);
+    pdf.setTextColor(...colors.accent);
+    pdf.text("BILL TO", 50, y + 18);
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(13);
+    pdf.setTextColor(...colors.darkText);
+    pdf.text(name, 50, y + 38);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.setTextColor(...colors.mediumText);
+    pdf.text(`Phone: ${phone}`, 50, y + 56);
+
+    // Right side - Order info box
+    pdf.setFillColor(...colors.lightCream);
+    pdf.roundedRect(pageWidth - 290, y, 250, 85, 5, 5, 'F');
+    pdf.setDrawColor(...colors.gold);
+    pdf.setLineWidth(1.5);
+    pdf.roundedRect(pageWidth - 290, y, 250, 85, 5, 5, 'S');
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(10);
+    pdf.setTextColor(...colors.accent);
+    pdf.text("ORDER DETAILS", pageWidth - 280, y + 18);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.setTextColor(...colors.mediumText);
+    pdf.text(`Order ID: #${orderId}`, pageWidth - 280, y + 40);
+    
+    // Payment status badge
+    const isPaid = statusBadge.includes('PAID');
+    pdf.setFillColor(isPaid ? 34 : 220, isPaid ? 197 : 53, isPaid ? 94 : 69); // Green or Red
+    pdf.roundedRect(pageWidth - 280, y + 50, isPaid ? 50 : 90, 20, 3, 3, 'F');
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(isPaid ? "PAID" : "COD/UNPAID", pageWidth - 255, y + 63, { align: "center" });
+
+    y += 110;
+
+    // ========== PRODUCTS TABLE (Ultra Premium) ==========
     const rows = [];
     for (let i = 0; i < cart.length; i++) {
       const item = cart[i];
@@ -209,98 +337,171 @@ export async function handler(event) {
         { content: "", image: imgBase64 },
         item.title,
         item.qty,
-        `Rs. ${item.price}`,
-        `Rs. ${item.price * item.qty}`
+        `₹${item.price}`,
+        `₹${item.price * item.qty}`
       ]);
     }
 
+    // Grand Total Row
     rows.push([
-      { content: "Total", colSpan: 5, styles: { halign: "right", fontStyle: "bold" } },
-      { content: `Rs. ${computedTotal}`, styles: { halign: "right", fontStyle: "bold" } }
+      { content: "", colSpan: 5, styles: { halign: "right", fontStyle: "bold", fontSize: 12, textColor: colors.darkText } },
+      { content: `₹${computedTotal}`, styles: { halign: "right", fontStyle: "bold", fontSize: 12, fillColor: colors.gold, textColor: [51, 51, 51] } }
     ]);
 
     autoTable(pdf, {
       startY: y,
-      head: [["No.", "Image", "Product", "Qty", "Price", "Subtotal"]],
+      head: [["#", "Image", "Product", "Qty", "Price", "Subtotal"]],
       body: rows,
-      styles: { fontSize: 10, valign: "middle", lineWidth: 0.5, lineColor: [0, 0, 0] },
-      headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: "bold", lineWidth: 0.5, lineColor: [0, 0, 0] },
-      bodyStyles: { minCellHeight: 50, lineWidth: 0.5, lineColor: [0, 0, 0] },
-      columnStyles: { 0: { cellWidth: 35 }, 1: { cellWidth: 50 }, 2: { cellWidth: 210 }, 3: { cellWidth: 50 }, 4: { cellWidth: 70 }, 5: { cellWidth: 80 } },
+      theme: 'plain',
+      styles: { 
+        fontSize: 10, 
+        valign: "middle",
+        cellPadding: 8,
+        lineColor: colors.gold,
+        lineWidth: 0.5
+      },
+      headStyles: { 
+        fillColor: colors.primary,
+        textColor: colors.white,
+        fontStyle: "bold",
+        fontSize: 11,
+        halign: "center",
+        lineWidth: 0
+      },
+      bodyStyles: { 
+        minCellHeight: 55,
+        textColor: colors.darkText
+      },
+      alternateRowStyles: {
+        fillColor: colors.lightCream
+      },
+      columnStyles: { 
+        0: { cellWidth: 30, halign: "center", fontStyle: "bold", textColor: colors.mediumText },
+        1: { cellWidth: 55, halign: "center" },
+        2: { cellWidth: 220 },
+        3: { cellWidth: 45, halign: "center" },
+        4: { cellWidth: 70, halign: "right" },
+        5: { cellWidth: 75, halign: "right", fontStyle: "bold" }
+      },
       didDrawCell: (data) => {
         try {
-          if (data.column.index === 1 && data.cell.raw?.image) {
-            const imgSize = 40;
+          if (data.column.index === 1 && data.cell.raw?.image && data.section === 'body') {
+            const imgSize = 45;
             const xCenter = data.cell.x + (data.cell.width - imgSize) / 2;
             const yCenter = data.cell.y + (data.cell.height - imgSize) / 2;
+            
+            // Draw white background for image
+            pdf.setFillColor(255, 255, 255);
+            pdf.roundedRect(xCenter - 2, yCenter - 2, imgSize + 4, imgSize + 4, 3, 3, 'F');
+            
+            // Draw image
             pdf.addImage(data.cell.raw.image, "JPEG", xCenter, yCenter, imgSize, imgSize);
           }
         } catch (e) {
           // ignore image draw errors
         }
+      },
+      didDrawPage: (data) => {
+        // Add subtle border around table
+        if (data.table.finalY) {
+          pdf.setDrawColor(...colors.gold);
+          pdf.setLineWidth(2);
+          pdf.rect(40, data.table.pageStartY - 5, pageWidth - 80, data.table.finalY - data.table.pageStartY + 5, 'S');
+        }
       }
     });
 
-    const finalY = (pdf.lastAutoTable && pdf.lastAutoTable.finalY) ? pdf.lastAutoTable.finalY + 20 : y + 20;
+    const finalY = (pdf.lastAutoTable && pdf.lastAutoTable.finalY) ? pdf.lastAutoTable.finalY + 30 : y + 30;
+
+    // ========== PREMIUM FOOTER SECTION ==========
+    // Decorative line
+    pdf.setDrawColor(...colors.gold);
+    pdf.setLineWidth(1.5);
+    pdf.line(40, finalY, pageWidth - 40, finalY);
+
+    // Thank you message with elegant styling
     pdf.setFont("times", "italic");
-    pdf.setFontSize(11);
-    pdf.setTextColor(60);
-    pdf.text(
-      "Thank you for shopping at Sublime Store.\nWe’ll call or WhatsApp you to confirm your order.",
-      pageWidth / 2,
-      finalY + 30,
-      { align: "center" }
-    );
+    pdf.setFontSize(13);
+    pdf.setTextColor(...colors.accent);
+    const thankYouY = finalY + 25;
+    pdf.text(`Thank you for shopping with ${shopName}!`, pageWidth / 2, thankYouY, { align: "center" });
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.setTextColor(...colors.mediumText);
+    pdf.text("We will contact you shortly to confirm your order.", pageWidth / 2, thankYouY + 18, { align: "center" });
+
+    // Contact CTA
+    pdf.setFontSize(9);
+    pdf.setTextColor(...colors.primary);
+    pdf.text(`📞 ${shopPhone}  •  🌐 ${siteUrl.replace(/^https?:\/\//, '')}`, pageWidth / 2, thankYouY + 36, { align: "center" });
+
+    // Bottom decorative element
+    const bottomY = pageHeight - 40;
+    pdf.setFillColor(...colors.primary);
+    pdf.rect(0, bottomY, pageWidth, 40, 'F');
+    
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(`Order placed at ${siteUrl.replace(/^https?:\/\//, '')} • Generated on ${orderDate}`, pageWidth / 2, bottomY + 15, { align: "center" });
+    
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(7);
+    pdf.text("Powered by Sublime Technologies", pageWidth / 2, bottomY + 28, { align: "center" });
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔥 ULTRA-PREMIUM PDF DESIGN ENDS HERE 🔥
+    // ═══════════════════════════════════════════════════════════════
 
     const pdfBuffer = Buffer.from(pdf.output("arraybuffer"));
-   // Send a copy to owner emails via Netlify server function (optional — non-blocking)
-try {
-  const pdfB64 = pdfBuffer.toString('base64');
-  // fire-and-forget: call Netlify function to email owners
-  fetch(`${process.env.URL || ""}/.netlify/functions/sendEmailOrder`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name,
-      phone,
-      orderId,
-      cart,
-      totalAmount: computedTotal,
-      messageText,
-      pdfBase64: pdfB64
-    })
-  }).catch(err => {
-    // log but do not fail the main function
-    console.warn('sendEmailOrder call failed:', err && err.message);
-  });
-} catch (e) {
-  console.warn('Error preparing email send:', e && e.message);
-}
-// after pdfBuffer created and maybe after owner email/fire-and-forget call
-try {
-  const pdfB64 = pdfBuffer.toString('base64');
-  // call Netlify function to send customer receipt via Brevo
-  if (body.email) {
-    fetch(`${process.env.URL || ""}/.netlify/functions/sendEmailCustomer`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        phone,
-        email: body.email,
-        orderId,
-        cart,
-        totalAmount: computedTotal,
-        messageText,
-        pdfBase64: pdfB64
-      })
-    }).catch(err => {
-      console.warn('sendEmailCustomer call failed:', err && err.message);
-    });
-  }
-} catch (e) {
-  console.warn('Error calling sendEmailCustomer:', e && e.message);
-}
+
+    // Send a copy to owner emails via Netlify server function (optional — non-blocking)
+    try {
+      const pdfB64 = pdfBuffer.toString('base64');
+      fetch(`${process.env.URL || ""}/.netlify/functions/sendEmailOrder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          phone,
+          orderId,
+          cart,
+          totalAmount: computedTotal,
+          messageText,
+          pdfBase64: pdfB64
+        })
+      }).catch(err => {
+        console.warn('sendEmailOrder call failed:', err && err.message);
+      });
+    } catch (e) {
+      console.warn('Error preparing email send:', e && e.message);
+    }
+
+    // Send customer receipt via Brevo
+    try {
+      const pdfB64 = pdfBuffer.toString('base64');
+      if (body.email) {
+        fetch(`${process.env.URL || ""}/.netlify/functions/sendEmailCustomer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            phone,
+            email: body.email,
+            orderId,
+            cart,
+            totalAmount: computedTotal,
+            messageText,
+            pdfBase64: pdfB64
+          })
+        }).catch(err => {
+          console.warn('sendEmailCustomer call failed:', err && err.message);
+        });
+      }
+    } catch (e) {
+      console.warn('Error calling sendEmailCustomer:', e && e.message);
+    }
 
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const TELEGRAM_CHAT_IDS = getChatIdsFromEnv();
@@ -325,7 +526,7 @@ try {
         const formData = new FormData();
         formData.append("chat_id", chatId);
         formData.append("document", pdfBuffer, {
-          filename: `order-${orderId}.pdf`,
+          filename: `${shopName.replace(/\s+/g, '-')}-Order-${orderId}.pdf`,
           contentType: "application/pdf"
         });
         const headers = formData.getHeaders ? formData.getHeaders() : {};
