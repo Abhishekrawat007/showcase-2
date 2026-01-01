@@ -2,6 +2,7 @@
 import admin from "firebase-admin";
 import zlib from "zlib";
 import { promisify } from "util";
+import jwt from "jsonwebtoken"; // ✅ ADD THIS
 
 const gunzip = promisify(zlib.gunzip);
 
@@ -91,10 +92,18 @@ export async function handler(event) {
 
     if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
 
-    // AUTH
-    const secret = event.headers["x-broadcast-secret"] || event.headers["X-Broadcast-Secret"] || "";
-    if (!secret || secret !== process.env.BROADCAST_SECRET) {
-      return { statusCode: 401, body: JSON.stringify({ error: "Unauthorized" }) };
+    // ✅ REPLACE SECRET CHECK WITH JWT VERIFICATION
+    const authHeader = event.headers["authorization"] || event.headers["Authorization"] || "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    
+    if (!token) {
+      return { statusCode: 401, body: JSON.stringify({ error: "No token provided" }) };
+    }
+
+    try {
+      jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return { statusCode: 401, body: JSON.stringify({ error: "Invalid token" }) };
     }
 
     const bodyJson = JSON.parse(event.body || "{}");

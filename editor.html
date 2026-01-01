@@ -101,63 +101,6 @@
     window.location.href = "kunnu.html";
   }
 })();
-function decodeJwt(token) {
-  // JWT parts: header.payload.signature
-  const payload = token.split('.')[1];
-  // JWT payload is base64url encoded, replace URL-safe chars and decode
-  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split('')
-      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-      .join('')
-  );
-  return JSON.parse(jsonPayload);
-}
-
-function setupTokenExpiryWarning(token) {
-  const payload = decodeJwt(token);
-  if (!payload.exp) {
-    console.warn("Token has no expiry");
-    return;
-  }
-
-  const expiryTime = payload.exp * 1000; // convert to ms
-  const now = Date.now();
-  const warningTime = expiryTime - 5 * 60 * 1000; // 5 minutes before expiry
-
-  if (now > expiryTime) {
-    alert("Your session has already expired. Please login again.");
-    sessionStorage.removeItem("adminToken");
-    window.location.href = "kunnu.html";
-    return;
-  }
-
-  if (now > warningTime) {
-    // If less than 5 minutes remain, show warning immediately
-    showExpiryWarning(expiryTime);
-  } else {
-    // Otherwise, set a timeout to warn at warningTime
-    setTimeout(() => showExpiryWarning(expiryTime), warningTime - now);
-  }
-}
-
-function showExpiryWarning(expiryTime) {
-  const timeLeft = Math.round((expiryTime - Date.now()) / 1000 / 60);
-  if (confirm(`⚠️ Your session will expire in about ${timeLeft} minutes.\nDo you want to stay logged in?`)) {
-    // User wants to stay logged in - redirect to login or refresh token
-    window.location.href = "kunnu.html";
-  } else {
-    // User ignores or cancels - do nothing or log out after expiry
-    // Optional: you can auto-logout after expiry time here if you want
-  }
-}
-
-// Run this after successful token verification on editor page load
-const token = sessionStorage.getItem("adminToken");
-if (token) {
-  setupTokenExpiryWarning(token);
-}
 
 </script>
 <!-- Mobile Hamburger Menu Button -->

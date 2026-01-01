@@ -707,13 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Ask for secret (so we do not store it in code)
-    let secret = sessionStorage.getItem('broadcast_secret');
-    if (!secret) {
-      secret = prompt('Enter broadcast secret (admin only):');
-      if (!secret) return;
-      sessionStorage.setItem('broadcast_secret', secret);
-    }
+   
     openModal();
   });
 
@@ -735,12 +729,7 @@ sendBtn?.addEventListener('click', async () => {
     return;
   }
 
-  let secret = sessionStorage.getItem('broadcast_secret');
-  if (!secret) {
-    secret = prompt('Enter broadcast secret (admin only):');
-    if (!secret) { resultEl.textContent = 'Broadcast cancelled.'; resultEl.className = 'broadcast-result error'; return; }
-    sessionStorage.setItem('broadcast_secret', secret);
-  }
+ 
 
   sendBtn.disabled = true;
   sendBtn.textContent = 'Sending...';
@@ -750,12 +739,11 @@ sendBtn?.addEventListener('click', async () => {
     const adminToken = sessionStorage.getItem('adminToken') || '';
     const res = await fetch('/.netlify/functions/broadcast', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-broadcast-secret': secret,
-        'Authorization': adminToken ? ('Bearer ' + adminToken) : ''
-      },
-      body: JSON.stringify({ title, body, url, topic: 'all', secret })
+     headers: {
+  'Content-Type': 'application/json',
+  'Authorization': adminToken ? ('Bearer ' + adminToken) : ''
+},
+body: JSON.stringify({ title, body, url, topic: 'all' })
     });
 
     let data;
