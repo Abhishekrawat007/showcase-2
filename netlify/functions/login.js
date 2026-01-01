@@ -25,7 +25,7 @@ export const handler = async (event) => {
     }
 
     // Create token: include any claims you want (role, iat, etc.)
-    const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '90d' });
 
     return {
       statusCode: 200,
