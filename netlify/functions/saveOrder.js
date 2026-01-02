@@ -9,10 +9,8 @@ let _initPromise = null;
 
 async function loadServiceAccountFromEnv() {
   if (_saCache) return _saCache;
-
   const b64 = process.env.FIREBASE_SA_GZ;
   if (!b64) throw new Error("Missing FIREBASE_SA_GZ");
-
   const gzBuffer = Buffer.from(b64, "base64");
   const jsonBuf = await gunzip(gzBuffer);
   _saCache = JSON.parse(jsonBuf.toString("utf8"));
@@ -48,8 +46,8 @@ export async function handler(event) {
       return { statusCode: 400, body: "Invalid order payload" };
     }
 
-    // ✅ FIX: PUSH, DON'T SET
-    await admin
+    // Save order
+    const orderRef = await admin
       .database()
       .ref("sites/showcase-2/orders")
       .push({
@@ -57,9 +55,54 @@ export async function handler(event) {
         createdAt: Date.now(),
       });
 
+    // ✅ SEND NOTIFICATION TO ALL ADMIN WORKERS
+    let notifResult = { status: 'starting' };
+    try {
+      const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
+      const tokenData = snapshot.val() || {};
+      const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
+      
+      notifResult.tokensFound = adminTokens.length;
+
+      if (adminTokens.length > 0) {
+        notifResult.status = 'sending';
+        let successCount = 0;
+        let failureCount = 0;
+        
+        for (const token of adminTokens) {
+          try {
+            await admin.messaging().send({
+              token: token,
+              notification: {
+                title: "🔔 New Order!",
+                body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
+              },
+              webpush: {
+                fcmOptions: { link: "/editor.html" }
+              }
+            });
+            successCount++;
+          } catch (err) {
+            failureCount++;
+            console.error(`Failed to send:`, err.message);
+          }
+        }
+        
+        notifResult.status = 'sent';
+        notifResult.success = successCount;
+        notifResult.failed = failureCount;
+      } else {
+        notifResult.status = 'noTokens';
+      }
+    } catch (notifErr) {
+      notifResult.status = 'error';
+      notifResult.error = notifErr.message;
+      console.error("Notification failed:", notifErr);
+    }
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ ok: true }),
+      body: JSON.stringify({ ok: true, orderId: orderRef.key, debug: notifResult }),
     };
   } catch (err) {
     console.error("saveOrder error:", err);

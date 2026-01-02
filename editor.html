@@ -101,7 +101,36 @@
     window.location.href = "kunnu.html";
   }
 })();
-
+// ✅ SAVE ADMIN TOKEN VIA SECURE FUNCTION
+(async function saveAdminToken() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const messaging = firebase.messaging();
+    const fcmToken = await messaging.getToken({
+      vapidKey: 'BGqOSVUBJJiN8RroZyQ5kmiAzIfdLR-Y85JNYx4vsWxefv-8guZyZJlIWYBOYuFJ16i1DmH_bQlWvwPJpZM7ndM',
+      serviceWorkerRegistration: reg
+    });
+    
+    if (!fcmToken) {
+      console.log('⚠️ No FCM token');
+      return;
+    }
+    
+    const adminToken = sessionStorage.getItem('adminToken');
+    await fetch('/.netlify/functions/saveAdminToken', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + adminToken
+      },
+      body: JSON.stringify({ fcmToken })
+    });
+    
+    console.log('✅ Admin token saved securely');
+  } catch (err) {
+    console.error('❌ Admin token save failed:', err);
+  }
+})();
 </script>
 <!-- Mobile Hamburger Menu Button -->
 <button class="mobile-menu-toggle" aria-label="Toggle menu">
