@@ -203,13 +203,9 @@ export async function handler(event) {
     pdf.setFillColor(255, 250, 240); // Very light cream
     pdf.rect(0, 0, pageWidth, pageHeight, 'F');
 
-    // PREMIUM ORANGE/GOLD GRADIENT HEADER BAR
+    // PREMIUM ORANGE HEADER BAR (single solid color)
     pdf.setFillColor(255, 140, 0); // Orange
     pdf.rect(0, 0, pageWidth, 90, 'F');
-    
-    // Lighter orange overlay for gradient effect
-    pdf.setFillColor(255, 180, 50);
-    pdf.rect(0, 0, pageWidth, 60, 'F');
 
     // Gold decorative line below header
     pdf.setDrawColor(255, 215, 0); // Gold
@@ -254,10 +250,10 @@ export async function handler(event) {
       ]);
     }
 
-    // Total row
+    // Total row with BIGGER, BOLDER text
     rows.push([
-      { content: "Total", colSpan: 5, styles: { halign: "right", fontStyle: "bold" } },
-      { content: `Rs. ${computedTotal}`, styles: { halign: "right", fontStyle: "bold" } }
+      { content: "Total", colSpan: 5, styles: { halign: "right", fontStyle: "bold", fontSize: 14, textColor: [0, 0, 0] } },
+      { content: `Rs. ${computedTotal}`, styles: { halign: "right", fontStyle: "bold", fontSize: 14, textColor: [255, 140, 0] } }
     ]);
 
     // Create the table with PREMIUM ORANGE HEADER
