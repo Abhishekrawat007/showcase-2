@@ -197,26 +197,42 @@ export async function handler(event) {
 
     const pdf = new jsPDF("p", "pt", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-    // Clean white background
-    pdf.setFillColor(255, 255, 255);
-    pdf.rect(0, 0, pageWidth, pdf.internal.pageSize.getHeight(), 'F');
+    // Premium cream background (subtle, not harsh white)
+    pdf.setFillColor(255, 250, 240); // Very light cream
+    pdf.rect(0, 0, pageWidth, pageHeight, 'F');
 
-    // Simple header - just shop name centered, bold
+    // PREMIUM ORANGE/GOLD GRADIENT HEADER BAR
+    pdf.setFillColor(255, 140, 0); // Orange
+    pdf.rect(0, 0, pageWidth, 90, 'F');
+    
+    // Lighter orange overlay for gradient effect
+    pdf.setFillColor(255, 180, 50);
+    pdf.rect(0, 0, pageWidth, 60, 'F');
+
+    // Gold decorative line below header
+    pdf.setDrawColor(255, 215, 0); // Gold
+    pdf.setLineWidth(2);
+    pdf.line(0, 90, pageWidth, 90);
+
+    // Shop name - WHITE TEXT on orange background
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(18);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(shopName, pageWidth / 2, 40, { align: "center" });
+    pdf.setFontSize(20);
+    pdf.setTextColor(255, 255, 255); // White
+    pdf.text(shopName.toUpperCase(), pageWidth / 2, 45, { align: "center" });
 
-    // Contact info - simple, clean
+    // Contact info - WHITE TEXT on orange header
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(10);
-    pdf.text(`${shopAddress}, ${shopCity}`, pageWidth / 2, 55, { align: "center" });
-    pdf.text(`Phone: ${shopPhone} | Website: ${siteUrl.replace(/^https?:\/\//, '')}`, pageWidth / 2, 70, { align: "center" });
+    pdf.setFontSize(9);
+    pdf.setTextColor(255, 255, 255); // White
+    pdf.text(`${shopAddress}, ${shopCity}`, pageWidth / 2, 63, { align: "center" });
+    pdf.text(`Phone: ${shopPhone} | Website: ${siteUrl.replace(/^https?:\/\//, '')}`, pageWidth / 2, 78, { align: "center" });
 
-    // Customer and order details section
-    let y = 100;
+    // Customer and order details section - BLACK TEXT on cream background
+    let y = 120;
     pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0); // Black text
     pdf.text(`Customer: ${name}`, 40, y);
     pdf.text(`Phone: ${phone}`, 40, y + 18);
     pdf.text(`Order ID: ${orderId}`, 40, y + 36);
@@ -244,7 +260,7 @@ export async function handler(event) {
       { content: `Rs. ${computedTotal}`, styles: { halign: "right", fontStyle: "bold" } }
     ]);
 
-    // Create the table
+    // Create the table with PREMIUM ORANGE HEADER
     autoTable(pdf, {
       startY: y,
       head: [["No.", "Image", "Product", "Qty", "Price", "Subtotal"]],
@@ -253,19 +269,22 @@ export async function handler(event) {
         fontSize: 10, 
         valign: "middle", 
         lineWidth: 0.5, 
-        lineColor: [0, 0, 0] 
+        lineColor: [200, 200, 200] // Light gray borders
       },
       headStyles: { 
-        fillColor: [220, 220, 220], 
-        textColor: [0, 0, 0], 
+        fillColor: [255, 140, 0], // ORANGE HEADER
+        textColor: [255, 255, 255], // White text
         fontStyle: "bold", 
         lineWidth: 0.5, 
-        lineColor: [0, 0, 0] 
+        lineColor: [255, 140, 0] 
       },
       bodyStyles: { 
         minCellHeight: 50, 
         lineWidth: 0.5, 
-        lineColor: [0, 0, 0] 
+        lineColor: [200, 200, 200] 
+      },
+      alternateRowStyles: {
+        fillColor: [255, 248, 240] // Light cream for alternate rows
       },
       columnStyles: { 
         0: { cellWidth: 35 }, 
@@ -289,15 +308,22 @@ export async function handler(event) {
       }
     });
 
+    // Premium footer with gold accent line
+    const finalY = (pdf.lastAutoTable && pdf.lastAutoTable.finalY) ? pdf.lastAutoTable.finalY + 30 : y + 30;
+    
+    // Gold decorative line before footer
+    pdf.setDrawColor(255, 215, 0); // Gold
+    pdf.setLineWidth(1.5);
+    pdf.line(40, finalY - 10, pageWidth - 40, finalY - 10);
+    
     // Footer message
-    const finalY = (pdf.lastAutoTable && pdf.lastAutoTable.finalY) ? pdf.lastAutoTable.finalY + 20 : y + 20;
     pdf.setFont("times", "italic");
     pdf.setFontSize(11);
-    pdf.setTextColor(60);
+    pdf.setTextColor(139, 69, 19); // Brown for elegance
     pdf.text(
       `Thank you for shopping with ${shopName}.\nWe'll call or WhatsApp you to confirm your order.`,
       pageWidth / 2,
-      finalY + 30,
+      finalY + 15,
       { align: "center" }
     );
 
