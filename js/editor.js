@@ -766,7 +766,7 @@ body: JSON.stringify({ title, body, url, topic: 'all' })
       if (data.successCount === 0) {
         resultEl.innerHTML += '<div style="color:orange;">Note: successCount is 0 — tokens may not be subscribed to topic "all" or tokens are invalid.</div>';
       }
-      setTimeout(() => closeModal(), 1200);
+      // setTimeout(() => closeModal(), 1200);
     }
   } catch (err) {
     console.error('Broadcast send error', err);
