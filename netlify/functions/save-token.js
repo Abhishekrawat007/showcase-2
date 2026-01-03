@@ -48,6 +48,12 @@ export async function handler(event) {
     if (!token || token.length < 100) {
       return { statusCode: 400, body: JSON.stringify({ error: "Invalid token" }) };
     }
+   if (typeof token !== 'string' || !token.includes(':')) {
+  return { statusCode: 400, body: JSON.stringify({ error: "Invalid token format" }) };
+}
+
+
+const tokenString = typeof token === 'object' ? JSON.stringify(token) : String(token);
 
     const payload = {
       token,
