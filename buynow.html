@@ -795,7 +795,7 @@ let quantity = 1;
                     <div class="confirmed-box">
                       <h3>✓ Payment & Order Confirmed</h3>
                       <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
-                      <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
+                      <p>Thank you for shopping with <strong>${window.CONFIG?.SHOP_NAME || 'Sublime Store'}</strong>. We will contact you shortly to confirm your order.</p>
                       <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
                     </div>
                   `;
@@ -863,7 +863,7 @@ let quantity = 1;
           <div class="confirmed-box">
             <h3>✓ Order Confirmed</h3>
             <p>🧾 Your Order ID is <strong>${orderId}</strong></p>
-            <p>Thank you for shopping with Sublime Store. We will contact you shortly to confirm your order.</p>
+            <p>Thank you for shopping with <strong>${window.CONFIG?.SHOP_NAME || 'Sublime Store'}</strong>. We will contact you shortly to confirm your order.</p>
             <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
             <div id="backgroundStatus" style="margin-top: 15px; font-size: 14px; color: #555; display: flex; align-items: center; justify-content: center; gap: 8px;">
               <span class="spinner" style="width: 16px; height: 16px; border: 3px solid #ccc; border-top: 3px solid #4CAF50; border-radius: 50%; display: inline-block; animation: spin 1s linear infinite;"></span>

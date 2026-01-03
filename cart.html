@@ -1079,7 +1079,7 @@ const payload = {
       <div style="padding:20px;text-align:center;color:green;">
         <h3>✓ Payment & Order Confirmed</h3>
         <p><strong>Order ID:</strong> ${orderId}</p>
-        <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
+        <p>Thank you for shopping with <strong>${window.CONFIG?.SHOP_NAME || 'Sublime Store'}</strong>. We will contact you shortly to confirm your order.</p>
         <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
       </div>
     `;
@@ -1155,7 +1155,7 @@ function simpleSuccessUI({ name, phone, orderId }) {
     <div style="padding:20px;text-align:center;color:green;">
       <h3>✓ Order Confirmed</h3>
       <p><strong>Order ID:</strong> ${orderId}</p>
-      <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
+      <p>Thank you for shopping with <strong>${window.CONFIG?.SHOP_NAME || 'Sublime Store'}</strong>. We will contact you shortly to confirm your order.</p>
       <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
     </div>
   `;
@@ -1651,7 +1651,7 @@ const successHTML = `
   <div style="padding: 20px; text-align: center; color: green;">
     <h3>✓ Order Confirmed</h3>
     <p><strong>Order ID:</strong> ${orderId}</p>
-    <p>Thank you for buying from <strong>Sublime Store</strong>. We will contact you shortly to confirm your order.</p>
+   <p>Thank you for shopping with <strong>${window.CONFIG?.SHOP_NAME || 'Sublime Store'}</strong>. We will contact you shortly to confirm your order.</p>
     <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
   </div>
 `;
