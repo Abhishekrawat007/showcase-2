@@ -55,53 +55,57 @@ export async function handler(event) {
         createdAt: Date.now(),
       });
 
-    // ✅ SEND NOTIFICATION TO ALL ADMIN WORKERS
-    let notifResult = { status: 'starting' };
-    try {
-      const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
-      const tokenData = snapshot.val() || {};
-      const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
-      
-      notifResult.tokensFound = adminTokens.length;
+ // ✅ SEND NOTIFICATION + AUTO-CLEANUP FAILED TOKENS
+let notifResult = { status: 'starting' };
+try {
+  const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
+  const tokenData = snapshot.val() || {};
+  const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
+  
+  notifResult.tokensFound = adminTokens.length;
 
-      if (adminTokens.length > 0) {
-        notifResult.status = 'sending';
-        let successCount = 0;
-        let failureCount = 0;
-        
+  if (adminTokens.length > 0) {
+    notifResult.status = 'sending';
+    let successCount = 0;
+    let failureCount = 0;
+    const toRemove = []; // ✅ DEFINE ARRAY HERE
+    
     for (const token of adminTokens) {
-  try {
-    await admin.messaging().send({
-      token: token,
-      notification: {
-        title: "🔔 New Order!",
-        body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
-      },
-      webpush: {
-        fcmOptions: { link: "/editor.html" }
+      try {
+        await admin.messaging().send({
+          token: token,
+          notification: {
+            title: "🔔 New Order!",
+            body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
+          },
+          webpush: {
+            fcmOptions: { link: "/editor.html" }
+          }
+        });
+        successCount++;
+      } catch (err) {
+        failureCount++;
+        toRemove.push(token);
+        console.log('Failed token, removing:', token.substring(0, 20));
       }
-    });
-    successCount++;
-  } catch (err) {
-    failureCount++;
-    // ✅ REMOVE ANY FAILED TOKEN (don't check error code)
-    toRemove.push(token);
-    console.log('Failed token, removing:', token.substring(0, 20), err.code || err.message);
-  }
-}
-        
-        notifResult.status = 'sent';
-        notifResult.success = successCount;
-        notifResult.failed = failureCount;
-      } else {
-        notifResult.status = 'noTokens';
-      }
-    } catch (notifErr) {
-      notifResult.status = 'error';
-      notifResult.error = notifErr.message;
-      console.error("Notification failed:", notifErr);
     }
-
+    
+    // Cleanup invalid tokens
+    for (const token of toRemove) {
+      await admin.database().ref('sites/showcase-2/adminTokens/' + token).remove();
+    }
+    
+    notifResult.status = 'sent';
+    notifResult.success = successCount;
+    notifResult.failed = failureCount;
+    notifResult.removed = toRemove.length;
+  } else {
+    notifResult.status = 'noTokens';
+  }
+} catch (notifErr) {
+  notifResult.status = 'error';
+  notifResult.error = notifErr.message;
+}
     return {
       statusCode: 200,
       body: JSON.stringify({ ok: true, orderId: orderRef.key, debug: notifResult }),
