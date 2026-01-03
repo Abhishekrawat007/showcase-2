@@ -56,7 +56,7 @@ export async function handler(event) {
 const tokenString = typeof token === 'object' ? JSON.stringify(token) : String(token);
 
     const payload = {
-      token,
+      token: tokenString,
       context: context || 'web',
       ua: ua || null,
       origin: origin || null,
