@@ -55,6 +55,10 @@ export async function handler(event) {
     try {
       const resp = await mg.subscribeToTopic([token], topic);
       console.log("subscribeToTopic resp:", JSON.stringify(resp));
+      if (resp.failureCount > 0) {
+  await admin.database().ref('sites/showcase-2/pushSubscribers/' + token).remove();
+  console.log('Removed invalid token:', token.slice(0,16));
+}
       // Save metadata to RTDB under pushSubscribers/<token>/topics/<topic>
       try {
         const meta = {

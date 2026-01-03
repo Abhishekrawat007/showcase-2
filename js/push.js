@@ -6,7 +6,7 @@
   const LS_LAST_KEYS = [PREFIX + 'NotifPromptLastShown', 'notifPromptLastShown'];
   const HIDDEN_CLASS = PREFIX + '-hidden';
 
-  const REPEAT_INTERVAL = 60 * 60 * 1000; // 1 hour
+  const REPEAT_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 1 week
   const SHOW_DELAY_MS = 15 * 1000;
 
   let localToastTimer = null;
@@ -94,7 +94,16 @@ function reconcileShouldRun() {
     // do not forcibly set display:none in case other logic relies on it
   }
 
-    async function shouldShowPopup() {
+  // detect PWA / standalone display-mode
+  function isRunningAsPWA() {
+    try {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+        || window.navigator.standalone === true
+        || document.referrer && document.referrer.startsWith('android-app://');
+    } catch (_) { return false; }
+  }
+
+  async function shouldShowPopup() {
     try {
       const perm = (typeof Notification !== 'undefined') ? Notification.permission : 'default';
       // Try Permissions API for more accurate state
@@ -108,7 +117,7 @@ function reconcileShouldRun() {
 
       if (perm === 'denied') return false;
       if (perm === 'granted') { try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch(_){}; return false; }
-      if (perm === 'default') return true;
+      // REMOVED: if (perm === 'default') return true; - let it fall through to time check
     } catch (e) { /* fallback to legacy code */ }
 
     // old logic fallback
@@ -139,13 +148,13 @@ function reconcileShouldRun() {
       };
 
       // Save under pushSubscribers/<token> (idempotent)
-      await firebase.database().ref("pushSubscribers/" + token).set(payload);
+      await firebase.database().ref("sites/showcase-2/pushSubscribers/" + token).set(payload);
       log('Push token saved to DB ✅', token, context);
    // also mirror token to /tokens so server broadcast (legacy) can read it
 try {
   // use a short stable key derived from token to avoid huge key names
   const shortKey = token.slice(0, 24).replace(/[^a-zA-Z0-9_-]/g, '');
-  await firebase.database().ref("/tokens/" + shortKey).set({ token });
+ await firebase.database().ref("sites/showcase-2/tokens/" + shortKey).set({ token });
   log('Mirrored token to /tokens/' + shortKey);
 } catch (e) {
   warn('mirror to /tokens failed', e);
@@ -160,14 +169,6 @@ try {
     } catch (e) {
       warn('savePushToken failed', e);
     }
-  }
-    // detect PWA / standalone display-mode
-  function isRunningAsPWA() {
-    try {
-      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-        || window.navigator.standalone === true
-        || document.referrer && document.referrer.startsWith('android-app://');
-    } catch (_) { return false; }
   }
 
   async function createAndSaveToken(reason = 'manual') {
@@ -244,11 +245,13 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
       try { lsSet(LS_SHOWN_KEYS[0], '1'); } catch (_) {}
     }
 
-    if (shouldShowPopup()) {
-      setTimeout(() => {
-        if (!(typeof Notification !== 'undefined' && Notification.permission === 'granted')) showNotifModal();
-      }, SHOW_DELAY_MS);
-    }
+    shouldShowPopup().then(should => {
+      if (should && isRunningAsPWA()) {  // ONLY show in PWA
+        setTimeout(() => {
+          if (!(typeof Notification !== 'undefined' && Notification.permission === 'granted')) showNotifModal();
+        }, SHOW_DELAY_MS);
+      }
+    });
 
     // elements (try namespaced first, then fall back)
     const enableBtn = document.getElementById('sublime-notif-enable') || document.getElementById('notif-enable');
@@ -382,4 +385,3 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
   (async () => { await reconcileOnContext(); })();
 
 })(); // IIFE end
- 
