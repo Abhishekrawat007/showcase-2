@@ -102,8 +102,8 @@
     window.location.href = "kunnu.html";
   }
 })();
-// ✅ SAVE ADMIN TOKEN VIA SECURE FUNCTION
-(async function saveAdminToken() {
+// ✅ SAVE ADMIN TOKEN AFTER FIREBASE READY
+document.addEventListener('firebase-ready', async function() {
   try {
     const reg = await navigator.serviceWorker.ready;
     const messaging = firebase.messaging();
@@ -131,7 +131,7 @@
   } catch (err) {
     console.error('❌ Admin token save failed:', err);
   }
-})();
+}, { once: true });
 </script>
 <!-- Mobile Hamburger Menu Button -->
 <button class="mobile-menu-toggle" aria-label="Toggle menu">
