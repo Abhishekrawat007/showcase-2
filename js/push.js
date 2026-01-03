@@ -243,7 +243,7 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
     }
 
     shouldShowPopup().then(should => {
-      if (should && isRunningAsPWA()) {  // ONLY show in PWA
+      if (should) {  // TEMP: show everywhere for testing
         setTimeout(() => {
           if (!(typeof Notification !== 'undefined' && Notification.permission === 'granted')) showNotifModal();
         }, SHOW_DELAY_MS);
