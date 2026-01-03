@@ -182,6 +182,7 @@ export async function handler(event) {
                   msg.includes('registration-token-not-registered') ||
                   msg.includes('invalid-registration-token') ||
                   msg.includes('mismatched-sender-id') ||
+                  msg.includes('invalid-payload') ||
                   msg.includes('NotRegistered') ||
                   msg.includes('InvalidRegistration')
                 ) {
