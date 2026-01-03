@@ -69,24 +69,26 @@ export async function handler(event) {
         let successCount = 0;
         let failureCount = 0;
         
-        for (const token of adminTokens) {
-          try {
-            await admin.messaging().send({
-              token: token,
-              notification: {
-                title: "🔔 New Order!",
-                body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
-              },
-              webpush: {
-                fcmOptions: { link: "/editor.html" }
-              }
-            });
-            successCount++;
-          } catch (err) {
-            failureCount++;
-            console.error(`Failed to send:`, err.message);
-          }
-        }
+    for (const token of adminTokens) {
+  try {
+    await admin.messaging().send({
+      token: token,
+      notification: {
+        title: "🔔 New Order!",
+        body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
+      },
+      webpush: {
+        fcmOptions: { link: "/editor.html" }
+      }
+    });
+    successCount++;
+  } catch (err) {
+    failureCount++;
+    // ✅ REMOVE ANY FAILED TOKEN (don't check error code)
+    toRemove.push(token);
+    console.log('Failed token, removing:', token.substring(0, 20), err.code || err.message);
+  }
+}
         
         notifResult.status = 'sent';
         notifResult.success = successCount;
