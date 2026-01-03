@@ -131,45 +131,42 @@ function reconcileShouldRun() {
   }
 
 
-    async function savePushToken(token, context = 'web') {
-    try {
-      if (!window.firebase || !firebase.database) {
-        warn('Firebase DB not available; token not saved.');
-        return;
-      }
+  async function savePushToken(token, context = 'web') {
+  try {
+    const payload = {
+      token,
+      context,
+      ua: navigator.userAgent || null,
+      origin: location.origin || null
+    };
 
-      // Build payload with metadata so we can reason about tokens later
-      const payload = {
-        token,
-        context,              // 'web' or 'pwa'
-        ua: navigator.userAgent || null,
-        origin: location.origin || null,
-        time: Date.now()
-      };
+    // Call secure Netlify function instead of direct DB write
+    const response = await fetch("/.netlify/functions/save-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-      // Save under pushSubscribers/<token> (idempotent)
-      await firebase.database().ref("sites/showcase-2/pushSubscribers/" + token).set(payload);
-      log('Push token saved to DB ✅', token, context);
-   // also mirror token to /tokens so server broadcast (legacy) can read it
-try {
-  // use a short stable key derived from token to avoid huge key names
-  const shortKey = token.slice(0, 24).replace(/[^a-zA-Z0-9_-]/g, '');
- await firebase.database().ref("sites/showcase-2/tokens/" + shortKey).set({ token });
-  log('Mirrored token to /tokens/' + shortKey);
-} catch (e) {
-  warn('mirror to /tokens failed', e);
-}
-
-      // non-blocking subscribe call (best-effort)
-      fetch("/.netlify/functions/subscribe-topic", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, topic: "all" })
-      }).then(r => r.json()).then(d => log('subscribe-topic response', d)).catch(e => warn('subscribe-topic error', e));
-    } catch (e) {
-      warn('savePushToken failed', e);
+    const result = await response.json();
+    
+    if (!response.ok) {
+      warn('save-token failed:', result.error);
+      return;
     }
+
+    log('Push token saved via function ✅', token.slice(0,16), context);
+
+    // Still call subscribe-topic (best-effort)
+    fetch("/.netlify/functions/subscribe-topic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, topic: "all" })
+    }).then(r => r.json()).then(d => log('subscribe-topic response', d)).catch(e => warn('subscribe-topic error', e));
+
+  } catch (e) {
+    warn('savePushToken failed', e);
   }
+}
 
   async function createAndSaveToken(reason = 'manual') {
     if (!window.firebase || typeof firebase.messaging !== 'function') {
