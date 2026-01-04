@@ -362,18 +362,7 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
       }
     } catch(_) {}
 }); // DOMContentLoaded
-// Handle foreground messages (tab open)
-(async () => {
-  await swRegistrationPromise;
-  if (window.firebase && firebase.messaging) {
-    const messaging = firebase.messaging();
-    messaging.onMessage((payload) => {
-      const title = payload.notification?.title || 'New notification';
-      const body = payload.notification?.body || '';
-      new Notification(title, {body});
-    });
-  }
-})();
+
  // Reconcile tokens on install / visibility change — ensures PWA token is recorded when user installs app
  async function reconcileOnContext() {
   try {
@@ -392,5 +381,16 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
 
   // Also run once now (best-effort)
   (async () => { await reconcileOnContext(); })();
-
+// Handle foreground messages (tab open)
+(async () => {
+  await swRegistrationPromise;
+  if (window.firebase && firebase.messaging) {
+    const messaging = firebase.messaging();
+    messaging.onMessage((payload) => {
+      const title = payload.notification?.title || 'New notification';
+      const body = payload.notification?.body || '';
+      new Notification(title, {body});
+    });
+  }
+})();
 })(); // IIFE end
