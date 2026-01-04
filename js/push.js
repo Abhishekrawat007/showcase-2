@@ -205,15 +205,8 @@ function reconcileShouldRun() {
   // expose for outside callers + debugging
 try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
 
-// Handle foreground messages
-if (window.firebase && firebase.messaging) {
-  const messaging = firebase.messaging();
-  messaging.onMessage((payload) => {
-    console.log('Foreground message:', payload);
-    const {title, options} = notificationFromPayload(payload);
-    new Notification(title, options);
-  });
-}
+
+
   // Display modal safely (supports both new and old IDs)
   function showNotifModal() {
     applyModalTheme();
@@ -368,8 +361,19 @@ if (window.firebase && firebase.messaging) {
         }).catch(()=>{/*ignore*/});
       }
     } catch(_) {}
-
-  }); // DOMContentLoaded
+}); // DOMContentLoaded
+// Handle foreground messages (tab open)
+(async () => {
+  await swRegistrationPromise;
+  if (window.firebase && firebase.messaging) {
+    const messaging = firebase.messaging();
+    messaging.onMessage((payload) => {
+      const title = payload.notification?.title || 'New notification';
+      const body = payload.notification?.body || '';
+      new Notification(title, {body});
+    });
+  }
+})();
  // Reconcile tokens on install / visibility change — ensures PWA token is recorded when user installs app
  async function reconcileOnContext() {
   try {
