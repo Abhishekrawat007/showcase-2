@@ -205,7 +205,15 @@ function reconcileShouldRun() {
   // expose for outside callers + debugging
 try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
 
-
+// Handle foreground messages
+if (window.firebase && firebase.messaging) {
+  const messaging = firebase.messaging();
+  messaging.onMessage((payload) => {
+    console.log('Foreground message:', payload);
+    const {title, options} = notificationFromPayload(payload);
+    new Notification(title, options);
+  });
+}
   // Display modal safely (supports both new and old IDs)
   function showNotifModal() {
     applyModalTheme();
