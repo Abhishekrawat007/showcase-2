@@ -244,7 +244,7 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
     }
 
     shouldShowPopup().then(should => {
-      if (should) {  // TEMP: show everywhere for testing
+     if (should && isRunningAsPWA()) {  
         setTimeout(() => {
           if (!(typeof Notification !== 'undefined' && Notification.permission === 'granted')) showNotifModal();
         }, SHOW_DELAY_MS);

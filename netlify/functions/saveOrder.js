@@ -40,20 +40,21 @@ export async function handler(event) {
   try {
     await ensureFirebaseInit();
 
-    const order = JSON.parse(event.body || "{}");
+   const { pdfUrl, ...order } = JSON.parse(event.body || "{}");
 
-    if (!order.orderId || !order.phone || !order.cart) {
-      return { statusCode: 400, body: "Invalid order payload" };
-    }
+if (!order.orderId) {
+  return { statusCode: 400, body: "Missing orderId" };
+}
 
-    // Save order
-    const orderRef = await admin
-      .database()
-      .ref("sites/showcase-2/orders")
-      .push({
-        ...order,
-        createdAt: Date.now(),
-      });
+// Save order to Firebase (including pdfUrl if present)
+const orderRef = await admin
+  .database()
+  .ref("orders")
+  .push({
+    ...order,
+    pdfUrl: pdfUrl || null,
+    createdAt: Date.now(),
+  });
 
  // ✅ SEND NOTIFICATION + AUTO-CLEANUP FAILED TOKENS
 let notifResult = { status: 'starting' };

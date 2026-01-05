@@ -28,7 +28,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-  <script src="js/config.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/init-firebase.js"></script>
+
+  <script>
+if (typeof firebase === 'undefined') {
+  console.error('❌ Firebase not loaded');
+}
+</script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/safe-storage.js"></script>
 
