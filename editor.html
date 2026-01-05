@@ -111,6 +111,8 @@
 document.addEventListener('firebase-ready', async function() {
 try {
   console.log('🔔 Requesting FCM token...');
+   const messaging = firebase.messaging();
+  const reg = await navigator.serviceWorker.ready;
   const fcmToken = await messaging.getToken({
     vapidKey: 'BHBFlNFxt6EUM9f6NYU_o006ti5ZG0a-VMPJ-dWHYH_X6iqlWpEu3DDB7fvq6OSOaIoIeJBqpw7iZSDntJV-KMk',
     serviceWorkerRegistration: reg
