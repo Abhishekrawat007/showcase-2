@@ -361,19 +361,18 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
         }).catch(()=>{/*ignore*/});
       }
     } catch(_) {}
-}); // DOMContentLoaded
+  }); // DOMContentLoaded
 
- // Reconcile tokens on install / visibility change — ensures PWA token is recorded when user installs app
- async function reconcileOnContext() {
-  try {
-    if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') return;
-    if (!reconcileShouldRun()) return;   // <--- throttle here
-    await createAndSaveToken('reconcile');
-  } catch (e) {
-    console.warn('reconcileOnContext failed', e);
+  // Reconcile tokens on install / visibility change — ensures PWA token is recorded when user installs app
+  async function reconcileOnContext() {
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') return;
+      if (!reconcileShouldRun()) return;   // <--- throttle here
+      await createAndSaveToken('reconcile');
+    } catch (e) {
+      console.warn('reconcileOnContext failed', e);
+    }
   }
-}
-
 
   window.addEventListener('appinstalled', () => reconcileOnContext());
   window.addEventListener('focus', () => reconcileOnContext());
@@ -381,16 +380,19 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
 
   // Also run once now (best-effort)
   (async () => { await reconcileOnContext(); })();
-// Handle foreground messages (tab open)
-(async () => {
-  await swRegistrationPromise;
-  if (window.firebase && firebase.messaging) {
-    const messaging = firebase.messaging();
-    messaging.onMessage((payload) => {
-      const title = payload.notification?.title || 'New notification';
-      const body = payload.notification?.body || '';
-      new Notification(title, {body});
-    });
-  }
-})();
+
+  // Handle foreground messages (tab open)
+  (async () => {
+    await swRegistrationPromise;
+    if (window.firebase && firebase.messaging) {
+      const messaging = firebase.messaging();
+      messaging.onMessage((payload) => {
+        log('📬 Foreground message received:', payload);
+        const title = payload.notification?.title || 'New notification';
+        const body = payload.notification?.body || '';
+        new Notification(title, {body});
+      });
+    }
+  })();
+
 })(); // IIFE end
