@@ -381,18 +381,5 @@ try { window.createAndSaveToken = createAndSaveToken; } catch (_) {}
   // Also run once now (best-effort)
   (async () => { await reconcileOnContext(); })();
 
-  // Handle foreground messages (tab open)
-  (async () => {
-    await swRegistrationPromise;
-    if (window.firebase && firebase.messaging) {
-      const messaging = firebase.messaging();
-      messaging.onMessage((payload) => {
-        log('📬 Foreground message received:', payload);
-        const title = payload.notification?.title || 'New notification';
-        const body = payload.notification?.body || '';
-        new Notification(title, {body});
-      });
-    }
-  })();
 
 })(); // IIFE end

@@ -81,4 +81,21 @@
 
   // start it
   doInit();
+   // Setup foreground handler after Firebase ready
+  document.addEventListener('firebase-ready', () => {
+    if (window.firebase && firebase.messaging) {
+      try {
+        const messaging = firebase.messaging();
+        messaging.onMessage((payload) => {
+          console.log('📬 Foreground message:', payload);
+          const title = payload.notification?.title || 'New notification';
+          const body = payload.notification?.body || '';
+          new Notification(title, {body});
+        });
+        console.log('✅ Foreground handler registered');
+      } catch(e) {
+        console.warn('Foreground handler setup failed', e);
+      }
+    }
+  });
 })();
