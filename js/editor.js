@@ -897,6 +897,11 @@ function openOrderDetail(order, no) {
       `).join('')
     : '<li>No items</li>';
 
+  // ✅ Add PDF download button if available
+  const pdfButton = order.pdfUrl 
+    ? `<a href="${order.pdfUrl}" download="Order-${order.orderId}.pdf" style="display:inline-block;padding:8px 16px;background:#dc2626;color:#fff;border-radius:6px;text-decoration:none;margin-top:10px;">📄 Download Invoice PDF</a>`
+    : '';
+
   document.getElementById('orderDetailBody').innerHTML = `
     <h3>Order #${no}</h3>
 
@@ -918,6 +923,8 @@ function openOrderDetail(order, no) {
     <h4>Items Ordered</h4>
     <ul>${itemsHtml}</ul>
 
+    ${pdfButton}
+
     <div class="order-actions">
       <a href="https://wa.me/91${order.phone}" target="_blank">💬 WhatsApp Customer</a>
       <a href="tel:${order.phone}">📞 Call Customer</a>
@@ -926,7 +933,6 @@ function openOrderDetail(order, no) {
 
   document.getElementById('orderDetailModal').classList.remove('hidden');
 }
-
 
 function closeOrderDetail() {
   document.getElementById('orderDetailModal').classList.add('hidden');
