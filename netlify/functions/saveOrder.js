@@ -59,7 +59,7 @@ export async function handler(event) {
     // ✅ SEND NOTIFICATION IN BACKGROUND (NON-BLOCKING)
     (async () => {
       try {
-        const snapshot = await admin.database().ref('adminTokens').once('value');
+        const snapshot = await admin.database().ref('sites/showcase-2/adminToken').once('value');
         const tokenData = snapshot.val() || {};
         const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
 
@@ -77,7 +77,7 @@ export async function handler(event) {
             } catch (err) {
               if (err.code === 'messaging/registration-token-not-registered' || 
                   err.code === 'messaging/invalid-registration-token') {
-                await admin.database().ref('adminTokens/' + token).remove();
+                await admin.database().ref('sites/showcase-2/adminToken/' + token).remove();
               }
             }
           }
