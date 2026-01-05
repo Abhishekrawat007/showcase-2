@@ -1,55 +1,76 @@
-// ✅ SEND NOTIFICATION + AUTO-CLEANUP FAILED TOKENS
-let notifResult = { status: 'starting' };
-try {
-  const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
-  const tokenData = snapshot.val() || {};
-  const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
-  
-  notifResult.tokensFound = adminTokens.length;
+import admin from "firebase-admin";
+import jwt from "jsonwebtoken";
+import zlib from "zlib";
+import { promisify } from "util";
 
-  if (adminTokens.length > 0) {
-    notifResult.status = 'sending';
-    let successCount = 0;
-    let failureCount = 0;
-    const toRemove = []; // Track failed tokens
-    
-    for (const token of adminTokens) {
-      try {
-        await admin.messaging().send({
-          token: token,
-          notification: {
-            title: "🔔 New Order!",
-            body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
-          },
-          webpush: {
-            fcmOptions: { link: "/editor.html" }
-          }
-        });
-        successCount++;
-      } catch (err) {
-        failureCount++;
-        // ✅ AUTO-REMOVE INVALID TOKENS
-        if (err.code === 'messaging/registration-token-not-registered' || 
-            err.code === 'messaging/invalid-registration-token') {
-          toRemove.push(token);
-          console.log('Invalid token detected, will remove:', token.substring(0, 20));
-        }
-      }
-    }
-    
-    // ✅ CLEANUP INVALID TOKENS
-    for (const token of toRemove) {
-      await admin.database().ref('sites/showcase-2/adminTokens/' + token).remove();
-    }
-    
-    notifResult.status = 'sent';
-    notifResult.success = successCount;
-    notifResult.failed = failureCount;
-    notifResult.removed = toRemove.length;
-  } else {
-    notifResult.status = 'noTokens';
+const gunzip = promisify(zlib.gunzip);
+
+let _saCache = null;
+let _initPromise = null;
+
+async function loadServiceAccountFromEnv() {
+  if (_saCache) return _saCache;
+  const b64 = process.env.FIREBASE_SA_GZ;
+  if (!b64) throw new Error("Missing FIREBASE_SA_GZ");
+  const gzBuffer = Buffer.from(b64, "base64");
+  const jsonBuf = await gunzip(gzBuffer);
+  _saCache = JSON.parse(jsonBuf.toString("utf8"));
+  return _saCache;
+}
+
+async function ensureFirebaseInit() {
+  if (admin.apps.length) return;
+  if (_initPromise) return _initPromise;
+
+  _initPromise = (async () => {
+    const sa = await loadServiceAccountFromEnv();
+    admin.initializeApp({
+      credential: admin.credential.cert(sa),
+      databaseURL: process.env.FIREBASE_DB_URL,
+    });
+  })();
+
+  return _initPromise;
+}
+
+export async function handler(event) {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method Not Allowed" };
   }
-} catch (notifErr) {
-  notifResult.status = 'error';
-  notifResult.error = notifErr.message;
+
+  try {
+    const authHeader = event.headers['authorization'] || event.headers['Authorization'] || '';
+    const token = authHeader.replace('Bearer ', '').trim();
+    
+    if (!token) {
+      return { statusCode: 401, body: JSON.stringify({ error: 'No token' }) };
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET);
+
+    await ensureFirebaseInit();
+
+    const { fcmToken } = JSON.parse(event.body || '{}');
+    
+    if (!fcmToken) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Missing fcmToken' }) };
+    }
+
+    await admin.database().ref('sites/showcase-2/adminTokens/' + fcmToken).set({
+      token: fcmToken,
+      timestamp: Date.now()
+    });
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ ok: true })
+    };
+
+  } catch (err) {
+    console.error("saveAdminToken error:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
+  }
 }
