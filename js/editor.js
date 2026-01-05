@@ -837,11 +837,14 @@ async function loadOrders() {
   try {
     const token = sessionStorage.getItem("adminToken") || "";
 
-    const res = await fetch("/.netlify/functions/getAllOrders", {
-      headers: {
-        Authorization: "Bearer " + token
-      }
-    });
+  const res = await fetch("/.netlify/functions/getAllOrders", {
+  method: "POST",  
+  headers: {
+    Authorization: "Bearer " + token,
+    "Content-Type": "application/json"  
+  },
+  body: JSON.stringify({ path: "sites/showcase-2/orders" })  
+});
 
     if (!res.ok) throw new Error("Failed to fetch orders");
 

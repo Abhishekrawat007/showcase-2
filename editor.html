@@ -109,36 +109,46 @@
 })();
 // ✅ SAVE ADMIN TOKEN AFTER FIREBASE READY
 document.addEventListener('firebase-ready', async function() {
-  try {
-    const reg = await navigator.serviceWorker.ready;
-    const messaging = firebase.messaging();
-    const fcmToken = await messaging.getToken({
-      vapidKey: 'BHBFlNFxt6EUM9f6NYU_o006ti5ZG0a-VMPJ-dWHYH_X6iqlWpEu3DDB7fvq6OSOaIoIeJBqpw7iZSDntJV-KMk',
-      serviceWorkerRegistration: reg
-    });
-    
-    if (!fcmToken) {
-      console.log('⚠️ No FCM token');
-      return;
-    }
-    
-    const adminToken = sessionStorage.getItem('adminToken');
-    await fetch('/.netlify/functions/saveAdminToken', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + adminToken
-  },
-  body: JSON.stringify({ 
-    fcmToken,
-    site: 'showcase-2'  
-  })
-});
-    
-    console.log('✅ Admin token saved securely');
-  } catch (err) {
-    console.error('❌ Admin token save failed:', err);
+try {
+  console.log('🔔 Requesting FCM token...');
+  const fcmToken = await messaging.getToken({
+    vapidKey: 'BHBFlNFxt6EUM9f6NYU_o006ti5ZG0a-VMPJ-dWHYH_X6iqlWpEu3DDB7fvq6OSOaIoIeJBqpw7iZSDntJV-KMk',
+    serviceWorkerRegistration: reg
+  });
+  
+  console.log('✅ FCM Token:', fcmToken ? fcmToken.substring(0, 20) + '...' : 'NONE');
+  
+  if (!fcmToken) {
+    console.log('⚠️ No FCM token');
+    return;
   }
+  
+  const adminToken = sessionStorage.getItem('adminToken');
+  console.log('📤 Saving admin token...');
+  
+  const saveRes = await fetch('/.netlify/functions/saveAdminToken', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + adminToken
+    },
+    body: JSON.stringify({ 
+      fcmToken,
+      site: 'showcase-2'  
+    })
+  });
+  
+  const saveData = await saveRes.json();
+  console.log('💾 Token save response:', saveData);
+  
+  if (saveRes.ok) {
+    console.log('✅ Admin token saved securely');
+  } else {
+    console.error('❌ Token save failed:', saveData);
+  }
+} catch (err) {
+  console.error('❌ Admin token save failed:', err);
+}
 }, { once: true });
 </script>
 <!-- Mobile Hamburger Menu Button -->

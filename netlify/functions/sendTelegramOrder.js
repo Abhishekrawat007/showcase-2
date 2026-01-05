@@ -405,7 +405,13 @@ export async function handler(event) {
       }
     }
 
-    return { statusCode: 200, body: JSON.stringify({ success: true }) };
+   return { 
+  statusCode: 200, 
+  body: JSON.stringify({ 
+    success: true,
+    pdfUrl: `data:application/pdf;base64,${pdfBuffer.toString('base64')}`
+  }) 
+};
 
   } catch (err) {
     console.error("Error generating order PDF:", err && (err.stack || err.message || err));
