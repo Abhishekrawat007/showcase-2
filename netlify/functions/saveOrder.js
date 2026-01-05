@@ -50,7 +50,7 @@ export async function handler(event) {
     // Save order to Firebase
     const orderRef = await admin
       .database()
-      .ref("orders")
+      .ref("sites/showcase-2/orders")
       .push({
         ...order,
         pdfUrl: pdfUrl || null,
