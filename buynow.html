@@ -864,28 +864,50 @@ let quantity = 1;
 
         // ---------- COD Flow ----------
         
-        // ✅ FIX 2: Save to Firebase ONLY in COD flow
-// 🔔 Send Telegram FIRST to get PDF
+     // 🔔 Send Telegram FIRST to get PDF
 let pdfUrl = null;
 try {
-  const telegramRes = await sendOrderOnce(payload);
-  console.log('Telegram response:', telegramRes);
-  if (telegramRes && telegramRes.pdfUrl) {
-    pdfUrl = telegramRes.pdfUrl;
+  const messageText = `🛒 *Buy Now Order*
+🧾 *Order ID:* ${orderId}
+👤 *Name:* ${name}
+📞 *Phone:* ${phone}
+🔗 *WhatsApp:* https://wa.me/91${phone}
+💰 *Total:* ₹${order.totalAmount}
+📦 *Product:* ${product.name} x${quantity}`;
+
+  const telegramPayload = {
+    name,
+    phone,
+    email,
+    orderId,
+    cart: order.cart,
+    totalAmount: order.totalAmount,
+    messageText,
+    payment: { status: 'cod' }
+  };
+
+  const telegramRes = await fetch("/.netlify/functions/sendTelegramOrder", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(telegramPayload)
+  });
+  const telegramData = await telegramRes.json();
+  console.log('Telegram response:', telegramData);
+  if (telegramData && telegramData.pdfUrl) {
+    pdfUrl = telegramData.pdfUrl;
   }
 } catch (e) {
   console.warn('Telegram failed', e);
 }
 
-// Save order via Netlify Function (COD) with pdfUrl
-try {
-  const savePayload = { ...payload, pdfUrl };
-  console.log("❌ Saving order to Firebase:", savePayload);
-  const saveRes = await fetch("/.netlify/functions/saveOrder", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(savePayload)
-  });
+// ✅ Save to Firebase in COD flow with pdfUrl
+const savePayload = { ...order, pdfUrl };
+console.log("❌ Saving order to Firebase:", savePayload);
+const saveRes = await fetch("/.netlify/functions/saveOrder", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(savePayload)
+});
 const saveData = await saveRes.json();
 console.log("✅ Firebase save response:", saveData);
 

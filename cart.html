@@ -1635,16 +1635,21 @@ const payload = {
 // 🔔 Send Telegram FIRST to get PDF
 let pdfUrl = null;
 try {
-  const telegramRes = await sendOrderOnce(payload);
-  console.log('Telegram response:', telegramRes);
-  if (telegramRes && telegramRes.pdfUrl) {
-    pdfUrl = telegramRes.pdfUrl;
+  const telegramRes = await fetch("/.netlify/functions/sendTelegramOrder", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const telegramData = await telegramRes.json();
+  console.log('Telegram response:', telegramData);
+  if (telegramData && telegramData.pdfUrl) {
+    pdfUrl = telegramData.pdfUrl;
   }
 } catch (e) {
-  console.warn('Telegram failed', e);
+  console.warn('Telegram send failed', e);
 }
 
-// Save order via Netlify Function (COD) with pdfUrl
+// ✅ Save to Firebase with pdfUrl
 try {
   const savePayload = { ...payload, pdfUrl };
   console.log("❌ Saving order to Firebase:", savePayload);
@@ -1657,13 +1662,6 @@ try {
   console.log("✅ Firebase save response:", saveData);
 } catch (err) {
   console.error("saveOrder COD failed:", err);
-}
-// 🔔 Send Telegram for COD (deduped)
-try {
-  await sendOrderOnce(payload);
-  console.log('COD Telegram sent');
-} catch (e) {
-  console.warn('COD Telegram failed', e);
 }
 
 
