@@ -1630,14 +1630,17 @@ const payload = {
   timestamp: Date.now()
 };
 
+
 // Save order via Netlify Function (COD)
 try {
-  await fetch("/.netlify/functions/saveOrder", {
+  console.log("❌ Saving order to Firebase:", payload);
+  const saveRes = await fetch("/.netlify/functions/saveOrder", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  console.log("COD order saved via saveOrder:", orderId);
+  const saveData = await saveRes.json();
+  console.log("✅ Firebase save response:", saveData);
 } catch (err) {
   console.error("saveOrder COD failed:", err);
 }

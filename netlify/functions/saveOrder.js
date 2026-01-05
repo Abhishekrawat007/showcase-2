@@ -33,6 +33,7 @@ async function ensureFirebaseInit() {
 }
 
 export async function handler(event) {
+    console.log("❌ saveOrder called with body:", event.body);
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }

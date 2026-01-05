@@ -865,12 +865,15 @@ let quantity = 1;
         // ---------- COD Flow ----------
         
         // ✅ FIX 2: Save to Firebase ONLY in COD flow
-        await fetch("/.netlify/functions/saveOrder", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(order)
-        });
-        console.log("BuyNow COD order saved to Firebase:", orderId);
+        // ✅ Save to Firebase in COD flow
+console.log("❌ Saving order to Firebase:", order);
+const saveRes = await fetch("/.netlify/functions/saveOrder", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(order)
+});
+const saveData = await saveRes.json();
+console.log("✅ Firebase save response:", saveData);
 
         document.querySelector(".container").innerHTML = `
           <div class="confirmed-box">
