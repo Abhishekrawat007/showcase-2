@@ -124,13 +124,16 @@ document.addEventListener('firebase-ready', async function() {
     
     const adminToken = sessionStorage.getItem('adminToken');
     await fetch('/.netlify/functions/saveAdminToken', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + adminToken
-      },
-      body: JSON.stringify({ fcmToken })
-    });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + adminToken
+  },
+  body: JSON.stringify({ 
+    fcmToken,
+    site: 'showcase-2'  
+  })
+});
     
     console.log('✅ Admin token saved securely');
   } catch (err) {

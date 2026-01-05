@@ -40,76 +40,57 @@ export async function handler(event) {
   try {
     await ensureFirebaseInit();
 
-   const { pdfUrl, ...order } = JSON.parse(event.body || "{}");
+    const { pdfUrl, ...order } = JSON.parse(event.body || "{}");
 
-if (!order.orderId) {
-  return { statusCode: 400, body: "Missing orderId" };
-}
+    if (!order.orderId) {
+      return { statusCode: 400, body: "Missing orderId" };
+    }
 
-// Save order to Firebase (including pdfUrl if present)
-const orderRef = await admin
-  .database()
-  .ref("orders")
-  .push({
-    ...order,
-    pdfUrl: pdfUrl || null,
-    createdAt: Date.now(),
-  });
+    // Save order to Firebase
+    const orderRef = await admin
+      .database()
+      .ref("orders")
+      .push({
+        ...order,
+        pdfUrl: pdfUrl || null,
+        createdAt: Date.now(),
+      });
 
- // ✅ SEND NOTIFICATION + AUTO-CLEANUP FAILED TOKENS
-let notifResult = { status: 'starting' };
-try {
-  const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
-  const tokenData = snapshot.val() || {};
-  const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
-  
-  notifResult.tokensFound = adminTokens.length;
-
-  if (adminTokens.length > 0) {
-    notifResult.status = 'sending';
-    let successCount = 0;
-    let failureCount = 0;
-    const toRemove = []; // ✅ DEFINE ARRAY HERE
-    
-    for (const token of adminTokens) {
+    // ✅ SEND NOTIFICATION IN BACKGROUND (NON-BLOCKING)
+    (async () => {
       try {
-        await admin.messaging().send({
-          token: token,
-          notification: {
-            title: "🔔 New Order!",
-            body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
-          },
-          webpush: {
-            fcmOptions: { link: "/editor.html" }
+        const snapshot = await admin.database().ref('adminTokens').once('value');
+        const tokenData = snapshot.val() || {};
+        const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
+
+        if (adminTokens.length > 0) {
+          for (const token of adminTokens) {
+            try {
+              await admin.messaging().send({
+                token: token,
+                notification: {
+                  title: "🔔 New Order!",
+                  body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
+                },
+                webpush: { fcmOptions: { link: "/editor.html" } }
+              });
+            } catch (err) {
+              if (err.code === 'messaging/registration-token-not-registered' || 
+                  err.code === 'messaging/invalid-registration-token') {
+                await admin.database().ref('adminTokens/' + token).remove();
+              }
+            }
           }
-        });
-        successCount++;
+        }
       } catch (err) {
-        failureCount++;
-        toRemove.push(token);
-        console.log('Failed token, removing:', token.substring(0, 20));
+        console.error("Notification error:", err);
       }
-    }
-    
-    // Cleanup invalid tokens
-    for (const token of toRemove) {
-      await admin.database().ref('sites/showcase-2/adminTokens/' + token).remove();
-    }
-    
-    notifResult.status = 'sent';
-    notifResult.success = successCount;
-    notifResult.failed = failureCount;
-    notifResult.removed = toRemove.length;
-  } else {
-    notifResult.status = 'noTokens';
-  }
-} catch (notifErr) {
-  notifResult.status = 'error';
-  notifResult.error = notifErr.message;
-}
+    })();
+
+    // Return immediately
     return {
       statusCode: 200,
-      body: JSON.stringify({ ok: true, orderId: orderRef.key, debug: notifResult }),
+      body: JSON.stringify({ ok: true, orderId: orderRef.key }),
     };
   } catch (err) {
     console.error("saveOrder error:", err);
