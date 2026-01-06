@@ -60,9 +60,15 @@ export async function handler(event) {
     // ✅ SEND NOTIFICATION IN BACKGROUND (NON-BLOCKING)
     (async () => {
       try {
-        const snapshot = await admin.database().ref('sites/showcase-2/adminToken').once('value');
-        const tokenData = snapshot.val() || {};
-        const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
+       const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
+const tokenData = snapshot.val() || {};
+
+// ✅ The key IS "shortToken:fullToken", extract full token part
+const adminTokens = Object.keys(tokenData)
+  .map(key => key.includes(':') ? key.split(':')[1] : key)
+  .filter(Boolean);
+
+console.log('Found admin tokens:', adminTokens.length);
 
         if (adminTokens.length > 0) {
           for (const token of adminTokens) {
