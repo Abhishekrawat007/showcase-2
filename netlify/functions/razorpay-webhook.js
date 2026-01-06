@@ -35,7 +35,6 @@ export async function handler(event) {
   await ensureFirebaseInit();
 
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-
   const signature = event.headers["x-razorpay-signature"];
   const body = event.body;
 
@@ -55,32 +54,50 @@ export async function handler(event) {
   }
 
   const payment = payload.payload.payment.entity;
+  const cart = JSON.parse(payment.notes.cart || "[]");
 
-  const firebaseOrderKey = payment.notes.firebaseOrderKey;
-  if (!firebaseOrderKey) {
-    return { statusCode: 200, body: "No firebase key" };
+  // ✅ Build full order payload
+  const orderPayload = {
+    orderId: payment.notes.orderId,
+    name: payment.notes.name,
+    phone: payment.notes.phone,
+    email: payment.notes.email || payment.email || '',
+    cart: cart,
+    totalAmount: payment.amount / 100,
+    isPaid: true,
+    razorpay_payment_id: payment.id,
+    payment: { status: "paid", provider: "razorpay" }
+  };
+
+  // ✅ Send to sendTelegramOrder FIRST to get PDF
+  let pdfUrl = null;
+  try {
+    const telegramRes = await fetch(`${process.env.URL}/.netlify/functions/sendTelegramOrder`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...orderPayload,
+        messageText: `🔔 *New Paid Order*\n*Order ID:* ${orderPayload.orderId}\n👤 *Name:* ${orderPayload.name}\n📞 *Phone:* ${orderPayload.phone}\n💰 *Total:* ₹${orderPayload.totalAmount}`
+      })
+    });
+    const telegramData = await telegramRes.json();
+    if (telegramData && telegramData.pdfUrl) {
+      pdfUrl = telegramData.pdfUrl;
+    }
+  } catch (e) {
+    console.error('Telegram webhook failed:', e);
   }
 
-  const db = admin.database();
-  await db.ref("sites/showcase-2/secureOrders/" + firebaseOrderKey).update({
-    isPaid: true,
-    razorpay_payment_id: payment.id
-  });
-
-  // send Telegram
-  await fetch(`${process.env.URL}/.netlify/functions/sendTelegramOrder`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: payment.notes.name,
-      phone: payment.notes.phone,
-      orderId: payment.notes.orderId,
-      cart: JSON.parse(payment.notes.cart || "[]"),
-      totalAmount: payment.amount / 100,
-      payment: { status: "paid" },
-      amountPaid: payment.amount / 100
-    })
-  });
+  // ✅ Call save-order.js to save with notifications
+  try {
+    await fetch(`${process.env.URL}/.netlify/functions/save-order`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...orderPayload, pdfUrl })
+    });
+  } catch (e) {
+    console.error('save-order webhook failed:', e);
+  }
 
   return { statusCode: 200, body: "OK" };
 }
