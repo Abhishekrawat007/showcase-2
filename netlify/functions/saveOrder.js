@@ -57,58 +57,68 @@ export async function handler(event) {
         createdAt: Date.now(),
       });
 
-   // ✅ SEND NOTIFICATION IN BACKGROUND (NON-BLOCKING)
-(async () => {
-  try {
-    const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
-    const tokenData = snapshot.val() || {};
+  // ✅ SEND NOTIFICATION SYNCHRONOUSLY (WAIT BEFORE RETURNING)
+let notifResult = { status: 'starting' };
+try {
+  const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
+  const tokenData = snapshot.val() || {};
+  const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
+  
+  notifResult.tokensFound = adminTokens.length;
 
-    // ✅ Extract tokens from VALUES (not keys)
-    const adminTokens = Object.values(tokenData)
-      .map(obj => obj.token)
-      .filter(Boolean);
-
-    console.log('📤 Found admin tokens:', adminTokens.length);
-
-    if (adminTokens.length > 0) {
-      for (const token of adminTokens) {
-        try {
-          await admin.messaging().send({
-            token: token,
-            notification: {
-              title: "🔔 New Order!",
-              body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
-            },
-            webpush: { fcmOptions: { link: "/editor.html" } }
-          });
-          console.log('✅ Notification sent to:', token.substring(0, 20));
-        } catch (err) {
-          console.error('❌ Notification error:', err.code);
-          // Auto-cleanup invalid tokens
-          if (err.code === 'messaging/registration-token-not-registered' || 
-              err.code === 'messaging/invalid-registration-token') {
-            // Find the key that has this token
-            const tokenKey = Object.keys(tokenData).find(k => tokenData[k].token === token);
-            if (tokenKey) {
-              await admin.database().ref('sites/showcase-2/adminTokens/' + tokenKey).remove();
-              console.log('🗑️ Removed invalid token');
-            }
+  if (adminTokens.length > 0) {
+    notifResult.status = 'sending';
+    let successCount = 0;
+    let failureCount = 0;
+    const toRemove = [];
+    
+    for (const token of adminTokens) {
+      try {
+        await admin.messaging().send({
+          token: token,
+          notification: {
+            title: "🔔 New Order!",
+            body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
+          },
+          webpush: {
+            fcmOptions: { link: "/editor.html" }
           }
+        });
+        successCount++;
+      } catch (err) {
+        failureCount++;
+        const tokenKey = Object.keys(tokenData).find(k => tokenData[k].token === token);
+        if (tokenKey) {
+          toRemove.push(tokenKey);
         }
+        console.error(`Failed token:`, token.substring(0, 20), err.message);
       }
-    } else {
-      console.log('⚠️ No admin tokens found in Firebase');
     }
-  } catch (err) {
-    console.error("Notification error:", err);
+    
+    // Cleanup invalid tokens
+    for (const tokenKey of toRemove) {
+      await admin.database().ref('sites/showcase-2/adminTokens/' + tokenKey).remove();
+    }
+    
+    notifResult.status = 'sent';
+    notifResult.success = successCount;
+    notifResult.failed = failureCount;
+    notifResult.removed = toRemove.length;
+    
+    console.log(`✅ Sent: ${successCount}/${adminTokens.length}, Cleaned: ${toRemove.length}`);
+  } else {
+    notifResult.status = 'noTokens';
   }
-})();
+} catch (notifErr) {
+  notifResult.status = 'error';
+  notifResult.error = notifErr.message;
+  console.error("⚠️ Notification failed:", notifErr);
+}
 
-    // Return immediately
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ ok: true, orderId: orderRef.key }),
-    };
+return {
+  statusCode: 200,
+  body: JSON.stringify({ ok: true, orderId: orderRef.key, debug: notifResult }),
+};
   } catch (err) {
     console.error("saveOrder error:", err);
     return {
