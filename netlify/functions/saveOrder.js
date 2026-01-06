@@ -57,42 +57,52 @@ export async function handler(event) {
         createdAt: Date.now(),
       });
 
-    // ✅ SEND NOTIFICATION IN BACKGROUND (NON-BLOCKING)
-    (async () => {
-      try {
-       const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
-const tokenData = snapshot.val() || {};
+   // ✅ SEND NOTIFICATION IN BACKGROUND (NON-BLOCKING)
+(async () => {
+  try {
+    const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
+    const tokenData = snapshot.val() || {};
 
-// ✅ The key IS "shortToken:fullToken", extract full token part
-const adminTokens = Object.keys(tokenData)
-  .map(key => key.includes(':') ? key.split(':')[1] : key)
-  .filter(Boolean);
+    // ✅ Extract tokens from VALUES (not keys)
+    const adminTokens = Object.values(tokenData)
+      .map(obj => obj.token)
+      .filter(Boolean);
 
-console.log('Found admin tokens:', adminTokens.length);
+    console.log('📤 Found admin tokens:', adminTokens.length);
 
-        if (adminTokens.length > 0) {
-          for (const token of adminTokens) {
-            try {
-              await admin.messaging().send({
-                token: token,
-                notification: {
-                  title: "🔔 New Order!",
-                  body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
-                },
-                webpush: { fcmOptions: { link: "/editor.html" } }
-              });
-            } catch (err) {
-              if (err.code === 'messaging/registration-token-not-registered' || 
-                  err.code === 'messaging/invalid-registration-token') {
-                await admin.database().ref('sites/showcase-2/adminToken/' + token).remove();
-              }
+    if (adminTokens.length > 0) {
+      for (const token of adminTokens) {
+        try {
+          await admin.messaging().send({
+            token: token,
+            notification: {
+              title: "🔔 New Order!",
+              body: `${order.name || 'Customer'} - ₹${order.totalAmount || 0}`
+            },
+            webpush: { fcmOptions: { link: "/editor.html" } }
+          });
+          console.log('✅ Notification sent to:', token.substring(0, 20));
+        } catch (err) {
+          console.error('❌ Notification error:', err.code);
+          // Auto-cleanup invalid tokens
+          if (err.code === 'messaging/registration-token-not-registered' || 
+              err.code === 'messaging/invalid-registration-token') {
+            // Find the key that has this token
+            const tokenKey = Object.keys(tokenData).find(k => tokenData[k].token === token);
+            if (tokenKey) {
+              await admin.database().ref('sites/showcase-2/adminTokens/' + tokenKey).remove();
+              console.log('🗑️ Removed invalid token');
             }
           }
         }
-      } catch (err) {
-        console.error("Notification error:", err);
       }
-    })();
+    } else {
+      console.log('⚠️ No admin tokens found in Firebase');
+    }
+  } catch (err) {
+    console.error("Notification error:", err);
+  }
+})();
 
     // Return immediately
     return {
