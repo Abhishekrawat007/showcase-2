@@ -22,7 +22,6 @@ async function loadServiceAccountFromEnv() {
 
 async function ensureFirebaseInit() {
   if (admin.apps.length) return;
-
   if (_initPromise) return _initPromise;
 
   _initPromise = (async () => {
@@ -49,10 +48,12 @@ export async function handler(event) {
       orderId,
       name,
       phone,
+      email,
       cart,
       totalAmount,
       isPaid,
       razorpay_payment_id,
+      pdfUrl,
     } = body;
 
     if (!orderId || !name || !phone || !cart || !totalAmount) {
@@ -60,20 +61,85 @@ export async function handler(event) {
     }
 
     const db = admin.database();
-    await db.ref("sites/showcase-2/secureOrders/" + orderId).set({
+    
+    // ✅ Save to same path as COD orders
+    const orderRef = await db.ref("sites/showcase-2/orders").push({
       orderId,
       name,
       phone,
+      email: email || null,
       cart,
       totalAmount,
       isPaid: !!isPaid,
       razorpay_payment_id: razorpay_payment_id || null,
-      timestamp: Date.now(),
+      pdfUrl: pdfUrl || null,
+      payment: { status: isPaid ? 'paid' : 'pending' },
+      createdAt: Date.now(),
     });
+
+    console.log('✅ Order saved:', orderRef.key);
+
+    // ✅ SEND NOTIFICATIONS SYNCHRONOUSLY
+    let notifResult = { status: 'starting' };
+    try {
+      const snapshot = await admin.database().ref('sites/showcase-2/adminTokens').once('value');
+      const tokenData = snapshot.val() || {};
+      const adminTokens = Object.values(tokenData).map(t => t.token).filter(Boolean);
+      
+      notifResult.tokensFound = adminTokens.length;
+
+      if (adminTokens.length > 0) {
+        notifResult.status = 'sending';
+        let successCount = 0;
+        let failureCount = 0;
+        const toRemove = [];
+        
+        for (const token of adminTokens) {
+          try {
+            await admin.messaging().send({
+              token: token,
+              notification: {
+                title: "🔔 New Paid Order!",
+                body: `${name} - ₹${totalAmount} (PAID)`
+              },
+              webpush: {
+                fcmOptions: { link: "/editor.html" }
+              }
+            });
+            successCount++;
+          } catch (err) {
+            failureCount++;
+            const tokenKey = Object.keys(tokenData).find(k => tokenData[k].token === token);
+            if (tokenKey) {
+              toRemove.push(tokenKey);
+            }
+            console.error(`Failed token:`, token.substring(0, 20), err.message);
+          }
+        }
+        
+        // Cleanup invalid tokens
+        for (const tokenKey of toRemove) {
+          await admin.database().ref('sites/showcase-2/adminTokens/' + tokenKey).remove();
+        }
+        
+        notifResult.status = 'sent';
+        notifResult.success = successCount;
+        notifResult.failed = failureCount;
+        notifResult.removed = toRemove.length;
+        
+        console.log(`✅ Sent: ${successCount}/${adminTokens.length}, Cleaned: ${toRemove.length}`);
+      } else {
+        notifResult.status = 'noTokens';
+      }
+    } catch (notifErr) {
+      notifResult.status = 'error';
+      notifResult.error = notifErr.message;
+      console.error("⚠️ Notification failed:", notifErr);
+    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ ok: true }),
+      body: JSON.stringify({ ok: true, orderId: orderRef.key, debug: notifResult }),
     };
   } catch (err) {
     console.error("save-order error", err);
