@@ -803,7 +803,22 @@ let quantity = 1;
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                   });
-
+                 try {
+  const saveRes = await fetch('/.netlify/functions/save-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      ...payload, 
+      pdfUrl: null,
+      isPaid: true,
+      razorpay_payment_id: response.razorpay_payment_id
+    })
+  });
+  const saveData = await saveRes.json();
+  console.log('✅ Online order saved:', saveData);
+} catch (err) {
+  console.error('❌ save-order failed:', err);
+}
                   document.querySelector(".container").innerHTML = `
                     <div class="confirmed-box">
                       <h3>✓ Payment & Order Confirmed</h3>

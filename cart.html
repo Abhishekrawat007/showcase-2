@@ -1075,7 +1075,22 @@ const payload = {
       // helpful hint for debugging: log the full payload and server response to console
       console.warn('Payload sent (for debugging):', payload);
     }
-
+    try {
+  const saveRes = await fetch('/.netlify/functions/save-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      ...payload, 
+      pdfUrl: sendResult.pdfUrl || null,
+      isPaid: true,
+      razorpay_payment_id: response.razorpay_payment_id
+    })
+  });
+  const saveData = await saveRes.json();
+  console.log('✅ Online order saved to Firebase:', saveData);
+} catch (err) {
+  console.error('❌ save-order failed:', err);
+}
     // 6) Generate PDF (do NOT set __noNotify here so server receives notification already above)
     setTimeout(() => {
   try { generateAndSendPDF(payload); }
