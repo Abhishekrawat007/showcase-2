@@ -1075,15 +1075,34 @@ const payload = {
       // helpful hint for debugging: log the full payload and server response to console
       console.warn('Payload sent (for debugging):', payload);
     }
-    try {
+  // 🔔 Send Telegram FIRST to get PDF
+let pdfUrl = null;
+try {
+  const telegramRes = await fetch('/.netlify/functions/sendTelegramOrder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const telegramData = await telegramRes.json();
+  console.log('Telegram response:', telegramData);
+  if (telegramData && telegramData.pdfUrl) {
+    pdfUrl = telegramData.pdfUrl;
+  }
+} catch (e) {
+  console.warn('Telegram failed:', e);
+}
+
+// ✅ Save with PDF URL
+try {
   const saveRes = await fetch('/.netlify/functions/save-order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
       ...payload, 
-      pdfUrl: sendResult.pdfUrl || null,
+      pdfUrl: pdfUrl,
       isPaid: true,
-      razorpay_payment_id: response.razorpay_payment_id
+      razorpay_payment_id: response.razorpay_payment_id,
+      createdAt: Date.now()
     })
   });
   const saveData = await saveRes.json();
