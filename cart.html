@@ -1066,16 +1066,7 @@ const payload = {
     // 4) DEBUG: print payload to console before sending (inspect Network / function logs)
     console.log('Sending order payload to /.netlify/functions/sendTelegramOrder', payload);
 
-    // 5) Send once (use sendOrderOnce helper). Await result so we can log server response
-    const sendResult = await sendOrderOnce(payload);
-    console.log('Razorpay -> sendOrderOnce result', sendResult);
-
-    // If server returned non-ok, show user-friendly message but still generate PDF
-    if (!sendResult.ok) {
-      console.warn('Notification endpoint returned non-ok:', sendResult.status, sendResult.text);
-      // helpful hint for debugging: log the full payload and server response to console
-      console.warn('Payload sent (for debugging):', payload);
-    }
+  
   // 🔔 Send Telegram FIRST to get PDF
 let pdfUrl = null;
 try {
@@ -1130,6 +1121,7 @@ try {
       </div>
     `;
     document.getElementById("orderForm").innerHTML = successHTML;
+    clearCheckoutState();
     try {
       if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
         window.safeStorage.removeItem('cart');
