@@ -75,6 +75,7 @@ export async function handler(event) {
       pdfUrl: pdfUrl || null,
       payment: { status: isPaid ? 'paid' : 'pending' },
       createdAt: Date.now(),
+      timestamp: body.timestamp || new Date().toISOString(),
     });
 
     console.log('✅ Order saved:', orderRef.key);
