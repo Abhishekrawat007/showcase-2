@@ -1129,6 +1129,7 @@ try {
         <a href="index.html#productList" class="btn-continue" id="continueShopping">Continue shopping</a>
       </div>
     `;
+    document.getElementById("orderForm").innerHTML = successHTML;
     try {
       if (window.safeStorage && typeof window.safeStorage.removeItem === "function") {
         window.safeStorage.removeItem('cart');
