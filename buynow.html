@@ -795,7 +795,8 @@ let quantity = 1;
                       razorpay_payment_id: response.razorpay_payment_id
                     },
                     amountPaid: order.totalAmount,
-                    ts: Date.now()
+                    ts: Date.now(),
+                    timestamp: new Date().toISOString()
                   };
 
                  // 🔔 Send Telegram FIRST to get PDF

@@ -1059,7 +1059,8 @@ const payload = {
   },
   rawOrder: order || verifyJson || null,
   messageText,
-  ts: Date.now()
+  ts: Date.now(),
+  timestamp: new Date().toISOString()
 };
 
     // 4) DEBUG: print payload to console before sending (inspect Network / function logs)
@@ -1110,7 +1111,7 @@ try {
 } catch (err) {
   console.error('❌ save-order failed:', err);
 }
-document.getElementById("orderForm").innerHTML = successHTML;
+
     // 6) Generate PDF (do NOT set __noNotify here so server receives notification already above)
     setTimeout(() => {
   try { generateAndSendPDF(payload); }
@@ -1119,7 +1120,7 @@ document.getElementById("orderForm").innerHTML = successHTML;
 
 
     // 7) Success UI + clear cart (same user experience as COD)
-    
+    document.getElementById("orderForm").innerHTML = successHTML;
     const successHTML = `
       <div style="padding:20px;text-align:center;color:green;">
         <h3>✓ Payment & Order Confirmed</h3>
