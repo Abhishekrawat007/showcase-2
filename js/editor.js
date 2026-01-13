@@ -480,40 +480,53 @@ window.debouncedSearch = debouncedSearch;
 window.onload = () => renderProducts();
 
 async function submitChanges(products) {
-  // Check for any products with a temporary ID
+  const now = Date.now();
+  const timeSinceLastPublish = now - lastPublishTime;
+  const cooldown = 10000;
+  
+  if (timeSinceLastPublish < cooldown) {
+    const waitTime = Math.ceil((cooldown - timeSinceLastPublish) / 1000);
+    alert(`⏳ Please wait ${waitTime} seconds before publishing again`);
+    return;
+  }
+  
+  lastPublishTime = now;
+  
   const tempProducts = products.filter(p => typeof p.id === 'string' && p.id.startsWith('temp-'));
   if (tempProducts.length > 0) {
     alert(`⚠️ ${tempProducts.length} product(s) have temporary IDs. Please set a valid unique ID before publishing.`);
-    return; // Stop submission
+    return;
   }
 
   const productArray = JSON.stringify(products, null, 2);
-
   const fileContent = 
 `const products = ${productArray};
 
-// Works in browser
 if (typeof window !== 'undefined') {
   window.products = products;
 }
 
-// Works in Node.js / Netlify
 if (typeof module !== 'undefined') {
   module.exports = products;
-}
-`.trim();
+}`.trim();
+
+  const token = sessionStorage.getItem("adminToken");  // ✅ MOVE OUTSIDE try block
 
   try {
-    const token = sessionStorage.getItem("adminToken");
-const res = await fetch("/.netlify/functions/updateProduct", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer " + (token || "")
-  },
- body: JSON.stringify({ owner: "Abhishekrawat007", repo: "showcase-2", path: "js/product.js", content: fileContent }),
-});
-
+    // Publish product.js
+    const res = await fetch("/.netlify/functions/updateProduct", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + (token || "")
+      },
+      body: JSON.stringify({ 
+        owner: "Abhishekrawat007", 
+        repo: "showcase-2", 
+        path: "js/product.js", 
+        content: fileContent 
+      }),
+    });
 
     const text = await res.text();
     let data;
@@ -523,14 +536,35 @@ const res = await fetch("/.netlify/functions/updateProduct", {
       throw new Error("Invalid JSON returned:\n" + text);
     }
 
-    if (res.ok) {
-      const modalEl = document.querySelector("#successModal");
-      modalEl.classList.add("show");
-      modalEl.style.display = "flex";
-      console.log("✅ Response:", data);
-    } else {
+    if (!res.ok) {
       throw new Error(data.error || "❌ Unknown error from server.");
     }
+
+    // ✅ Publish stylishPages.js (INSIDE try block, after success)
+    const stylishContent = localStorage.getItem('stylishPages') 
+      ? `const stylishPages = ${localStorage.getItem('stylishPages')};\nif(typeof window!=='undefined') window.stylishPages = stylishPages;\nif(typeof module!=='undefined') module.exports = stylishPages;`
+      : 'const stylishPages = [];\nif(typeof window!=="undefined") window.stylishPages = stylishPages;';
+    
+    await fetch('/.netlify/functions/updateProduct', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json', 
+        Authorization: 'Bearer ' + (token || "")
+      },
+      body: JSON.stringify({
+        owner: "Abhishekrawat007",
+        repo: "showcase-2",
+        path: "js/stylishPages.js",
+        content: stylishContent
+      })
+    });
+
+    // Show success modal
+    const modalEl = document.querySelector("#successModal");
+    modalEl.classList.add("show");
+    modalEl.style.display = "flex";
+    console.log("✅ Response:", data);
+
   } catch (err) {
     showModal({
       title: "Publish Failed",
@@ -538,18 +572,6 @@ const res = await fetch("/.netlify/functions/updateProduct", {
     });
     console.error("Full error:", err);
   }
-  // inside submitChanges after product.js publish success:
-await fetch('/.netlify/functions/updateProduct', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-  body: JSON.stringify({
-    owner: "...",
-    repo: "...",
-    path: "js/stylishPages.js",
-    content: localStorage.getItem('stylishPages') ? `const stylishPages = ${localStorage.getItem('stylishPages')};\nif(typeof window!=='undefined') window.stylishPages = stylishPages;` : 'const stylishPages = []; if(typeof window!=="undefined") window.stylishPages = stylishPages;'
-  })
-});
-
 }
 
 // ---------- Save New Arrivals to repo (creates js/newArrivals.js) ----------
