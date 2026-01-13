@@ -135,7 +135,7 @@ export async function handler(event) {
     } catch (notifErr) {
       notifResult.status = 'error';
       notifResult.error = notifErr.message;
-      console.error("⚠️ Notification failed:", notifErr);
+    console.error("⚠️ Notification failed:", notifErr);
     }
 
     return {
