@@ -24,6 +24,7 @@
 let originalProducts = JSON.parse(JSON.stringify(products));
 const productHistory = new Map();
 let filteredProducts = [...products];
+let lastPublishTime = 0;
 let currentPage = 1;
 const perPage = 30;
 const productList = document.getElementById("productList");
