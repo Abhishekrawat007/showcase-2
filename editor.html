@@ -277,6 +277,16 @@ try {
       <textarea id="broadcast-input-body" rows="3" maxlength="240" style="width:100%; padding:8px; border-radius:6px; margin-top:6px;"></textarea>
     </label>
 
+    <!-- ✅ Upload OR paste URL -->
+    <label style="display:block; margin-top:10px; font-weight:600;">Image
+      <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+        <label for="broadcast-upload-btn" style="padding:8px 12px; background:#444; color:#fff; border-radius:6px; cursor:pointer; white-space:nowrap;">📤 Upload</label>
+        <input type="file" accept="image/*" id="broadcast-upload-btn" style="display:none;" />
+        <input id="broadcast-input-image" type="text" placeholder="Or paste image URL" style="flex:1; padding:8px; border-radius:6px;" readonly />
+        <span id="broadcast-upload-spinner" style="display:none;">⏳</span>
+      </div>
+    </label>
+
     <label style="display:block; margin-top:10px; font-weight:600;">Link (optional)
       <input id="broadcast-input-url" type="text" placeholder="/" style="width:100%; padding:8px; border-radius:6px; margin-top:6px;" />
     </label>
@@ -289,7 +299,6 @@ try {
     <div id="broadcast-result" class="broadcast-result" aria-live="polite" style="margin-top:10px; font-size:13px;"></div>
   </div>
 </div>
-
 <style>
 /* Broadcast modal styles (add with the HTML block) */
 .broadcast-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1200; display:block; }

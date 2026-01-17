@@ -704,9 +704,9 @@ document.addEventListener("DOMContentLoaded", () => {
     inTitle.value = '';
     inBody.value = '';
     inUrl.value = '/';
+    document.getElementById('broadcast-input-image').value = '';
     resultEl.textContent = '';
     inTitle.focus();
-    // stop page scroll
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
   }
@@ -720,6 +720,47 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
   }
+  const uploadBtn = document.getElementById('broadcast-upload-btn');
+const imageInput = document.getElementById('broadcast-input-image');
+const spinner = document.getElementById('broadcast-upload-spinner');
+
+uploadBtn?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  spinner.style.display = 'inline-block';
+  uploadBtn.disabled = true;
+
+  try {
+    const compressed = await compressImage(file, 800, 800);
+    const token = sessionStorage.getItem("adminToken");
+    const res = await fetch("/.netlify/functions/uploadImage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + (token || "")
+      },
+      body: JSON.stringify({ imageData: compressed })
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok && data.secure_url) {
+      imageInput.value = data.secure_url;
+      resultEl.textContent = '✅ Image uploaded!';
+      resultEl.className = 'broadcast-result success';
+    } else {
+      throw new Error(data.error || "Upload failed");
+    }
+  } catch (err) {
+    resultEl.textContent = '❌ Upload failed: ' + err.message;
+    resultEl.className = 'broadcast-result error';
+  } finally {
+    spinner.style.display = 'none';
+    uploadBtn.disabled = false;
+    uploadBtn.value = '';
+  }
+});
 
   // When Broadcast button clicked: prompt for secret, store in sessionStorage for session
   btn.addEventListener('click', () => {
@@ -745,6 +786,7 @@ sendBtn?.addEventListener('click', async () => {
   const title = inTitle.value.trim();
   const body = inBody.value.trim();
   const url = (inUrl.value || '/').trim() || '/';
+  const image = document.getElementById('broadcast-input-image').value.trim();
 
   if (!title || !body) {
     resultEl.textContent = 'Title and message are required.';
@@ -752,22 +794,28 @@ sendBtn?.addEventListener('click', async () => {
     return;
   }
 
- 
-
   sendBtn.disabled = true;
   sendBtn.textContent = 'Sending...';
   resultEl.textContent = '';
 
   try {
     const adminToken = sessionStorage.getItem('adminToken') || '';
+    
+    // ✅ Only include image if it has a value
+    const payload = { title, body, url, topic: 'all' };
+    if (image && image.length > 0) {
+      payload.image = image;
+    }
+    
     const res = await fetch('/.netlify/functions/broadcast', {
       method: 'POST',
-     headers: {
-  'Content-Type': 'application/json',
-  'Authorization': adminToken ? ('Bearer ' + adminToken) : ''
-},
-body: JSON.stringify({ title, body, url, topic: 'all' })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': adminToken ? ('Bearer ' + adminToken) : ''
+      },
+      body: JSON.stringify(payload)  // ✅ Use payload instead
     });
+
 
     let data;
     try { data = await res.json(); } catch (e) { data = { rawText: await res.text() }; }
