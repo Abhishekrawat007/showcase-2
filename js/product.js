@@ -16,7 +16,8 @@ const products = [
       "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766042725/aaoundo462gcog1tbwcd.webp",
       "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766219042/l0hv68c5k0qhgvqxkkfo.webp",
       "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766219044/hk5opnsjtw3xpealu6cf.webp",
-      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766219045/oywxrebuuriwnagmbbtg.webp"
+      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1766219045/oywxrebuuriwnagmbbtg.webp",
+      "https://res.cloudinary.com/dx4rkba7l/image/upload/v1768379676/vjwfezjh88wrvzbqeimf.webp"
     ],
     "video": "https://youtube.com/watch?v=TcAZwTE0dDI",
     "oldPrice": 450,
@@ -4527,12 +4528,10 @@ const products = [
   }
 ];
 
-// Works in browser
 if (typeof window !== 'undefined') {
   window.products = products;
 }
 
-// Works in Node.js / Netlify
 if (typeof module !== 'undefined') {
   module.exports = products;
 }
